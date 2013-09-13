@@ -8,23 +8,36 @@ KinectReader::KinectReader(void)
 	
 }
 
+/**
+ *
+ */
 KinectReader::KinectReader(unsigned int min_depth, unsigned int max_depth, float dist)
 {
+	// m_depth = matric depth
 	m_depth = new float[640 * 480];
+	// Initiering
 	memset(m_depth, 0, 640 * 480 * sizeof(float));
+	// Matric point 
 	m_pNuiSensor = NULL;
+
 	CreateFirstConnected();
+
 	_min_depth = min_depth;
 	_max_depth = max_depth;
 	_active_depth = dist;
 }
 
-
+/**
+ * Destructor
+ */
 KinectReader::~KinectReader(void)
 {
 	delete [] m_depth;
 }
 
+/**
+ * 
+ */
 HRESULT KinectReader::CreateFirstConnected()
 {
     INuiSensor* pNuiSensor = NULL;
@@ -83,6 +96,9 @@ HRESULT KinectReader::CreateFirstConnected()
     return hr;
 }
 
+/**
+ * 
+ */
 void KinectReader::ProcessDepth()
 {
 	if(!m_pNuiSensor)
@@ -94,7 +110,6 @@ void KinectReader::ProcessDepth()
 
 		return;
 	}
-
 
     HRESULT hr;
     NUI_IMAGE_FRAME imageFrame;
@@ -176,6 +191,9 @@ ReleaseFrame:
     m_pNuiSensor->NuiImageStreamReleaseFrame(m_pDepthStreamHandle, &imageFrame);
 }
 
+/**
+ *
+ */
 float* KinectReader::GetDepth()
 {
 	return m_depth;
