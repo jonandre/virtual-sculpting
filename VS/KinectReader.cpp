@@ -2,59 +2,49 @@
 #include "main.h"
 #include "NuiApi.h"
 
-
 KinectReader::KinectReader(void)
 {
 	
 }
 
-/**
- *
- */
-KinectReader::KinectReader(unsigned int min_depth, unsigned int max_depth, float dist)
+KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, float dist )
 {
-	// m_depth = matric depth
-	m_depth = new float[640 * 480];
-	// Initiering
-	memset(m_depth, 0, 640 * 480 * sizeof(float));
-	// Matric point 
+	m_depth = new float[640*480];
+	memset(m_depth, 0, 640*480*sizeof(float));
 	m_pNuiSensor = NULL;
-
 	CreateFirstConnected();
-
 	_min_depth = min_depth;
 	_max_depth = max_depth;
 	_active_depth = dist;
 }
 
-/**
- * Destructor
- */
+
 KinectReader::~KinectReader(void)
 {
 	delete [] m_depth;
 }
 
-/**
- * 
- */
 HRESULT KinectReader::CreateFirstConnected()
 {
-    INuiSensor* pNuiSensor = NULL;
+    INuiSensor * pNuiSensor = NULL;
     HRESULT hr;
     int iSensorCount = 0;
     hr = NuiGetSensorCount(&iSensorCount);
     if (FAILED(hr))
+    {
         return hr;
+    }
 
     // Look at each Kinect sensor
-    for (int i = 0; i < iSensorCount; i++)
+    for (int i = 0; i < iSensorCount; ++i)
     {
         // Create the sensor so we can check status, if we can't create it, move on to the next
         hr = NuiCreateSensorByIndex(i, &pNuiSensor);
         if (FAILED(hr))
+        {
             continue;
-	
+        }
+
         // Get the status of the sensor, and if connected, then we can initialize it
         hr = pNuiSensor->NuiStatus();
         if (S_OK == hr)
@@ -66,8 +56,8 @@ HRESULT KinectReader::CreateFirstConnected()
         // This sensor wasn't OK, so release it since we're not using it
         pNuiSensor->Release();
     }
-    
-    if (m_pNuiSensor != NULL)
+
+    if (NULL != m_pNuiSensor)
     {
         // Initialize the Kinect and specify that we'll be using depth
         hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH); 
@@ -86,24 +76,22 @@ HRESULT KinectReader::CreateFirstConnected()
                 &m_pDepthStreamHandle);
         }
     }
-    
-    if ((m_pNuiSensor == NULL) || FAILED(hr))
+
+    if (NULL == m_pNuiSensor || FAILED(hr))
     {
-	std::cerr << "No ready Kinect found!" << std::endl;
+		std::cout<<"No ready Kinect found!"<<std::endl;
+        //SetStatusMessage(L"No ready Kinect found!");
         return E_FAIL;
     }
-    
+
     return hr;
 }
 
-/**
- * 
- */
 void KinectReader::ProcessDepth()
 {
 	if(!m_pNuiSensor)
 	{/*
-		int delta_depth = _max_depth - _min_depth;
+		int delta_depth =  _max_depth - _min_depth;
 		for ( unsigned int i = 0; i < 640*160; i++ )
 			m_depth[i] = (rand()%delta_depth - delta_depth)*0.15f;
 			*/
@@ -111,13 +99,17 @@ void KinectReader::ProcessDepth()
 		return;
 	}
 
+
     HRESULT hr;
     NUI_IMAGE_FRAME imageFrame;
 
     // Attempt to get the depth frame
-    hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pDepthStreamHandle, 0, &imageFrame);	
+    hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pDepthStreamHandle, 0, &imageFrame);
+	
     if (FAILED(hr))
+    {
         return;
+    }
 
     BOOL nearMode;
     INuiFrameTexture* pTexture;
@@ -126,7 +118,9 @@ void KinectReader::ProcessDepth()
     hr = m_pNuiSensor->NuiImageFrameGetDepthImagePixelFrameTexture(
         m_pDepthStreamHandle, &imageFrame, &nearMode, &pTexture);
     if (FAILED(hr))
+    {
         goto ReleaseFrame;
+    }
 	
     NUI_LOCKED_RECT LockedRect;
 	
@@ -141,17 +135,17 @@ void KinectReader::ProcessDepth()
         int maxDepth = _max_depth;///(nearMode ? NUI_IMAGE_DEPTH_MAXIMUM_NEAR_MODE : NUI_IMAGE_DEPTH_MAXIMUM) >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
 
         float * float_run = m_depth;
-        const NUI_DEPTH_IMAGE_PIXEL * pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(LockedRect.pBits);
+        const NUI_DEPTH_IMAGE_PIXEL * pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL *>(LockedRect.pBits);
 
         // end pixel is start + width*height - 1
         const NUI_DEPTH_IMAGE_PIXEL * pBufferEnd = pBufferRun + (cDepthWidth * cDepthHeight);
 
 		float intensity = 0.0f;
 		int delta_depth =  maxDepth - minDepth;
-		float float_per_depth_unit = _active_depth / float(delta_depth );
+		float float_per_depth_unit = _active_depth/float(delta_depth );
 		static int t=0;
 		++t;
-        while (pBufferRun < pBufferEnd)
+        while ( pBufferRun < pBufferEnd )
         {
             // discard the portion of the depth that contains only the player index
             USHORT depth = pBufferRun->depth;
@@ -164,7 +158,7 @@ void KinectReader::ProcessDepth()
             // Note: Using conditionals in this loop could degrade performance.
             // Consider using a lookup table instead when writing production code.
 			//if (depth)
-			intensity = static_cast<float>(depth >= minDepth && depth < maxDepth ? ((depth - minDepth) - delta_depth) * float_per_depth_unit : 0.0f);
+			intensity = static_cast<float>(depth >= minDepth && depth < maxDepth ? ((depth-minDepth)-delta_depth)*float_per_depth_unit : 0.0f);
 
 			//if ( t < 1000)
 			//	intensity = (rand()%delta_depth - delta_depth)*float_per_depth_unit;
@@ -182,18 +176,15 @@ void KinectReader::ProcessDepth()
 
     // We're done with the texture so unlock it
     pTexture->UnlockRect(0);
-    
+
     pTexture->Release();
 
 ReleaseFrame:
-    //return;
+	//return;
     // Release the frame
     m_pNuiSensor->NuiImageStreamReleaseFrame(m_pDepthStreamHandle, &imageFrame);
 }
 
-/**
- *
- */
 float* KinectReader::GetDepth()
 {
 	return m_depth;
