@@ -11,16 +11,18 @@ class Shader;
 class KinectTool
 {
 public:
-	KinectTool( float half_x, float half_y, float start_z, float end_z );
+	KinectTool(float half_x, float half_y, float start_z, float end_z);
 	~KinectTool();
 	void DoToolUpdate();
-	int InteractModel( GridModel* model, glm::quat quat );
+	int InteractModel(GridModel* model, glm::quat quat);
 	TriangleMesh* GetToolMesh();
 	Shader* GetToolShader();
 	unsigned int GetPVMLocation();
+
 private:
 	KinectTool();
-	float _start_z, _end_z;
+	float _start_z;
+	float _end_z;
 
 	TriangleMesh* _msh;
 	KinectReader* _reader;
