@@ -5,15 +5,21 @@
 #include "TriangleMesh.h"
 #include "Soundify.h"
 
-inline double diffclock( clock_t clock1, clock_t clock2 ) 
-{
-	double diffticks = clock1 - clock2;
-    double diffms    = diffticks * 1000 / CLOCKS_PER_SEC;
 
-    return diffms;
+/**
+ * Calculate the difference, in milliseconds, between two time points
+ * 
+ * @param   end    The later time point
+ * @param   start  The earlier time point
+ * @return         The difference in milliseconds
+ */
+inline double diffclock(clock_t end, clock_t start) 
+{
+    return (end - start) * 1000 / CLOCKS_PER_SEC;
 }
 
-int main( int argc, UINT8** argv) 
+
+int main(int argc, UINT8** argv) 
 {
 	GLContext* cntx = new GLContext();//Window+render.
 	Input* inp = new Input();//Input system.
