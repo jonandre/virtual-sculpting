@@ -22,68 +22,59 @@ inline float dot(float x, float y, float z, float* g)
     return x * g[0] + y * g[1] + z * g[2];
 }
 
-inline float noise(float xin, float yin, float zin){
-    float F3, G3, t, X0, Y0, Z0, x0, y0, z0, s, x1, y1, z1, x2, y2, z2, x3, y3, z3, t0, t1, t2, t3, n0, n1, n2, n3;
-    int i, j, k, ii, jj, kk, i1, j1, k1, i2, j2, k2, gi0, gi1, gi2, gi3;
-    
-    F3 = 1.0f / 3.0f;
-    s = (xin + yin + zin) * F3;
-    i = xin + s;
-    j = yin + s;
-    k = zin + s;
-    G3 = 1.0 / 6.0;
-    t = (i + j + k) * G3;
-    X0 = i - t;
-    Y0 = j - t;
-    Z0 = k - t;
-    x0 = xin - X0;
-    y0 = yin - Y0;
-    z0 = zin - Z0;
-    
-    if (x0 >= y0)
-    {
-        if (y0 >= z0){
-            i1=1; j1=0; k1=0; i2=1; j2=1; k2=0;
-        }
-        else if (x0 >= z0){
-             i1=1; j1=0; k1=0; i2=1; j2=0; k2=1;
-        }
-        else{
-            i1=0; j1=0; k1=1; i2=1; j2=0; k2=1;
-        }
-    }
-    else
-    {
-        if (y0 < z0){
-            i1=0; j1=0; k1=1; i2=0; j2=1; k2=1;
-        }
-        else if (x0 < z0){ 
-            i1=0; j1=1; k1=0; i2=0; j2=1; k2=1;
-        }
-        else{
-            i1=0; j1=1; k1=0; i2=1; j2=1; k2=0;
-        }
-    }
-
-    x1 = x0 - i1 + G3;
-    y1 = y0 - j1 + G3;
-    z1 = z0 - k1 + G3;
-    x2 = x0 - i2 + 2.0 * G3;
-    y2 = y0 - j2 + 2.0 * G3;
-    z2 = z0 - k2 + 2.0 * G3;
-    x3 = x0 - 1.0 + 3.0 * G3;
-    y3 = y0 - 1.0 + 3.0 * G3;
-    z3 = z0 - 1.0 + 3.0 * G3;
-    
-    ii = i & 255;
-    jj = j & 255;
-    kk = k & 255;
-    
-    gi0 = perm[ii +      perm[jj +      perm[kk     ]]] % 12;
-    gi1 = perm[ii + i1 + perm[jj + j1 + perm[kk + k1]]] % 12;
-    gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
-    gi3 = perm[ii + 1  + perm[jj + 1  + perm[kk + 1 ]]] % 12;
-    
+inline float noise(float xin, float yin, float zin)
+{
+	float F3, G3, t, X0, Y0, Z0, x0, y0, z0, s, x1, y1, z1, x2, y2, z2, x3, y3, z3, t0, t1, t2, t3, n0, n1, n2, n3;
+	int i, j, k, ii, jj, kk, i1, j1, k1, i2, j2, k2, gi0, gi1, gi2, gi3;
+	
+	F3 = 1.0f / 3.0f;
+	s = (xin + yin + zin) * F3;
+	i = xin + s;
+	j = yin + s;
+	k = zin + s;
+	G3 = 1.0 / 6.0;
+	t = (i + j + k) * G3;
+	X0 = i - t;
+	Y0 = j - t;
+	Z0 = k - t;
+	x0 = xin - X0;
+	y0 = yin - Y0;
+	z0 = zin - Z0;
+	
+	#define __(I1, J1, K1, I2, J2, K2)  { i1 = I1; j1 = J1; k1 = K1; i2 = I2; j2 = J2; k2 = K2; }
+	if (x0 >= y0)
+	{
+		if      (y0 >= z0)  __(1, 0, 0,  1, 1, 0)
+		else if (x0 >= z0)  __(1, 0, 0,  1, 0, 1)
+		else                __(0, 0, 1,  1, 0, 1)
+	}
+	else
+	{
+		if      (y0 < z0)  __(0, 0, 1,  0, 1, 1)
+		else if (x0 < z0)  __(0, 1, 0,  0, 1, 1)
+		else               __(0, 1, 0,  1, 1, 0)
+	}
+	#undef __
+	
+	x1 = x0 - i1 + G3;
+	y1 = y0 - j1 + G3;
+	z1 = z0 - k1 + G3;
+	x2 = x0 - i2 + 2.0 * G3;
+	y2 = y0 - j2 + 2.0 * G3;
+	z2 = z0 - k2 + 2.0 * G3;
+	x3 = x0 - 1.0 + 3.0 * G3;
+	y3 = y0 - 1.0 + 3.0 * G3;
+	z3 = z0 - 1.0 + 3.0 * G3;
+	
+	ii = i & 255;
+	jj = j & 255;
+	kk = k & 255;
+	
+	gi0 = perm[ii +      perm[jj +      perm[kk     ]]] % 12;
+	gi1 = perm[ii + i1 + perm[jj + j1 + perm[kk + k1]]] % 12;
+	gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
+	gi3 = perm[ii + 1  + perm[jj + 1  + perm[kk + 1 ]]] % 12;
+	
 	#define _2(X) ((X) * (X))
 	#define __(I)								\
 		t##I = 0.6 - _2(x##I) - _2(y##I) - _2(z##I);			\
@@ -98,23 +89,23 @@ inline float noise(float xin, float yin, float zin){
 	__(1) __(2) __(3)
 	#undef __
 	#undef _2
-
-    return 16.0 * (n0 + n1 + n2 + n3) + 1.0;
+	
+	return 16.0 * (n0 + n1 + n2 + n3) + 1.0;
 }
 
 inline float simplex_noise(int octaves, float x, float y, float z)
 {
-    float value = 0.0;
-    for (int i = 0; i < octaves; i++)
-        value += noise(x * (1 << 1), y * (1 << i), z * (1 << i));
-    return value;
+	float value = 0.0;
+	for (int i = 0; i < octaves; i++)
+		value += noise(x * (1 << 1), y * (1 << i), z * (1 << i));
+	return value;
 }
 
 inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z, unsigned char* data, unsigned int side)
 {
-    float caves, center_falloff, plateau_falloff, density;
-    float local_x = x / (side - 1.0f);
-    float local_y = y / (side - 1.0f);
+	float caves, center_falloff, plateau_falloff, density;
+	float local_x = x / (side - 1.0f);
+	float local_y = y / (side - 1.0f);
     float local_z = z / (side - 1.0f);
 
     if (local_y <= 0.8)
