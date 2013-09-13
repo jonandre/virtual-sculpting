@@ -119,14 +119,14 @@ void VoxelChunk::ClearMesh()
 	_vao = NULL;
 }
 
-inline UINT8 VoxelChunk::EvaluateCell(UINT8* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm) //check neighbours, basically "is visible" for given cell
+inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm) //check neighbours, basically "is visible" for given cell
 {
 	unsigned int index = x * dimm * dimm + y * dimm + z;
 
 	if (m_pBlocks[index] == 0)
 		return 0;
 	
-	UINT8 res = 0; //Coding 00xxxxxx - where x is side
+	unsigned char res = 0; //Coding 00xxxxxx - where x is side
 	
 	//top side:
 	if ((y == dimm-1) || m_pBlocks[index + dimm] == 0)
@@ -167,7 +167,7 @@ inline UINT8 VoxelChunk::EvaluateCell(UINT8* m_pBlocks, unsigned int x, unsigned
 	return res;
 }
 
-UINT8 VoxelChunk::GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z)
+unsigned char VoxelChunk::GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z)
 {
 	return _colors ? _colors[x * size * size + y * size + z].comp[3] : 0;
 }
@@ -191,7 +191,7 @@ void VoxelChunk::ClearGeometry()
 	_renderable_indexes = NULL;
 }
 
-inline void MapColor( Color* clr, UINT8 val, bool acted )
+inline void MapColor(Color* clr, unsigned char val, bool acted)
 {
 	if (acted)
 	{
@@ -207,7 +207,7 @@ inline void MapColor( Color* clr, UINT8 val, bool acted )
 	}
 }
 
-void VoxelChunk::CreateMesh( UINT8* m_pBlocks, bool* _acted, unsigned int dimm )//lower corner
+void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int dimm)//lower corner
 {
 	if (!_vao)
 		_vao = new VAO();
@@ -226,7 +226,7 @@ void VoxelChunk::CreateMesh( UINT8* m_pBlocks, bool* _acted, unsigned int dimm )
 	
 	unsigned int num_created = 0;
 	unsigned int global_index = 0;
-	UINT8 tmp_res = 0;
+	unsigned char tmp_res = 0;
 	unsigned int x, y;
 	
 	for (unsigned int i = 0; i < size; i++)
@@ -276,9 +276,9 @@ void VoxelChunk::CreateMesh( UINT8* m_pBlocks, bool* _acted, unsigned int dimm )
 	}
 }
 
-void VoxelChunk::RecalcColor(UINT8* voxels, unsigned int dimm)
+void VoxelChunk::RecalcColor(unsigned char* voxels, unsigned int dimm)
 {
-	if ( !_vao )
+	if (!_vao)
 		return;
 	
 	Color clr;

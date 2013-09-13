@@ -12,9 +12,9 @@ public:
 	GridModel(int power);
 	
 	~GridModel();
-	int UpdateCellMelt(int i, int j, int k, UINT8 val);
-	int UpdateCellAdd(int i, int j, int k, UINT8 val);
-	UINT8* GetCells();
+	int UpdateCellMelt(int i, int j, int k, unsigned char val);
+	int UpdateCellAdd(int i, int j, int k, unsigned char val);
+	unsigned char* GetCells();
 	unsigned int GetSize();
 	unsigned int GetDimm();
 	void UpdateGrid();
@@ -33,7 +33,7 @@ private:
 	//std::vector<GridCell*> _dirty_cells;
 	inline bool EvaluateCell(unsigned int x, unsigned int y, unsigned int z);
 	
-	UINT8* _cells;
+        unsigned char* _cells;
 	bool* _interacted;
 	VoxelChunk** _chunks;
 	std::vector<VoxelChunk*> _dirty_chunks;

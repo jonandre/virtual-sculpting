@@ -13,11 +13,9 @@ using namespace std;
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
 
-typedef unsigned char UINT8;
-
 struct Color
 {
-	UINT8 comp[4];
+	unsigned char comp[4];
 };
 
 struct Point
@@ -37,7 +35,7 @@ struct Vertex
 	Color _color; // 4⋅1
 	float _uv[2]; // 2⋅4
 	//Totall = 12 + 12 + 4 + 8 bytes == 36 - we need padding
-	UINT8 _padding[28];
+	unsigned char _padding[28];
 };
 
 

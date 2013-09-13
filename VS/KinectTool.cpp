@@ -122,7 +122,7 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 	
 	unsigned int pad_depth = 50; //grid_dimm;
 	
-	UINT8 val = 128;
+        unsigned char val = 128;
 	int accum = 0;
 	Point tmp;
 	Point dir_vector;

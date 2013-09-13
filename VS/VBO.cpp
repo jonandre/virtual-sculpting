@@ -99,7 +99,7 @@ const unsigned int VBO::bind(unsigned int start) const
 	if (vboID[1])
 	{
 		glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);		
-		glVertexAttribPointer((GLuint)1, sizeof(Color) / sizeof(UINT8), GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Color), 0);
+		glVertexAttribPointer((GLuint)1, sizeof(Color) / sizeof(unsigned char), GL_UNSIGNED_BYTE, GL_FALSE, sizeof(Color), 0);
 		glEnableVertexAttribArray(1);
 	}
 	if (vboID[2])

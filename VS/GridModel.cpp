@@ -127,7 +127,7 @@ inline float simplex_noise(int octaves, float x, float y, float z)
     return value;
 }
 
-inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z, UINT8* data, unsigned int side)
+inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z, unsigned char* data, unsigned int side)
 {
     float caves, center_falloff, plateau_falloff, density;
     float local_x = x / (side - 1.0f);
@@ -168,7 +168,7 @@ GridModel::GridModel(int power)
 	dimm = 1 << power; //grid dimension
 	size = dimm * dimm * dimm; //total size
 	half_dimm = dimm >> 1;
-	_cells = new UINT8[size]; //cells - voxels.
+	_cells = new unsigned char[size]; //cells - voxels.
 	_interacted = new bool[size]; //array to store bool - if voxel was changed during this frame.
 	memset(_interacted, 0, size * sizeof(bool));
 	
@@ -395,7 +395,7 @@ void GridModel::EnshureMarked(int i, int j, int k)
 }
 
 
-int GridModel::UpdateCellMelt(int i, int j, int k, UINT8 val)
+int GridModel::UpdateCellMelt(int i, int j, int k, unsigned char val)
 {
 	VoxelChunk* ptr = _chunks[(i >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
 	
@@ -407,7 +407,7 @@ int GridModel::UpdateCellMelt(int i, int j, int k, UINT8 val)
 		
 		
 		// zero alpha means that either voxel is not visible or is empty
-		UINT8 alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
+		unsigned char alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
 			j - (j >> power_for_chunk) * internal_chunk_size , k - (k >> power_for_chunk) * internal_chunk_size); //local index in chunk.
 
 		if (alpha == 0)
@@ -422,11 +422,11 @@ int GridModel::UpdateCellMelt(int i, int j, int k, UINT8 val)
 }
 
 
-int GridModel::UpdateCellAdd(int i, int j, int k, UINT8 val)
+int GridModel::UpdateCellAdd(int i, int j, int k, unsigned char val)
 {
 	VoxelChunk* ptr = _chunks[(i >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
 	
-	UINT8* current_voxel_ptr = &_cells[i * dimm * dimm + j * dimm + k];
+	unsigned char* current_voxel_ptr = &_cells[i * dimm * dimm + j * dimm + k];
 	
 	if (1)//if surface interaction.
 	{
@@ -434,7 +434,7 @@ int GridModel::UpdateCellAdd(int i, int j, int k, UINT8 val)
 		unsigned int index_y = j - (j >> power_for_chunk) * internal_chunk_size;
 		unsigned int index_z = k - (k >> power_for_chunk) * internal_chunk_size; //local index in chunk.*/
 	  
-		UINT8 alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
+		unsigned char alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
 			j - (j >> power_for_chunk) * internal_chunk_size, k - (k >> power_for_chunk) * internal_chunk_size); //local index in chunk.
 		
 		if ((alpha == 0) && (*current_voxel_ptr != 0)) // if not visible and not empty
@@ -462,7 +462,7 @@ GridModel::~GridModel()
 	delete [] _interacted;
 }
 
-UINT8* GridModel::GetCells()
+unsigned char* GridModel::GetCells()
 {
 	return _cells;
 }

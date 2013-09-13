@@ -19,17 +19,17 @@ public:
 
 	void Update(float dt);
 	void Render();
-	void CreateMesh(UINT8* voxels, bool* _acted, unsigned int dimm);
+	void CreateMesh(unsigned char* voxels, bool* _acted, unsigned int dimm);
 	VAO* GetVAO();
 	const Point& GetCenter();
 	bool IsDirty();
 	void MarkDirty();
-	UINT8 GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z); // In alpha chanel we have
-	void RecalcColor(UINT8* voxels, unsigned int dim);
+        unsigned char GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z); // In alpha chanel we have
+	void RecalcColor(unsigned char* voxels, unsigned int dim);
 
 private:
 	void ClearMesh();
-	inline UINT8 EvaluateCell(UINT8* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm);//check neighbours, basically "is visible" for given cell
+	inline unsigned char EvaluateCell(unsigned char* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm);//check neighbours, basically "is visible" for given cell
 
 	inline void SetColorForVoxel(unsigned int x, unsigned int y, unsigned int z, Color* clr);
 	void CreateGeometry();

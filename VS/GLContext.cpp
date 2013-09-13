@@ -154,11 +154,7 @@ void GLContext::doMessage()
 		if (msg.message == WM_QUIT)
 			running = false;
 		else
-			if ( msg.message == WM_KEYDOWN )
-			{
-				UINT8 c = MapVirtualKey(msg.wParam ,MAPVK_VK_TO_CHAR);					
-				inp->OnKeyPressed(c);
-			}
+			if      (msg.message == WM_KEYDOWN)      inp->OnKeyPressed(MapVirtualKey(msg.wParam, MAPVK_VK_TO_CHAR));
 			else if (msg.message == WM_LBUTTONDOWN)  inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
 			else if (msg.message == WM_LBUTTONUP)    inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
 			else if (msg.message == WM_MOUSEMOVE)    inp->OnMouseMove(msg.pt.x, msg.pt.y);
