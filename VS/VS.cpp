@@ -45,13 +45,16 @@ int main(int argc, char** argv)
 	KinectTool* tool = new KinectTool(side * 0.75f, side * 0.75f, side * 0.75f, -(side * 0.75f));
 	
 	Soundify snd;
+	snd.SetPitch(0.1 + glm::log2(acted * 1.0f) / 1000.0f); /* TODO did this really have to be after */
 	snd.Play();
 	
 	int acted = 0;
 	bool space_pressed = false;
 	while (cntx->alive())
-	{	
-		clock_t start = clock();
+	{
+		#ifdef DEBUG_TIME
+			clock_t start = clock();
+		#endif
 		acted = 0;
 		
 		inp->UpdateFrame(); //Reset frame variables.
@@ -69,23 +72,13 @@ int main(int argc, char** argv)
 		model->UpdateGrid(); //Update visual representation of model
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM()); //Do actual rendering.
 		
-		///
-		//static int tmp = 0;
-		//tmp++;
-		//acted = (rand() % 100) > 10 ? (rand() % 3000) : 0;
-		//acted = tmp;
-		///
+		snd.SetGain(acted ? 1.0f : 0.0f);
 		
-		if (acted) //sonification
-		{
-			snd.SetGain(1.0f);
-			snd.SetPitch(0.1 + glm::log2(acted * 1.0f) / 1000.0f);
-		}
-		else
-			snd.SetGain(0.0f);
-		
-		clock_t end = clock();
-		//std::cerr << "Frame time = " << diffclock(end, start) << " ms, " << " Interacted: " << acted << std::endl;
+		#ifdef DEBUG_TIME
+			clock_t end = clock();
+			std::cerr << "Frame time = " << diffclock(end, start) << " ms, "
+				  << " Interacted: " << acted << std::endl;
+		#endif
 	}
 	
 	snd.SetGain(0.0f);
