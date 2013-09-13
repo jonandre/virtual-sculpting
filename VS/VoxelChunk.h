@@ -1,7 +1,7 @@
 /*
-This class is wrapper for visual representation of some block of our voxelgrid. Idea - split whole 3D array into chunks:
-128^3 is splited in blocks of 32, for example. This is important in order to reduce amount of drawcalls - 4^3 is MUCH less than 128^3. But beware,
-it's a tradeoff - larger block is, more expencive update is.
+This class is wrapper for visual representation of some block of our voxelgrid. Idea — split whole 3D array into chunks:
+128³ is splited in blocks of 32, for example. This is important in order to reduce amount of drawcalls — 4³ is MUCH less than 128³. But beware,
+it's a tradeoff — larger block is, more expencive update is.
 */
 #pragma once
 
