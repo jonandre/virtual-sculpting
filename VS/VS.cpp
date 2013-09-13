@@ -15,7 +15,7 @@
  */
 inline double diffclock(clock_t end, clock_t start) 
 {
-	return (end - start) * 1000 / CLOCKS_PER_SEC;
+	return (end - start) * 1000. / CLOCKS_PER_SEC;
 }
 
 
