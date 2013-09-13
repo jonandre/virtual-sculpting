@@ -208,9 +208,11 @@ inline void MapColor( Color* clr, UINT8 val, bool acted )
 		clr->comp[2] = 0;
 	}
 	else
+	{
 		clr->comp[0] = 0;
 		clr->comp[1] = 250;
 		clr->comp[2] = 250;
+	}
 }
 
 void VoxelChunk::CreateMesh( UINT8* m_pBlocks, bool* _acted, unsigned int dimm )//lower corner
