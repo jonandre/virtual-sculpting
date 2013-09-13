@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 			snd.SetGain(0.0f);
 		
 		clock_t end = clock();
-		//std::cout << "Frame time = " << diffclock(end, start) << " ms, " << " Interacted: " << acted << std::endl;
+		//std::cerr << "Frame time = " << diffclock(end, start) << " ms, " << " Interacted: " << acted << std::endl;
 	}
 	
 	snd.SetGain(0.0f);

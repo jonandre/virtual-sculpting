@@ -203,7 +203,7 @@ GridModel::GridModel(int power)
 				//floating_rock(i, j, k, _cells, dimm);
 				if (iter != GetCellIndex(center, tmp1, tmp2, tmp3))
 				{
-					std::cout << "Error!";
+					std::cerr << "Error!";
 				}
 			}
 		}

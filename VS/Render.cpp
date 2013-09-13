@@ -118,7 +118,7 @@ void Render::Draw( GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat
 	
 	///
 	clock_t end = clock();
-	//std::cout<<"For ticks = "<<i<<", tick time = " << diffclock( end, start )<< " ms" << std::endl;
+	//std::cerr<<"For ticks = "<<i<<", tick time = " << diffclock( end, start )<< " ms" << std::endl;
 }
 
 void Render::Resize(int w, int h)

@@ -77,7 +77,7 @@ HRESULT KinectReader::CreateFirstConnected()
     
     if (NULL == m_pNuiSensor || FAILED(hr))
     {
-	std::cout << "No ready Kinect found!" << std::endl;
+	std::cerr << "No ready Kinect found!" << std::endl;
         //SetStatusMessage(L"No ready Kinect found!");
         return E_FAIL;
     }

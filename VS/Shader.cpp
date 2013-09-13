@@ -29,7 +29,7 @@ bool Shader::loadVertexShader( const char* name )
 			if ( InfoLogLength > 0 ){
 				std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
 				glGetShaderInfoLog(shader_vp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-				cout << FragmentShaderErrorMessage.data() << endl;
+				std::cerr << FragmentShaderErrorMessage.data() << std::endl;
 			}
 
 			return true;
@@ -61,7 +61,7 @@ bool Shader::loadFragmentShader( const char* name )
 			if ( InfoLogLength > 0 ){
 				std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
 				glGetShaderInfoLog(shader_fp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-				cout << FragmentShaderErrorMessage.data() << endl;
+				std::cerr << FragmentShaderErrorMessage.data() << std::endl;
 				//printf("%s\n", &FragmentShaderErrorMessage[0]);
 			}
 
@@ -94,7 +94,7 @@ bool Shader::loadGeometryShader( const char* name )
 			if ( InfoLogLength > 0 ){
 				std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
 				glGetShaderInfoLog(shader_gp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-				cout << FragmentShaderErrorMessage.data() << endl;
+				std::cerr << FragmentShaderErrorMessage.data() << std::endl;
 				//printf("%s\n", &FragmentShaderErrorMessage[0]);
 			}
 

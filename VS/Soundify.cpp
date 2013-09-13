@@ -75,7 +75,7 @@ ALboolean Soundify::CheckALCError()
   if ((ErrCode = alcGetError(pDevice)) != ALC_NO_ERROR)
   {
     Err += (char *)alcGetString(pDevice, ErrCode);
-	std::cout<<Err.data()<<std::endl;
+    std::cerr<<Err.data()<<std::endl;
     return AL_FALSE;
   }
   return AL_TRUE;
@@ -88,7 +88,7 @@ ALboolean Soundify::CheckALError()
   if ((ErrCode = alGetError()) != AL_NO_ERROR)
   {
     Err += (char *)alGetString(ErrCode);
-    std::cout<<Err.data()<<std::endl;
+    std::cerr<<Err.data()<<std::endl;
     return AL_FALSE;
   }
   return AL_TRUE;

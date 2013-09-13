@@ -59,7 +59,7 @@ static string textFileRead(const char* fileName)
 		file.close();
 	}
 	else
-		std::cout << "Unable to open " << fileName << std::endl;
+		std::cerr << "Unable to open " << fileName << std::endl;
     
     return fileString;
 }
