@@ -61,3 +61,6 @@ static string textFileRead(const char* fileName)
     
     return fileString;
 }
+
+#define poly3(A, B, C, D)  ((A) * (X) * (X) + (B) * (X) + (C))
+

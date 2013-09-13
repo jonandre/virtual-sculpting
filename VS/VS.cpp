@@ -13,7 +13,7 @@
  * @param   start  The earlier time point
  * @return         The difference in milliseconds
  */
-inline double diffclock(clock_t end, clock_t start) 
+inline double diffclock(clock_t end, clock_t start)
 {
 	return (end - start) * 1000. / CLOCKS_PER_SEC;
 }
@@ -26,7 +26,7 @@ inline double diffclock(clock_t end, clock_t start)
  * @param   argv  Command line arguments
  * @return        Exit value, zero on success
  */
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
 	(void) argc;
 	(void) argv;

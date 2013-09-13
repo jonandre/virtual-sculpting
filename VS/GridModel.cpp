@@ -96,42 +96,34 @@ inline float noise(float xin, float yin, float zin)
 inline float simplex_noise(int octaves, float x, float y, float z)
 {
 	float value = 0.0;
-	for (int i = 0; i < octaves; i++)
-		value += noise(x * (1 << 1), y * (1 << i), z * (1 << i));
+	for (int i = 1, n = octaves << 1; i != octaves; i <<= 1)
+		value += noise(x * i, y * i, z * i);
 	return value;
 }
 
 inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z, unsigned char* data, unsigned int side)
 {
-	float caves, center_falloff, plateau_falloff, density;
-	float local_x = x / (side - 1.0f);
-	float local_y = y / (side - 1.0f);
-    float local_z = z / (side - 1.0f);
-
-    if (local_y <= 0.8)
-      plateau_falloff = 1.0;
-    else if (0.8 < local_y && local_y < 0.9)
-      plateau_falloff = 1.0 - (local_y - 0.8) * 10.0;
-    else
-      plateau_falloff = 0.0;
-
-        center_falloff = 0.2 / (
-            pow((local_x - 0.5) * 1.5, 2) +
-            pow((local_y - 1.0) * 0.8, 2) +
-            pow((local_z - 0.5) * 1.5, 2)
-        );
-        caves = pow(simplex_noise(1, local_x * 5, local_y * 5, local_z * 5), 3);
-        density = (
-            simplex_noise(5, local_x, local_y * 0.5, local_z) *
-            center_falloff *
-            plateau_falloff
-        );
-        density *= pow(
-            noise((local_x + 1) * 3.0, (local_y + 1) * 3.0, (local_z + 1) * 3.0) + 0.4, 1.8
-        );
-        if (caves < 0.5)
-            density = 0;
-	data[x * side * side + y * side + z] = density > 3.1 ? 255 : 0;
+	float caves, centre_falloff, plateau_falloff, density;
+	float x_ = x / (side - 1.0f);
+	float y_ = y / (side - 1.0f);
+	float z_ = z / (side - 1.0f);
+	
+	if      (y_ <= 0.8)                 plateau_falloff = 1.0;
+	else if ((0.8 < y_) && (y_ < 0.9))  plateau_falloff = 1.0 - (y_ - 0.8) * 10.0;
+	else                                plateau_falloff = 0.0;
+	
+	#define __(X, Y)  pow((X) * Y, 2)
+        centre_falloff = 0.2 / (__(x_ - 0.5, 1.5) + __(y_ - 1.0, 0.8) + __(z_ - 0.5, 1.5));
+	#undef __
+	
+        caves = pow(simplex_noise(1, x_ * 5, y_ * 5, z_ * 5), 3);
+	
+	#define __(X)  (X + 1) * 3.0
+        density = simplex_noise(5, x_, y_ * 0.5, z_) * centre_falloff * plateau_falloff;
+        density *= pow(noise(__(x_), __(y_), __(z_)) + 0.4, 1.8);
+	#undef __
+	
+	data[poly3(x, y, z, side)] = ((caves < 0.5) || (3.1 <= density)) ? 255 : 0;
 }
 
 ///
@@ -239,13 +231,13 @@ unsigned int GridModel::GetDimm()
 	return dimm;
 }
 
-inline  unsigned int GridModel::GetCellIndex( const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z )
+inline  unsigned int GridModel::GetCellIndex(const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z)
 {
 	x = (unsigned)((int)(pos.coord[0]) + half_dimm);
 	y = (unsigned)((int)(pos.coord[1]) + half_dimm);
 	z = (unsigned)((int)(pos.coord[2]) + half_dimm);
 	
-	return x * dimm * dimm + y * dimm + z;
+	return poly3(x, y, z, dimm);
 }
 
 
@@ -291,7 +283,7 @@ void GridModel::UpdateGrid()
 }
 
 
-void GridModel::EnshureMarked(int i, int j, int k)
+void GridModel::EnshureMarked(int i, int j, int k) /* TODO fix name*/
 {
 	VoxelChunk* ptr = _chunks[(i >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
 	
@@ -377,7 +369,7 @@ int GridModel::UpdateCellMelt(int i, int j, int k, unsigned char val)
 		// zero alpha means that either voxel is not visible or is empty
 		unsigned char alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
 			j - (j >> power_for_chunk) * internal_chunk_size , k - (k >> power_for_chunk) * internal_chunk_size); //local index in chunk.
-
+		
 		if (alpha == 0)
 			return 0;
 	}
