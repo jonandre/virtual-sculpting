@@ -243,9 +243,7 @@ void GridModel::ReInitModel(bool clear)
 {
 	unsigned int iter;
 	for (int i = 0; i != dimm; i++)
-	{
 		for (int j = 0; j != dimm; j++)
-		{
 			for (int k = 0; k != dimm; k++)
 			{
 				iter = i * dimm * dimm + j * dimm + k;
@@ -254,8 +252,6 @@ void GridModel::ReInitModel(bool clear)
 				_interacted[iter] = false;
 				//floating_rock(i, j, k, _cells, dimm);				
 			}
-		}
-	}
 	
 	_dirty_chunks.clear();
 	_modified_chunks.clear();
@@ -290,13 +286,11 @@ void GridModel::UpdateGrid()
 	{
 		not_dirty = true;
 		for (j = 0; j < _dirty_chunks.size(); j++)
-		{
 			if ( _dirty_chunks[j] == _modified_chunks[i])
 			{
 				not_dirty = false;
 				break;
 			}
-		}
 		
 		if (not_dirty)
 			_modified_chunks[i]->RecalcColor(_cells, dimm);
