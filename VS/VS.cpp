@@ -45,7 +45,6 @@ int main(int argc, char** argv)
 	KinectTool* tool = new KinectTool(side * 0.75f, side * 0.75f, side * 0.75f, -(side * 0.75f));
 	
 	Soundify snd;
-	snd.SetPitch(0.1 + glm::log2(acted * 1.0f) / 1000.0f); /* TODO did this really have to be after */
 	snd.Play();
 	
 	int acted = 0;
@@ -72,6 +71,8 @@ int main(int argc, char** argv)
 		model->UpdateGrid(); //Update visual representation of model
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM()); //Do actual rendering.
 		
+		if (acted)
+		  snd.SetPitch(0.1 + glm::log2(acted * 1.0f) / 1000.0f);
 		snd.SetGain(acted ? 1.0f : 0.0f);
 		
 		#ifdef DEBUG_TIME
