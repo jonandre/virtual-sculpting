@@ -1,7 +1,7 @@
 #ifndef __LIBS
 #define __LIBS
-#include "GL\glew.h"
-#include "GL\wglew.h"
+#include "GL/glew.h"
+#include "GL/wglew.h"
 
 #ifdef _M_IX86
 	#pragma comment(lib, "glew32.lib")

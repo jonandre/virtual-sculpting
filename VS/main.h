@@ -2,17 +2,16 @@
 #include <string>
 #include <iostream>
 #include <vector>
-
 #include <fstream>
 
 using namespace std;
 
-#include "glm\glm.hpp"  
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtx\orthonormalize.hpp"
-#include "glm\gtx\quaternion.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtc\quaternion.hpp"
+#include "glm/glm/hpp"  
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtx/orthonormalize.hpp"
+#include "glm/gtx/quaternion.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/quaternion.hpp"
 
 typedef unsigned char UINT8;
 
