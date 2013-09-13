@@ -84,37 +84,20 @@ inline float noise(float xin, float yin, float zin){
     gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
     gi3 = perm[ii + 1  + perm[jj + 1  + perm[kk + 1 ]]] % 12;
     
-    t0 = 0.6 - x0 * x0 - y0 * y0 - z0 * z0;
-    if (t0 < 0)
-         n0 = 0.0;
-    else{
-        t0 *= t0;
-        n0 = t0 * t0 * dot(x0, y0, z0, grad[gi0]);
-    }
-
-    t1 = 0.6 - x1 * x1 - y1 * y1 - z1 * z1;
-    if (t1 < 0)
-         n1 = 0.0;
-    else{
-        t1 *= t1;
-        n1 = t1 * t1 * dot(x1, y1, z1, grad[gi1]);
-    }
+	#define _2(X) ((X) * (X))
+	#define __(I)								\
+		t##I = 0.6 - _2(x##I) - _2(y##I) - _2(z##I);			\
+		if (t##I < 0)							\
+			n##I = 0.0;						\
+		else								\
+		{								\
+			t##I *= t##I;						\
+			n##I = _2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]);	\
+		}
     
-    t2 = 0.6 - x2 * x2 - y2 * y2 - z2 * z2;
-    if (t2 < 0)
-         n2 = 0.0;
-    else{
-        t2 *= t2;
-        n2 = t2 * t2 * dot(x2, y2, z2, grad[gi2]);
-    }
-    
-    t3 = 0.6 - x3 * x3 - y3 * y3 - z3 * z3;
-    if (t3 < 0)
-         n3 = 0.0;
-    else{
-        t3 *= t3;
-        n3 = t3 * t3 * dot(x3, y3, z3, grad[gi3]);
-    }
+	__(1) __(2) __(3)
+	#undef __
+	#undef _2
 
     return 16.0 * (n0 + n1 + n2 + n3) + 1.0;
 }
