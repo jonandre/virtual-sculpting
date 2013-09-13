@@ -1,6 +1,6 @@
+#include <time.h>
 #include "GridModel.h"
 #include "GLContext.h"
-#include <time.h>
 #include "KinectTool.h"
 #include "TriangleMesh.h"
 #include "Soundify.h"
