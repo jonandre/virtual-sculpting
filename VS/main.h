@@ -6,7 +6,7 @@
 
 using namespace std;
 
-#include "glm/glm/hpp"  
+#include "glm/glm/hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtx/orthonormalize.hpp"
 #include "glm/gtx/quaternion.hpp"
@@ -33,7 +33,7 @@ struct Normal
 struct Vertex
 {
 	Point _point; // 3⋅4
-	Normal _normal;// 3⋅4
+	Normal _normal; // 3⋅4
 	Color _color; // 4⋅1
 	float _uv[2]; // 2⋅4
 	//Totall = 12 + 12 + 4 + 8 bytes == 36 - we need padding
