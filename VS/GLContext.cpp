@@ -27,14 +27,14 @@ GLContext::GLContext()
 	}
 
 	hWnd = CreateWindowExW(dwExStyle, title, title, WS_OVERLAPPEDWINDOW,
-      CW_USEDEFAULT, 0, 512, 512, NULL, NULL, hInstance, NULL);
+		CW_USEDEFAULT, 0, 512, 512, NULL, NULL, hInstance, NULL);
 
 	this->hwnd = hWnd;
 
 	create30Context(); // Create a context given a HWND
 	
 	ShowWindow(this->hwnd, SW_SHOW);
-    UpdateWindow(this->hwnd);
+	UpdateWindow(this->hwnd);
 }
 
 Render *GLContext::GetObjectFromHWnd( HWND hWnd )
@@ -72,16 +72,16 @@ GLContext::GLContext(HWND hwnd)
 	create30Context(); // Create a context given a HWND
 	
 	ShowWindow(this->hwnd, SW_SHOW);
-    UpdateWindow(this->hwnd);
+	UpdateWindow(this->hwnd);
 }
 
 GLContext::~GLContext() 
 {
 	delete render;
-    wglMakeCurrent(hdc, 0);
-    wglDeleteContext(hrc);
-
-    ReleaseDC(hwnd, hdc);	
+	wglMakeCurrent(hdc, 0);
+	wglDeleteContext(hrc);
+	
+	ReleaseDC(hwnd, hdc);	
 }
 
 bool GLContext::create30Context() 
@@ -93,7 +93,7 @@ bool GLContext::create30Context()
 	PIXELFORMATDESCRIPTOR pfd;
 	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR)); 
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL;// | PFD_DRAW_TO_WINDOW;
+	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL; // | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
 	pfd.cColorBits = 32;
 	pfd.cDepthBits = 32;
@@ -112,7 +112,7 @@ bool GLContext::create30Context()
 
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
-		return false;		 
+		return false;
 
 	int attributes[] = 
 	{
