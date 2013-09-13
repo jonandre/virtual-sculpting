@@ -98,22 +98,22 @@ bool GLContext::create30Context()
 	pfd.cColorBits = 32;
 	pfd.cDepthBits = 32;
 	pfd.iLayerType = PFD_MAIN_PLANE;
-
+	
 	int nPixelFormat = ChoosePixelFormat(hdc, &pfd);
 	if (nPixelFormat == 0)
 		return false;
-
+	
 	int bResult = SetPixelFormat(hdc, nPixelFormat, &pfd);
 	if (!bResult)
 		return false;
-
+	
 	HGLRC tempOGLWidget = wglCreateContext(hdc);
 	wglMakeCurrent(hdc, tempOGLWidget);
-
+	
 	GLenum error = glewInit();
 	if (error != GLEW_OK)
 		return false;
-
+	
 	int attributes[] = 
 	{
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
@@ -121,7 +121,7 @@ bool GLContext::create30Context()
 		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, 
 		0
 	};
-
+	
 	if (wglewIsSupported("WGL_ARB_create_context") == 1) 
 	{
 		hrc = wglCreateContextAttribsARB(hdc, NULL, attributes);
