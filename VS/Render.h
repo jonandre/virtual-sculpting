@@ -12,7 +12,8 @@ public:
 	void Init();
 	void SetupScene();
 	void Resize(int w, int h);
-	void Draw( GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj );
+	void Draw(GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj);
+
 private:
 	glm::mat4 projectionMatrix;
 
