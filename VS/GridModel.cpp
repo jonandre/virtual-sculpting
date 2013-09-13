@@ -476,4 +476,4 @@ std::map<unsigned int, VAO*>* GridModel::GetRenderableCells()
 {
 	return &_renderable_chunks;
 }
-'
+

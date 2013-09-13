@@ -29,7 +29,7 @@ void Input::OnKeyPressed(char c)
 	}
 	else if (c == 'F')  _rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
 	else if (c == 'I')  _model->ReInitModel(false);
-	else if (c == 'C')  _model->ReInitModel(true ;
+	else if (c == 'C')  _model->ReInitModel(true );
 	else if (c == 'D')  _rotation_vector_obj.y += 0.2f * rad_map;
 	else if (c == 'A')  _rotation_vector_obj.y -= 0.2f * rad_map;
 	else if (c == 'W')  _rotation_vector_obj.x += 0.2f * rad_map;
