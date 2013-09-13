@@ -1,10 +1,10 @@
+#include <time.h>
 #include "Render.h"
 #include "GraphicsLib.h"
 #include "GridModel.h"
 #include "VAO.h"
 #include "KinectTool.h"
 #include "TriangleMesh.h"
-#include <time.h>
 
 
 Render::Render(): shader(NULL)
@@ -38,14 +38,14 @@ void Render::SetupScene()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-	glBlendFunc (GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	shader = new Shader();
 	shader->loadFragmentShader("Shaders/shader.frag");
 	shader->loadGeometryShader("Shaders/shader.geom");
 	shader->loadVertexShader("Shaders/shader.vert");
 	shader->link();
-			
+	
 	pMatrixLocation = glGetUniformLocation(shader->id(), "p");
 	mMatrixLocation = glGetUniformLocation(shader->id(), "m");
 	vMatrixLocation = glGetUniformLocation(shader->id(), "v");
@@ -53,15 +53,19 @@ void Render::SetupScene()
 	projectionMatrix = glm::perspective(120.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4048.0f);
 }
 
-inline double diffclock( clock_t clock1, clock_t clock2 ) 
+/**
+ * Calculate the difference, in milliseconds, between two time points
+ * 
+ * @param   end    The later time point
+ * @param   start  The earlier time point
+ * @return         The difference in milliseconds
+ */
+inline double diffclock(clock_t end, clock_t start) 
 {
-	double diffticks = clock1 - clock2;
-    double diffms    = diffticks / ( CLOCKS_PER_SEC / 1000 );
-
-    return diffms;
+	return (end - start) * 1000 / CLOCKS_PER_SEC;
 }
 
-void Render::Draw( GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4& obj )
+void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4& obj)
 {
 	clock_t start = clock();
 	
@@ -69,15 +73,15 @@ void Render::Draw( GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_CULL_FACE);
 	glDisable(GL_BLEND);
-
+	
 	int i = 0;
 	shader->bind();
 	glUniformMatrix4fv(pMatrixLocation, 1, GL_FALSE, &(projectionMatrix[0][0]));
 	glUniformMatrix4fv(mMatrixLocation, 1, GL_FALSE, &(obj[0][0]));
 	glUniformMatrix4fv(vMatrixLocation, 1, GL_FALSE, &(view[0][0]));
 	
-	std::map< unsigned int, VAO* >* cells = model->GetRenderableCells();
-	std::map< unsigned int, VAO* >::iterator iter;
+	std::map<unsigned int, VAO*>* cells = model->GetRenderableCells();
+	std::map<unsigned int, VAO*>::iterator iter;
 	VAO* vao_ptr = NULL;
 	for (iter = cells->begin(); iter != cells->end(); iter++)
 	{
@@ -97,12 +101,12 @@ void Render::Draw( GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat
 	shader->unbind();
 	
 	glm::mat4 pvm = projectionMatrix*view;
-
+	
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_BLEND);	
 	glDepthMask(GL_FALSE);
 	vao_ptr = tool->GetToolMesh()->GetVAO();
-
+	
 	tool->GetToolShader()->bind();	
 	glUniformMatrix4fv(tool->GetPVMLocation(), 1, GL_FALSE, &(pvm[0][0]));
 	
@@ -118,7 +122,7 @@ void Render::Draw( GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat
 	
 	///
 	clock_t end = clock();
-	//std::cout<<"For ticks = "<<i<<", tick time = " << diffclock( end, start )<< " ms" << std::endl;
+	//std::cerr << "For ticks = " << i << ", tick time = " << diffclock(end, start) << " ms" << std::endl;
 }
 
 void Render::Resize(int w, int h)

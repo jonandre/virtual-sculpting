@@ -9,8 +9,8 @@ public:
 	Soundify();
 	~Soundify();
 	void Play();
-	void SetPitch( float val );
-	void SetGain( float val );
+	void SetPitch(float val);
+	void SetGain(float val);
 
 private:
 	void GenerateAudioData(double frequency, int seconds);
