@@ -8,22 +8,22 @@ class GLContext
 public:
 	GLContext();
 	~GLContext();
-	void renderScene( GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj );
+	void renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj);
 	void doMessage();
-	void SetInput( Input* );
+	void SetInput(Input*);
 	bool alive();
 
 	void setupScene();
 
-	//void setObject( glm::mat4& obj );
-	//void setProjection( glm::mat4& obj );
+	//void setObject(glm::mat4& obj);
+	//void setProjection(glm::mat4& obj);
 
 private:	
 	bool create30Context();
 	GLContext(HWND hwnd);
 
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
-	static Render* GetObjectFromHWnd( HWND hWnd );
+	static Render* GetObjectFromHWnd(HWND hWnd);
 	Render* render;
 	Input* inp;
 
