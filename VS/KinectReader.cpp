@@ -1,5 +1,7 @@
 #include "KinectReader.h"
+#ifndef WITHOUT_KINECT
 #include <NuiApi.h> /* FIXME must be included after "KinectReader.h" */
+#endif
 #include "main.h"
 
 
@@ -18,7 +20,9 @@ KinectReader::KinectReader(unsigned int min_depth, unsigned int max_depth, float
 	// Initiering
 	memset(m_depth, 0, 640 * 480 * sizeof(float));
 	// Matric point
+	#ifndef WITHOUT_KINECT
 	m_pNuiSensor = NULL;
+	#endif
 	
 	CreateFirstConnected();
 	
@@ -40,60 +44,64 @@ KinectReader::~KinectReader(void)
  */
 HRESULT KinectReader::CreateFirstConnected()
 {
-    INuiSensor* pNuiSensor = NULL;
-    HRESULT hr;
-    int iSensorCount = 0;
-    hr = NuiGetSensorCount(&iSensorCount);
-    if (FAILED(hr))
-        return hr;
-    
-    // Look at each Kinect sensor
-    for (int i = 0; i < iSensorCount; i++)
-    {
-        // Create the sensor so we can check status, if we can't create it, move on to the next
-        hr = NuiCreateSensorByIndex(i, &pNuiSensor);
-        if (FAILED(hr))
-            continue;
+	#ifndef WITHOUT_KINECT
+	INuiSensor* pNuiSensor = NULL;
+	int iSensorCount = 0;
+	HRESULT hr;
 	
-        // Get the status of the sensor, and if connected, then we can initialize it
-        hr = pNuiSensor->NuiStatus();
-        if (S_OK == hr)
-        {
-            m_pNuiSensor = pNuiSensor;
-            break;
-        }
+	hr = NuiGetSensorCount(&iSensorCount);
+	if (FAILED(hr))
+		return hr;
 	
-        // This sensor wasn't OK, so release it since we're not using it
-        pNuiSensor->Release();
-    }
-    
-    if (m_pNuiSensor != NULL)
-    {
-        // Initialize the Kinect and specify that we'll be using depth
-        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH);
-        if (SUCCEEDED(hr))
-        {
-            // Create an event that will be signaled when depth data is available
-            m_hNextDepthFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-	    
-            // Open a depth image stream to receive depth frames
-            hr = m_pNuiSensor->NuiImageStreamOpen(
-                NUI_IMAGE_TYPE_DEPTH,
-                NUI_IMAGE_RESOLUTION_640x480,
-                0,
-                2,
-                m_hNextDepthFrameEvent,
-                &m_pDepthStreamHandle);
-        }
-    }
-    
-    if ((m_pNuiSensor == NULL) || FAILED(hr))
-    {
+	// Look at each Kinect sensor
+	for (int i = 0; i < iSensorCount; i++)
+	{
+		// Create the sensor so we can check status, if we can't create it, move on to the next
+		hr = NuiCreateSensorByIndex(i, &pNuiSensor);
+		if (FAILED(hr))
+        		continue;
+		
+		// Get the status of the sensor, and if connected, then we can initialize it
+		hr = pNuiSensor->NuiStatus();
+		if (S_OK == hr)
+        	{
+        		m_pNuiSensor = pNuiSensor;
+			break;
+		}
+		
+		// This sensor wasn't OK, so release it since we're not using it
+		pNuiSensor->Release();
+	}
+	
+	if (m_pNuiSensor != NULL)
+	{
+		// Initialize the Kinect and specify that we'll be using depth
+		hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH);
+		if (SUCCEEDED(hr))
+		{
+			// Create an event that will be signaled when depth data is available
+			m_hNextDepthFrameEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+			
+			// Open a depth image stream to receive depth frames
+			hr = m_pNuiSensor->NuiImageStreamOpen(NUI_IMAGE_TYPE_DEPTH,
+							      NUI_IMAGE_RESOLUTION_640x480,
+							      0,
+							      2,
+							      m_hNextDepthFrameEvent,
+							      &m_pDepthStreamHandle);
+		}
+	}
+	
+	if ((m_pNuiSensor == NULL) || FAILED(hr))
+	{
 		std::cerr << "No ready Kinect found!" << std::endl;
 		return E_FAIL;
-    }
-    
-    return hr;
+	}
+	
+	return hr;
+	#else
+	return 0;
+	#endif
 }
 
 /**
@@ -101,6 +109,7 @@ HRESULT KinectReader::CreateFirstConnected()
  */
 void KinectReader::ProcessDepth()
 {
+	#ifndef WITHOUT_KINECT
 	if (!m_pNuiSensor)
 	{/*
 		int delta_depth = _max_depth - _min_depth;
@@ -189,6 +198,7 @@ ReleaseFrame:
 	//return;
 	// Release the frame
 	m_pNuiSensor->NuiImageStreamReleaseFrame(m_pDepthStreamHandle, &imageFrame);
+	#endif
 }
 
 /**
