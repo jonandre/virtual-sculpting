@@ -169,10 +169,10 @@ int KinectTool::InteractModel( GridModel* model, glm::quat quat )
 {
 	//for loop for each point, rotated by inverse of quat
 	points = _msh->GetPoints();
-	glm::quat inverse = glm::conjugate(quat);
+	inverse = glm::conjugate(quat);
 	
 
-	//Can be easy paralelized. With one but - UpdateCell should be treated properly - it's nor thead safe for moment.
+	//Can be easy paralelized. With one but - UpdateCell* should be treated properly - it's not thead safe for moment.
 	
 	
 	Point action_point;
@@ -255,9 +255,6 @@ void KinectTool::parallellise(long cpu, long beginning, long stop)
 	{
 		perror("pthread_create");
 		abort();
-	}
-	else
-	{
 	}
 }
 
