@@ -1,5 +1,8 @@
 #pragma once
+#pragma GCC diagnostic push
+#pragma GCC system_header
 #include <windows.h>
+#pragma GCC diagnostic pop
 struct INuiSensor;
 //#include "NuiImageCamera.h"
 struct Point;
