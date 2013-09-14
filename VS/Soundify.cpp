@@ -5,7 +5,7 @@
 Soundify::Soundify()
 {
 	sampleRate = 44100;
-	GenerateAudioData(1000, 1);
+	GenerateAudioData(440, 1);
 	pDevice = alcOpenDevice(NULL);
 	CheckALCError();
 	pContext = alcCreateContext(pDevice, NULL);
@@ -47,9 +47,13 @@ void Soundify::GenerateAudioData(double frequency, int seconds)
 {
 	frames = seconds * sampleRate;
 	audioData = new short[frames];
-	unsigned int MaxValue = (1 << (sizeof(short) * 8 - 1)) - 1;
+	unsigned int MaxValue = (1 << (sizeof(short) * 8 - 2)) - 1;
 	for (int i = 0; i < frames; i++)
-		audioData[i] = (short)(MaxValue * sin((2 * glm::pi<double>() * frequency) / sampleRate * i));
+	{
+		audioData[i] = 0;
+		for (int j = 1; j <= 4; j++)
+			audioData[i] += (short)(MaxValue * sin(((1 << j) * glm::pi<double>() * frequency) / sampleRate * i)) * pow(0.4, j - 1);
+	}
 }
 
 
