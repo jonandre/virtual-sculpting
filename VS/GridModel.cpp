@@ -161,7 +161,7 @@ GridModel::GridModel(int power)
 			for (int k = 0; k != dimm; k++)
 			{
 				center.coord[2] = (float)(k - half_dimm);
-				iter = poly3(i, j, j, dimm);
+				iter = poly3(i, j, k, dimm);
 				
 				_cells[iter] = 0;
 				radius = sqrtf(pow2(center.coord[0]) + pow2(center.coord[1]) + pow2(center.coord[2]));
