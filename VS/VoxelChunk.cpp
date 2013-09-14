@@ -36,14 +36,14 @@ void VoxelChunk::CreateGeometry()
 
 	for (int i = 0; i != size; i++)
 	{
-		pnt.coord[0] = float(_lbl[0] + i) + 0.5f;
+		pnt.coord[0] = (float)(_lbl[0] + i) + 0.5f;
 		for (int j = 0; j != size; j++)
 		{
-			pnt.coord[1] = float(_lbl[1] + j) + 0.5f;
+			pnt.coord[1] = (float)(_lbl[1] + j) + 0.5f;
 			for (int k = 0; k != size; k++)
 			{
-				pnt.coord[2] = float(_lbl[2] + k) + 0.5f;
-				index = i * size * size + j * size + k;
+				pnt.coord[2] = (float)(_lbl[2] + k) + 0.5f;
+				index = poly(i, j, k, size);
 				_points[index] = pnt;
 				_colors[index] = __clr;
 			}
@@ -121,33 +121,33 @@ void VoxelChunk::ClearMesh()
 
 inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm) //check neighbours, basically "is visible" for given cell
 {
-	unsigned int index = x * dimm * dimm + y * dimm + z;
+	unsigned int index = poly3(x, y, z, dimm);
 
 	if (m_pBlocks[index] == 0)
 		return 0;
 	
 	unsigned char res = 0; //Coding 00xxxxxx - where x is side
 	
-	//top side:
-	if ((y == dimm-1) || m_pBlocks[index + dimm] == 0)
+	//top
+	if ((y == dimm - 1) || m_pBlocks[index + dimm] == 0)
 		++res;
 	res <<= 1;
 
-	//Bottom
+	//bottom
 	if ((y == 0) || m_pBlocks[index - dimm] == 0)
 		 ++res;
 	res <<= 1;
 	
 	//right
-	if ((x == dimm - 1) || m_pBlocks[index + dimm * dimm] == 0)
+	if ((x == dimm - 1) || m_pBlocks[index + pow2(dimm)] == 0)
 		++res;
 	res <<= 1;
 
 	//left
-	if ((x == 0) || m_pBlocks[index - dimm * dimm] == 0)
+	if ((x == 0) || m_pBlocks[index - pow2(dimm)] == 0)
 		++res;
 	res <<= 1;
-
+	
 	//back
 	if ((z == 0) || m_pBlocks[index - 1] == 0)
 		++res;
@@ -169,12 +169,12 @@ inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned
 
 unsigned char VoxelChunk::GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z)
 {
-	return _colors ? _colors[x * size * size + y * size + z].comp[3] : 0;
+	return _colors ? _colors[poly3(x, y, z, size)].comp[3] : 0;
 }
 
 inline void VoxelChunk::SetColorForVoxel(unsigned int x, unsigned int y, unsigned int z, Color* clr)
 {
-	_colors[x * size * size + y * size + z] = *clr;
+	_colors[poly4(x, y, z, size)] = *clr;
 }
 
 void VoxelChunk::ClearGeometry()
@@ -229,15 +229,16 @@ void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int
 	unsigned char tmp_res = 0;
 	unsigned int x, y;
 	
+	#define __(I) (_local_to_global_##I + I)
 	for (unsigned int i = 0; i < size; i++)
 	{
-		x = (_local_to_global_i + i) * dimm * dimm;
+		x = __(i) * dimm * dimm;
 		for (unsigned int j = 0; j < size; j++)
 		{
-			y = (_local_to_global_j + j) * dimm;
+			y = __(j) * dimm;
 			for (unsigned int k = 0; k < size; k++)
 			{
-				tmp_res = EvaluateCell(m_pBlocks, _local_to_global_i + i, _local_to_global_j + j, _local_to_global_k + k, dimm);
+				tmp_res = EvaluateCell(m_pBlocks, __(i), __(j), __(k), dimm);
 				if (tmp_res)
 				{
 					if (_points == NULL)
@@ -246,19 +247,20 @@ void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int
 					if (!_vbo)
 						_vbo = new VBO(_points, NULL, 0, _vertex_len);
 					
-					global_index = (x + y + _local_to_global_k + k);
+					global_index = (x + y + __(k));
 					//MapColor(&clr, m_pBlocks[global_index], false);
 					MapColor(&clr, m_pBlocks[global_index], _acted[global_index]);
 					
 					_acted[global_index] = false;
 					clr.comp[3] = tmp_res;
 					SetColorForVoxel(i, j, k, &clr);
-					_renderable_indexes[num_created] = i * size * size + j * size + k;
+					_renderable_indexes[num_created] = poly3(i, j, k, size);
 					++num_created;
 				}
 			}
 		}
 	}
+	#undef __
 	
 	_renderable_indexes_count = num_created;
 	
@@ -290,22 +292,25 @@ void VoxelChunk::RecalcColor(unsigned char* voxels, unsigned int dimm)
 	unsigned int global_index = 0;
 	unsigned int x, y, index;
 	
+	#define __(I) (_local_to_global_##I + I)
 	for (unsigned int i = 0; i < size; i++)
 	{
-		x = (_local_to_global_i + i) * dimm * dimm;
+		x = __(i) * dimm * dimm;
 		for (unsigned int j = 0; j < size; j++)
 		{
-			y = (_local_to_global_j + j) * dimm;
+			y = __(j) * dimm;
 			for (unsigned int k = 0; k < size; k++)
 			{
-				MapColor(&clr, voxels[x + y + _local_to_global_k + k], false);
-				index = (i * size * size + j * size + k);
+				MapColor(&clr, voxels[x + y + __(k), false);
+				index = poly3(i, j, k, size);
 				_colors[index].comp[0] = clr.comp[0];
 				_colors[index].comp[1] = clr.comp[1];
 				_colors[index].comp[2] = clr.comp[2];
 			}
 		}
 	}
+	#undef __
+	
 	_vbo->UpdateColorArray(_colors, _vertex_len);
 	_vao->bind(*_vbo);
 }
