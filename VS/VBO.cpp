@@ -135,3 +135,4 @@ VBO::~VBO()
 	if (vboID[3])  glDeleteBuffers(1, &vboID[3]);
 	if (vboID[4])  glDeleteBuffers(1, &vboID[4]);
 }
+
