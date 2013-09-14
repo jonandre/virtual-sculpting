@@ -2,93 +2,107 @@
 #include "main.h"
 
 
-Soundify::Soundify()
+
+#define FRAMES     (AUDIO_DURATION * AUDIO_SAMPLE_RATE / 1000)
+#define MAX_VALUE  ((1 << (sizeof(short) * 8 - 1)) - 1)
+
+static short audioData[FRAMES];
+static ALCdevice* audioDevice;
+static ALCcontext* audioContext;
+
+static ALuint audioBuffer;
+static ALuint audioSource;
+
+
+
+/**
+ * Check for audio device error
+ */
+inline void check_alc_error()
 {
-	sampleRate = 44100;
-	GenerateAudioData(1000, 1);
-	pDevice = alcOpenDevice(NULL);
-	CheckALCError();
-	pContext = alcCreateContext(pDevice, NULL);
-	CheckALCError();
+	ALenum err;
+	if ((err = alcGetError(audioDevice)) != ALC_NO_ERROR)
+		std::cerr << "ALC error: " << alcGetString(audioDevice, err) << std::endl;
+}
+
+/**
+ * Check for audio error
+ */
+inline void check_al_error()
+{
+	ALenum err;
+	if ((err = alGetError()) != AL_NO_ERROR)
+		std::cerr << "OpenAL error: " << alGetString(err) << std::endl;
+}
+
+
+/**
+ * Initialise the audio emitted when sculpting
+ */
+void initialise_audio()
+{
+	/* Generate wave to play */
+	for (int i = 0; i < FRAMES; i++)
+		audioData[i] = (short)(MAX_VALUE * sin((2 * glm::pi<double>() * AUDIO_FREQUENCY) / AUDIO_SAMPLE_RATE * i));
 	
-	alcMakeContextCurrent(pContext);
-	CheckALCError();
-	alGenBuffers(1, &buffer);
-	CheckALError();
-	alGenSources(1, &source);
-	CheckALError();
+	/* Open default audio playback device */
+	audioDevice = alcOpenDevice(NULL);                   check_alc_error();
 	
-	alBufferData(buffer, AL_FORMAT_MONO16, audioData, frames, sampleRate);
-	CheckALError();
-	alSourcei(source, AL_BUFFER, buffer);
-	alSourcef(source, AL_PITCH,  1.0f);
-	alSourcef(source, AL_GAIN,   0.0f);
-	alSourcei(source,AL_LOOPING,AL_TRUE);
-}
-
-void Soundify::SetPitch(float val)
-{
-	alSourcef(source, AL_PITCH, val);
-}
-
-
-void Soundify::SetGain(float val)
-{
-	alSourcef(source, AL_GAIN, val);
-}
-
-
-void Soundify::Play()
-{
-	alSourcePlay(source);
-}
-
-void Soundify::GenerateAudioData(double frequency, int seconds)
-{
-	frames = seconds * sampleRate;
-	audioData = new short[frames];
-	unsigned int MaxValue = (1 << (sizeof(short) * 8 - 1)) - 1;
-	for (int i = 0; i < frames; i++)
-		audioData[i] = (short)(MaxValue * sin((2 * glm::pi<double>() * frequency) / sampleRate * i));
-}
-
-
-Soundify::~Soundify()
-{
-	delete [] audioData;
+	/* Create audio playback context */
+	audioContext = alcCreateContext(audioDevice, NULL);  check_alc_error();
+	alcMakeContextCurrent(audioContext);                 check_alc_error();
 	
-	alDeleteBuffers(1, &buffer);
-	alDeleteSources(1, &source);
+	/* Generate buffer and source */
+	alGenBuffers(1, &audioBuffer);                       check_al_error();
+	alGenSources(1, &audioSource);                       check_al_error();
+	
+	/* Configure audio playback */
+	alBufferData(audioBuffer, AL_FORMAT_MONO16, audioData, FRAMES, AUDIO_SAMPLE_RATE);
+	check_al_error();
+	alSourcei(audioSource, AL_BUFFER,  audioBuffer);
+	alSourcef(audioSource, AL_PITCH,   1.0f);
+	alSourcef(audioSource, AL_GAIN,    0.0f);
+	alSourcei(audioSource, AL_LOOPING, AL_TRUE);
+	
+	/* Start playback */
+	alSourcePlay(audioSource);
+}
+
+
+/**
+ * Uninitialise the audio
+ */
+void terminate_audio()
+{
+	audio_set_gain(0.0f);
+	
+	alDeleteBuffers(1, &audioBuffer);
+	alDeleteSources(1, &audioSource);
 	
 	alcMakeContextCurrent(NULL);
-	alcDestroyContext(pContext);
-	alcCloseDevice(pDevice);
+	alcDestroyContext(audioContext);
+	alcCloseDevice(audioDevice);
 }
 
 
-ALboolean Soundify::CheckALCError()
+/**
+ * Set the audio playback pitch
+ * 
+ * @param  pitch  Frequency mulitplayer
+ */
+void audio_set_pitch(float pitch)
 {
-	ALenum ErrCode;
-	string Err = "ALC error: ";
-	if ((ErrCode = alcGetError(pDevice)) != ALC_NO_ERROR)
-	{
-		Err += (char*)alcGetString(pDevice, ErrCode);
-		std::cerr << Err.data() << std::endl;
-		return AL_FALSE;
-	}
-	return AL_TRUE;
+	alSourcef(audioSource, AL_PITCH, pitch);
 }
 
-ALboolean Soundify::CheckALError()
+
+/**
+ * Set the audio playback gain
+ * 
+ * @param  gain  Volume mulitplayer
+ */
+void audio_set_gain(float gain)
 {
-	ALenum ErrCode;
-	string Err = "OpenAL error: ";
-	if ((ErrCode = alGetError()) != AL_NO_ERROR)
-	{
-		Err += (char*)alGetString(ErrCode);
-		std::cerr << Err.data() << std::endl;
-		return AL_FALSE;
-	}
-	return AL_TRUE;
+	alSourcef(audioSource, AL_GAIN, gain);
 }
 

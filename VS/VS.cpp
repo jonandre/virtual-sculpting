@@ -44,8 +44,7 @@ int main(int argc, char** argv)
 	
 	KinectTool* tool = new KinectTool(side * 0.75f, side * 0.75f, side * 0.75f, -(side * 0.75f));
 	
-	Soundify snd;
-	snd.Play();
+	initialise_audio();
 	
 	int acted = 0;
 	bool space_pressed = false;
@@ -72,8 +71,8 @@ int main(int argc, char** argv)
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM()); //Do actual rendering.
 		
 		if (acted)
-			snd.SetPitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
-		snd.SetGain(acted ? 1.0f : 0.0f);
+			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
+		audio_set_gain(acted ? 1.0f : 0.0f);
 		
 		#ifdef DEBUG_TIME
 			clock_t end = clock();
@@ -82,8 +81,7 @@ int main(int argc, char** argv)
 		#endif
 	}
 	
-	snd.SetGain(0.0f);
-	
+	terminate_audio();
 	delete model;
 	delete inp;
 	delete tool;
