@@ -28,13 +28,13 @@ inline double diffclock(clock_t end, clock_t start)
  */
 int main(int argc, char** argv)
 {
-	int acted = 0;
-	bool space_pressed = false;
-	GLContext* graphics;
-	Input* input;
-	GridModel* model;
+	int          acted         = 0;
+	bool         space_pressed = false;
+	GLContext*   graphics;
+	Input*       input;
+	GridModel*   model;
 	unsigned int side;
-	KinectTool* kinect;
+	KinectTool*  kinect;
 	
 	(void) argc;
 	(void) argv;
@@ -42,12 +42,12 @@ int main(int argc, char** argv)
 	
 	/* Initialise GUI */
 	graphics = new GLContext();
-	input = new Input();
+	input    = new Input();
 	graphics->SetInput(input);
 	
 	/* Initialise model */
 	model = new GridModel(8); /* power of 2 */
-	side = model->GetDimm();
+	side  = model->GetDimm();
 	input->SetZoom(-(side * 4.0f));
 	input->SetModel(model);
 	
@@ -67,9 +67,9 @@ int main(int argc, char** argv)
 			clock_t start = clock(), end;
 		#endif
 		
-		input->UpdateFrame();
+		input   ->UpdateFrame();
 		graphics->doMessage();
-		kinect->DoToolUpdate();
+		kinect  ->DoToolUpdate();
 		
 		acted = (space_pressed ^= input->IsPressed(' '))
 			? kinect->InteractModel(model, input->GetObjectQ())
