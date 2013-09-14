@@ -115,7 +115,7 @@ void KinectReader::ProcessDepth()
 	NUI_IMAGE_FRAME imageFrame;
 	
 	// Attempt to get the depth frame
-	hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pDepthStreamHandle, 0, &imageFrame);	
+	hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pDepthStreamHandle, 0, &imageFrame);
 	if (FAILED(hr))
 		return;
 	
@@ -148,7 +148,7 @@ void KinectReader::ProcessDepth()
 		
 		float intensity = 0.0f;
 		int delta_depth =  maxDepth - minDepth;
-		float float_per_depth_unit = _active_depth / float(delta_depth );
+		float float_per_depth_unit = _active_depth / (float)(delta_depth);
 		static int t = 0;
 		++t;
 		while (pBufferRun < pBufferEnd)
