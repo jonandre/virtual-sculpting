@@ -1,4 +1,8 @@
 class VBO;
+
+/**
+ * Vertex array object
+ */
 class VAO
 {
 public:
@@ -6,7 +10,7 @@ public:
 	~VAO();
 	unsigned int id();
 	unsigned int size();
-	void bind(const VBO&);
+	void bind(const VBO& vbo);
 	
 private:
 	unsigned int vaoID[1];

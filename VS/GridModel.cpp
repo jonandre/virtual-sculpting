@@ -1,7 +1,6 @@
 #include <string.h>
 #include "GridModel.h"
 #include "VoxelChunk.h"
-#include "VoxelBlock.h"
 #include "main.h"
 
 

@@ -4,7 +4,6 @@
 #include "GridModel.h"
 #include "VAO.h"
 #include "KinectTool.h"
-#include "TriangleMesh.h"
 
 
 Render::Render(): shader(NULL)

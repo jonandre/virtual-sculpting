@@ -2,6 +2,9 @@ struct Point;
 struct Color;
 struct Normal;
 
+/**
+ * Vertex buffer object
+ */
 class VBO
 {
 public:

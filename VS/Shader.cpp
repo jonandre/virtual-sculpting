@@ -3,6 +3,30 @@
 #include "GraphicsLib.h"
 
 
+static string textFileRead(const char* fileName)
+{
+	string fileString;
+	string line;
+	
+	ifstream file(fileName,ios_base::in);
+	
+	if (file.is_open()) 
+	{
+		while (!file.eof()) 
+		{
+			getline(file, line);
+		  	fileString.append(line);
+			fileString.append("\n");
+		}
+		file.close();
+	}
+	else
+		std::cerr << "Unable to open " << fileName << std::endl;
+    
+    return fileString;
+}
+
+
 Shader::Shader(): shader_fp(-1U), shader_vp(-1U), shader_id(-1U), shader_gp(-1U)
 {
 

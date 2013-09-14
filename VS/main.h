@@ -6,12 +6,12 @@
 
 using namespace std;
 
-#include "glm/glm.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtx/orthonormalize.hpp"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/quaternion.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/orthonormalize.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 typedef unsigned char UINT8;
 
@@ -40,29 +40,6 @@ struct Vertex
 	unsigned char _padding[28];
 };
 
-
-static string textFileRead(const char* fileName)
-{
-	string fileString;
-	string line;
-	
-	ifstream file(fileName,ios_base::in);
-	
-	if (file.is_open()) 
-	{
-		while (!file.eof()) 
-		{
-			getline(file, line);
-		  	fileString.append(line);
-			fileString.append("\n");
-		}
-		file.close();
-	}
-	else
-		std::cerr << "Unable to open " << fileName << std::endl;
-    
-    return fileString;
-}
 
 #define pow2(X)  ((X) * (X))
 #define pow3(X)  ((X) * (X) * (X))

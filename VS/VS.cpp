@@ -28,66 +28,74 @@ inline double diffclock(clock_t end, clock_t start)
  */
 int main(int argc, char** argv)
 {
+	int          acted         = 0;
+	bool         space_pressed = false;
+	GLContext*   graphics;
+	Input*       input;
+	GridModel*   model;
+	unsigned int side;
+	KinectTool*  kinect;
+	
 	(void) argc;
 	(void) argv;
 	
-	GLContext* cntx = new GLContext(); //Window+render.
-	Input* inp = new Input(); //Input system.
-	cntx->SetInput(inp); //Context redirects mouse+keyb to Input
 	
-	unsigned int power = 8;
+	/* Initialise GUI */
+	graphics = new GLContext();
+	input    = new Input();
+	graphics->SetInput(input);
 	
-	GridModel* model = new GridModel(power); //power of 2
-	unsigned int side = model->GetDimm();
-	inp->SetZoom(-(side * 4.0f));
-	inp->SetModel(model);
+	/* Initialise model */
+	model = new GridModel(8); /* power of 2 */
+	side  = model->GetDimm();
+	input->SetZoom(-(side * 4.0f));
+	input->SetModel(model);
 	
-	KinectTool* tool = new KinectTool(side * 0.75f, side * 0.75f, side * 0.75f, -(side * 0.75f));
+	/* Initialise Kinect */
+	#define SIDE  (size * 0.75f)
+	kinect = new KinectTool(SIDE, SIDE, SIDE, -SIDE);
+	#undef SIDE
 	
-	Soundify snd;
-	snd.Play();
+	/* Initialise audio */
+	initialise_audio();
 	
-	int acted = 0;
-	bool space_pressed = false;
-	while (cntx->alive())
+	
+	/* Main loop */
+	while (graphics->alive())
 	{
 		#ifdef DEBUG_TIME
-			clock_t start = clock();
+			clock_t start = clock(), end;
 		#endif
-		acted = 0;
 		
-		inp->UpdateFrame(); //Reset frame variables.
-		cntx->doMessage(); //Win message loop
+		input   ->UpdateFrame();
+		graphics->doMessage();
+		kinect  ->DoToolUpdate();
 		
+		acted = (space_pressed ^= input->IsPressed(' '))
+			? kinect->InteractModel(model, input->GetObjectQ())
+			: 0;
 		
-		tool->DoToolUpdate(); //Update tool state - like depthmap
-		
-		if (inp->IsPressed(' '))
-			space_pressed ^= true;
-		
-		if (space_pressed)
-			acted = tool->InteractModel(model, inp->GetObjectQ()); //obvious
-		
-		model->UpdateGrid(); //Update visual representation of model
-		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM()); //Do actual rendering.
+		model->UpdateGrid();
+		graphics->renderScene(model, kinect, input->GetViewM(), input->GetObjectM());
 		
 		if (acted)
-			snd.SetPitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
-		snd.SetGain(acted ? 1.0f : 0.0f);
+			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
+		audio_set_gain(acted ? 1.0f : 0.0f);
 		
 		#ifdef DEBUG_TIME
-			clock_t end = clock();
-			std::cerr << "Frame time = " << diffclock(end, start) << " ms, "
-				  << " Interacted: " << acted << std::endl;
+			end = clock();
+			std::cerr << "Frame time = " << diffclock(end, start) << " ms,  "
+				  << "Interacted: " << acted << std::endl;
 		#endif
 	}
 	
-	snd.SetGain(0.0f);
 	
+	terminate_audio();
 	delete model;
-	delete inp;
-	delete tool;
-	delete cntx;
+	delete input;
+	delete kinect;
+	delete graphics;
+	
 	return 0;
 }
 
