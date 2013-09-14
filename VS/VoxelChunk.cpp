@@ -43,7 +43,7 @@ void VoxelChunk::CreateGeometry()
 			for (int k = 0; k != size; k++)
 			{
 				pnt.coord[2] = (float)(_lbl[2] + k) + 0.5f;
-				index = poly(i, j, k, size);
+				index = poly3(i, j, k, size);
 				_points[index] = pnt;
 				_colors[index] = __clr;
 			}
@@ -174,7 +174,7 @@ unsigned char VoxelChunk::GetVoxelAlpha(unsigned int x, unsigned int y, unsigned
 
 inline void VoxelChunk::SetColorForVoxel(unsigned int x, unsigned int y, unsigned int z, Color* clr)
 {
-	_colors[poly4(x, y, z, size)] = *clr;
+	_colors[poly3(x, y, z, size)] = *clr;
 }
 
 void VoxelChunk::ClearGeometry()
@@ -301,7 +301,7 @@ void VoxelChunk::RecalcColor(unsigned char* voxels, unsigned int dimm)
 			y = __(j) * dimm;
 			for (unsigned int k = 0; k < size; k++)
 			{
-				MapColor(&clr, voxels[x + y + __(k), false);
+				MapColor(&clr, voxels[x + y + __(k)], false);
 				index = poly3(i, j, k, size);
 				_colors[index].comp[0] = clr.comp[0];
 				_colors[index].comp[1] = clr.comp[1];

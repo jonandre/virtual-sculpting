@@ -1,6 +1,7 @@
 #include "GridModel.h"
 #include "VoxelChunk.h"
 #include "VoxelBlock.h"
+#include "main.h"
 
 
 GridModel::GridModel()
@@ -141,7 +142,7 @@ GridModel::GridModel(int power)
 	power_for_chunk = max((unsigned int)(power - 4), (unsigned int)4); //chunk_size
 	unsigned int _chunk_power = power - power_for_chunk;
 	chunk_dimm = 1 << _chunk_power; //dimension for array of chunk
-	chunk_size = poly3(chunk_dimm);
+	chunk_size = pow3(chunk_dimm);
 	_chunks = new VoxelChunk*[chunk_size];
 	
 	internal_chunk_size = 1 << power_for_chunk; //internal chunk size, dimm == chunk_dimm * internal_chunk_size
@@ -168,7 +169,7 @@ GridModel::GridModel(int power)
 					_cells[iter] = 255;
 				//floating_rock(i, j, k, _cells, dimm);
 				if (iter != GetCellIndex(center, tmp1, tmp2, tmp3))
-					std::cerr << "Error!" << std:endl;
+					std::cerr << "Error!" << std::endl;
 			}
 		}
 	}
@@ -191,7 +192,7 @@ GridModel::GridModel(int power)
 			for (int k = 0; k != chunk_dimm; k++)
 			{
 				__(2, k);
-				iter = poly(i, j, k, chunk_dimm);
+				iter = poly3(i, j, k, chunk_dimm);
 				
 				_chunks[iter] = new VoxelChunk(center, tmp_lbl, tmp_ufr);
 				_chunks[iter]->MarkDirty();
@@ -279,16 +280,16 @@ void GridModel::UpdateGrid()
 	_dirty_chunks.clear();
 }
 
-
-void GridModel::EnshureMarked(int i, int j, int k) /* TODO fix name*/
+ /* TODO fix name*/
+void GridModel::EnshureMarked(int i, int j, int k)
 {
-	VoxelChunk* ptr = _chunks[poly3_shift(i, j, k, chunk_dimm, power_of_chunk)];
+	VoxelChunk* ptr = _chunks[poly3_shift(i, j, k, chunk_dimm, power_for_chunk)];
 	int limit = dimm - internal_chunk_size;
 	
-	#define on_clean()				\
-		if (ptr->IsDirty()) == false)		\
-		{					\
-			ptr->MarkDirty();		\
+	#define on_clean()						\
+		if (ptr->IsDirty() == false)		\
+		{									\
+			ptr->MarkDirty();				\
 			_dirty_chunks.push_back(ptr);	\
 		}
 	
@@ -297,11 +298,11 @@ void GridModel::EnshureMarked(int i, int j, int k) /* TODO fix name*/
 	// + side chunks
 	//why not in the prev. "if" - you can modify one more cell at border of dirty chunk, so you have to update 
 	
-	#define if_clean(cond_a, cond_modand, I, J, K)
-		if ((cond_a) && ((cond_modand) % internal_chunk_size == 0))
-		{
-			ptr = _chunks[poly3_shift(I, J, K, chunk_dimm, power_of_chunk)];
-			on_clean()
+	#define if_clean(cond_a, cond_modand, I, J, K)								\
+		if ((cond_a) && ((cond_modand) % internal_chunk_size == 0))				\
+		{																		\
+			ptr = _chunks[poly3_shift(I, J, K, chunk_dimm, power_for_chunk)];	\
+			on_clean()															\
 		}
 	
 	if_clean(i,         i,     i - 1, j, k)
