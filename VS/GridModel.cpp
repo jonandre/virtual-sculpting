@@ -95,7 +95,7 @@ inline float noise(float xin, float yin, float zin)
 inline float simplex_noise(int octaves, float x, float y, float z)
 {
 	float value = 0.0;
-	for (int i = 1, n = octaves << 1; i != octaves; i <<= 1)
+	for (int i = 1, n = 1 << octaves; i != octaves; i <<= 1)
 		value += noise(x * i, y * i, z * i);
 	return value;
 }
