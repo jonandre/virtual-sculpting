@@ -141,7 +141,7 @@ GridModel::GridModel(int power)
 	power_for_chunk = max((unsigned int)(power - 4), (unsigned int)4); //chunk_size
 	unsigned int _chunk_power = power - power_for_chunk;
 	chunk_dimm = 1 << _chunk_power; //dimension for array of chunk
-	chunk_size = chunk_dimm * chunk_dimm * chunk_dimm;
+	chunk_size = poly3(chunk_dimm);
 	_chunks = new VoxelChunk*[chunk_size];
 	
 	internal_chunk_size = 1 << power_for_chunk; //internal chunk size, dimm == chunk_dimm * internal_chunk_size
@@ -160,7 +160,7 @@ GridModel::GridModel(int power)
 			for (int k = 0; k != dimm; k++)
 			{
 				center.coord[2] = (float)(k - half_dimm);
-				iter = i * dimm * dimm + j * dimm + k;
+				iter = poly3(i, j, j, dimm);
 				
 				_cells[iter] = 0;
 				radius = sqrtf(pow2(center.coord[0]) + pow2(center.coord[1]) + pow2(center.coord[2]));
@@ -168,9 +168,7 @@ GridModel::GridModel(int power)
 					_cells[iter] = 255;
 				//floating_rock(i, j, k, _cells, dimm);
 				if (iter != GetCellIndex(center, tmp1, tmp2, tmp3))
-				{
-					std::cerr << "Error!";
-				}
+					std::cerr << "Error!" << std:endl;
 			}
 		}
 	}
@@ -178,23 +176,22 @@ GridModel::GridModel(int power)
 	int tmp_lbl[3];
 	int tmp_ufr[3];
 	float _h_s = (float)(internal_chunk_size >> 1);
+	
+	#define __(I, X)								\
+		tmp_lbl[I] = (int)(X << power_for_chunk) - (int)(dimm / 2);		\
+		center.coord[I] = (float)(tmp_lbl[I]) + _h_s; /* but here it is */	\
+		tmp_ufr[I] = tmp_lbl[I] + internal_chunk_size
+	
 	for (int i = 0; i != chunk_dimm; i++)
 	{
-		tmp_lbl[0] = (int)(i << power_for_chunk) - (int)(dimm / 2);
-		center.coord[0] = float(tmp_lbl[0]) + _h_s; //but here it is
-		tmp_ufr[0] = tmp_lbl[0] + internal_chunk_size;
+		__(0, i);
 		for (int j = 0; j != chunk_dimm; j++)
 		{
-			tmp_lbl[1] = int(j << power_for_chunk) - int(dimm / 2);
-			center.coord[1] = float(tmp_lbl[1]) + _h_s;
-			tmp_ufr[1] = tmp_lbl[1] + internal_chunk_size;
-			for (int k = 0; k < chunk_dimm; k++)
+			__(1, j);
+			for (int k = 0; k != chunk_dimm; k++)
 			{
-				tmp_lbl[2] = int(k << power_for_chunk) - int(dimm / 2);
-				center.coord[2] = float(tmp_lbl[2]) + _h_s;
-				tmp_ufr[2] = tmp_lbl[2] + internal_chunk_size;
-				
-				iter = i * chunk_dimm * chunk_dimm + j * chunk_dimm + k;
+				__(2, k);
+				iter = poly(i, j, k, chunk_dimm);
 				
 				_chunks[iter] = new VoxelChunk(center, tmp_lbl, tmp_ufr);
 				_chunks[iter]->MarkDirty();
