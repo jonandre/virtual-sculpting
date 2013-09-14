@@ -42,7 +42,7 @@ inline void check_al_error()
 void initialise_audio()
 {
 	/* Generate wave to play */
-	for (int i = 0; i < FRAMES; i++)
+	for (int i = 0; i < FRAMES; i++) /* TODO add overtones for a cleaner sound */
 		audioData[i] = (short)(MAX_VALUE * sin((2 * glm::pi<double>() * AUDIO_FREQUENCY) / AUDIO_SAMPLE_RATE * i));
 	
 	/* Open default audio playback device */
