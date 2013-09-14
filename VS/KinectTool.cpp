@@ -85,7 +85,6 @@ unsigned int KinectTool::GetPVMLocation()
 inline void Blur(float* in_out, float* tmp)
 {
 	static float coeffs[] = {0.2f, 0.2f, 0.2f, 0.2f, 0.2f};
-	float summ = 0;
 
 	//X
 	int i, j, dx;
@@ -175,10 +174,8 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 	
 	
 	Point action_point;
-	unsigned int index = 0;
 	unsigned int tmp1, tmp2, tmp3;
-	unsigned int grid_size = model->GetSize();
-	unsigned int grid_dimm = model->GetDimm() - 1;
+	grid_dimm = model->GetDimm() - 1;
 	
         unsigned char val = 128;
 	int accum = 0;
