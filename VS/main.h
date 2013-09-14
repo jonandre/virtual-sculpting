@@ -39,7 +39,7 @@ struct Vertex
 };
 
 
-static string textFileRead(const char* fileName) 
+static string textFileRead(const char* fileName)
 {
 	string fileString;
 	string line;

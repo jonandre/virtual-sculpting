@@ -59,7 +59,7 @@ void Render::SetupScene()
  * @param   start  The earlier time point
  * @return         The difference in milliseconds
  */
-inline double diffclock(clock_t end, clock_t start) 
+inline double diffclock(clock_t end, clock_t start)
 {
 	return (end - start) * 1000 / CLOCKS_PER_SEC;
 }
