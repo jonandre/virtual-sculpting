@@ -197,7 +197,7 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 				tmp.coord[0] = action_point.coord[0] + dir_vector.coord[0] * delta;
 				tmp.coord[1] = action_point.coord[1] + dir_vector.coord[1] * delta;
 				tmp.coord[2] = action_point.coord[2] + dir_vector.coord[2] * delta;
-				index = model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+				model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
 				
 				if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
 					accum += model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
@@ -280,7 +280,7 @@ static void* run(void* args)
 					tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0] * delta;
 					tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1] * delta;
 					tmp.coord[2] = action_point.coord[2] + local_dir_vector.coord[2] * delta;
-					/*index =*/ grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+					grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
 					
 					if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
 						accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
