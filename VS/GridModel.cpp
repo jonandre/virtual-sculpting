@@ -122,7 +122,7 @@ inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z,
 	density *= pow(noise(__(x_), __(y_), __(z_)) + 0.4f, 1.8f);
 	#undef __
 	
-	data[poly3(x, y, z, side)] = ((caves < 0.5) || (3.1 <= density)) ? 255 : 0;
+	data[poly3(x, y, z, side)] = ((caves < 0.5) || (density <= 3.1)) ? 0 : 255;
 }
 
 
