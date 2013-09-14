@@ -34,13 +34,13 @@ void VoxelChunk::CreateGeometry()
 	Point pnt;
 	unsigned int index = 0;
 	
-	for (int i = 0; i != size; i++)
+	for (unsigned int i = 0; i < size; i++)
 	{
 		pnt.coord[0] = (float)(_lbl[0] + i) + 0.5f;
-		for (int j = 0; j != size; j++)
+		for (unsigned int j = 0; j < size; j++)
 		{
 			pnt.coord[1] = (float)(_lbl[1] + j) + 0.5f;
-			for (int k = 0; k != size; k++)
+			for (unsigned int k = 0; k < size; k++)
 			{
 				pnt.coord[2] = (float)(_lbl[2] + k) + 0.5f;
 				index = poly3(i, j, k, size);
@@ -62,7 +62,7 @@ VoxelChunk::VoxelChunk(const Point& center, int lbl[3], int ufr[3])
 	memcpy(_ufr, ufr, 3 * sizeof(int));
 	_points = NULL;
 	_colors = NULL;
-	_vertex_len = NULL;
+	_vertex_len = 0;
 	_indexes = NULL;
 	_renderable_indexes = NULL;
 }
@@ -191,6 +191,8 @@ void VoxelChunk::ClearGeometry()
 
 inline void MapColor(Color* clr, unsigned char val, bool acted)
 {
+	(void) val; /* TODO: why does val exist? */
+	
 	if (acted)
 	{
 		clr->comp[0] = 255;
@@ -287,7 +289,6 @@ void VoxelChunk::RecalcColor(unsigned char* voxels, unsigned int dimm)
 	const int _local_to_global_j = h_dimm + _lbl[1];
 	const int _local_to_global_k = h_dimm + _lbl[2];
 	
-	unsigned int global_index = 0;
 	unsigned int x, y, index;
 	
 	#define __(I) (_local_to_global_##I + I)

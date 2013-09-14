@@ -3,7 +3,7 @@
 #include "GraphicsLib.h"
 
 
-Shader::Shader(): shader_fp(-1), shader_vp(-1), shader_id(-1), shader_gp(-1)
+Shader::Shader(): shader_fp(-1U), shader_vp(-1U), shader_id(-1U), shader_gp(-1U)
 {
 
 }
@@ -13,7 +13,7 @@ bool Shader::loadVertexShader(const char* name)
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 	
-	if (shader_vp == -1)
+	if (shader_vp == -1U)
 	{
 		shader_vp = glCreateShader(GL_VERTEX_SHADER);
 		string vsText = textFileRead(name);
@@ -45,7 +45,7 @@ bool Shader::loadFragmentShader(const char* name)
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 	
-	if (shader_fp == -1)
+	if (shader_fp == -1U)
 	{
 		shader_fp = glCreateShader(GL_FRAGMENT_SHADER);
 		string fsText = textFileRead(name);
@@ -80,7 +80,7 @@ bool Shader::loadGeometryShader(const char* name)
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
 	
-	if (shader_gp == -1)
+	if (shader_gp == -1U)
 	{
 		shader_gp = glCreateShader(GL_GEOMETRY_SHADER);
 		string fsText = textFileRead(name);
@@ -113,34 +113,34 @@ void Shader::link()
 {
 	shader_id = glCreateProgram();
 	
-	if (shader_vp != -1)  glAttachShader(shader_id, shader_vp);
-	if (shader_gp != -1)  glAttachShader(shader_id, shader_gp);
-	if (shader_fp != -1)  glAttachShader(shader_id, shader_fp);
+	if (shader_vp != -1U)  glAttachShader(shader_id, shader_vp);
+	if (shader_gp != -1U)  glAttachShader(shader_id, shader_gp);
+	if (shader_fp != -1U)  glAttachShader(shader_id, shader_fp);
 	
 	glLinkProgram(shader_id);
 }
 
 Shader::~Shader()
 {
-	if (shader_fp != -1)
+	if (shader_fp != -1U)
 	{
 		glDetachShader(shader_id, shader_fp);
 		glDeleteShader(shader_fp);
 	}
 	
-	if (shader_vp != -1)
+	if (shader_vp != -1U)
 	{
 		glDetachShader(shader_id, shader_vp);
 		glDeleteShader(shader_vp);
 	}
 	
-	if (shader_gp != -1)
+	if (shader_gp != -1U)
 	{
 		glDetachShader(shader_id, shader_gp);
 		glDeleteShader(shader_gp);
 	}
 	
-	if (shader_id != -1)
+	if (shader_id != -1U)
 		glDeleteProgram(shader_id);
 }
 

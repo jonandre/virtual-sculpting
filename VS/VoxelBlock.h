@@ -8,7 +8,7 @@ public:
 		BlockType_Clay,
 		BlockType_ModifiedClay,
 		BlockType_ModifiedEmpty,
-		BlockType_NumTypes,
+		BlockType_NumTypes
 	};
 	
 	VoxelBlock();

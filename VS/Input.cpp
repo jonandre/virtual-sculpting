@@ -47,7 +47,7 @@ void Input::OnKeyPressed(char c)
 
 bool Input::IsPressed(char c)
 {
-	for (int i = 0; i < _pressed_keys.size(); i++)
+	for (unsigned int i = 0; i < _pressed_keys.size(); i++)
 		if (_pressed_keys[i] == c)
 			return true;
 	
@@ -126,6 +126,9 @@ void Input::OnSroll(int dx)
 
 void Input::OnMouseLBUp(int x, int y)
 {
+	(void) x;
+	(void) y;
+	
 	_lbtn_pressed = false;
 	_angleXS = _angleX;
 	_angleYS = _angleY;

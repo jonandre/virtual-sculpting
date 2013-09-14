@@ -26,7 +26,7 @@ inline float dot(float x, float y, float z, float* g)
 
 inline float noise(float xin, float yin, float zin)
 {
-	float F3, G3, t, X0, Y0, Z0, x0, y0, z0, s, x1, y1, z1, x2, y2, z2, x3, y3, z3, t1, t2, t3, n0, n1, n2, n3;
+	float F3, G3, t, X0, Y0, Z0, x0, y0, z0, s, x1, y1, z1, x2, y2, z2, x3, y3, z3, t0, t1, t2, t3, n0, n1, n2, n3;
 	int i, j, k, ii, jj, kk, i1, j1, k1, i2, j2, k2, gi0, gi1, gi2, gi3;
 	
 	F3 = 1.0f / 3.0f;
@@ -87,7 +87,7 @@ inline float noise(float xin, float yin, float zin)
 			n##I = pow2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]);	\
 		}
 	
-	__(1) __(2) __(3)
+	__(0) __(1) __(2) __(3)
 	#undef __
 	
 	return 16.0f * (n0 + n1 + n2 + n3) + 1.0f;
@@ -96,7 +96,7 @@ inline float noise(float xin, float yin, float zin)
 inline float simplex_noise(int octaves, float x, float y, float z)
 {
 	float value = 0.0;
-	for (int i = 1, n = 1 << octaves; i != octaves; i <<= 1)
+	for (int i = 1, n = 1 << octaves; i != n; i <<= 1)
 		value += noise(x * i, y * i, z * i);
 	return value;
 }
@@ -146,16 +146,16 @@ GridModel::GridModel(int power)
 	
 	Point center; //center of voxel is always (±xx.5, ±yy.5, ±zz.5)
 	
-	int iter = 0;
+	unsigned int iter = 0;
 	unsigned int tmp1, tmp2, tmp3;
 	float radius = 0.0f;
-	for (int i = 0; i != dimm; i++)
+	for (unsigned int i = 0; i < dimm; i++)
 	{
 		center.coord[0] = (float)(i - half_dimm); //well, but not here =)
-		for (int j = 0; j != dimm; j++)
+		for (unsigned int j = 0; j < dimm; j++)
 		{
 			center.coord[1] = (float)(j - half_dimm);
-			for (int k = 0; k != dimm; k++)
+			for (unsigned int k = 0; k < dimm; k++)
 			{
 				center.coord[2] = (float)(k - half_dimm);
 				iter = poly3(i, j, k, dimm);
@@ -180,13 +180,13 @@ GridModel::GridModel(int power)
 		center.coord[I] = (float)(tmp_lbl[I]) + _h_s; /* but here it is */	\
 		tmp_ufr[I] = tmp_lbl[I] + internal_chunk_size
 	
-	for (int i = 0; i != chunk_dimm; i++)
+	for (unsigned int i = 0; i < chunk_dimm; i++)
 	{
 		__(0, i);
-		for (int j = 0; j != chunk_dimm; j++)
+		for (unsigned int j = 0; j < chunk_dimm; j++)
 		{
 			__(1, j);
-			for (int k = 0; k != chunk_dimm; k++)
+			for (unsigned int k = 0; k < chunk_dimm; k++)
 			{
 				__(2, k);
 				iter = poly3(i, j, k, chunk_dimm);
@@ -204,9 +204,9 @@ GridModel::GridModel(int power)
 void GridModel::ReInitModel(bool clear)
 {
 	unsigned int iter;
-	for (int i = 0; i != dimm; i++)
-		for (int j = 0; j != dimm; j++)
-			for (int k = 0; k != dimm; k++)
+	for (unsigned int i = 0; i < dimm; i++)
+		for (unsigned int j = 0; j < dimm; j++)
+			for (unsigned int k = 0; k < dimm; k++)
 			{
 				iter = poly3(i, j, k, dimm);
 				
@@ -371,7 +371,7 @@ GridModel::~GridModel()
 {
 	delete [] _cells;
 	
-	for (int i = 0, n = pow3(chunk_dimm); i = n; i++)
+	for (int i = 0, n = pow3(chunk_dimm); i != n; i++)
 		delete _chunks[i];
 	
 	delete [] _chunks;

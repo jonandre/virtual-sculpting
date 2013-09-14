@@ -11,15 +11,6 @@ Render::Render(): shader(NULL)
 {
 	windowWidth = 512;
 	windowHeight = 512;
-	Point center;
-	center.coord[0] = 0.0;
-	center.coord[1] = 0.0;
-	center.coord[2] = 0.0;
-	Color clr;
-	clr.comp[0] = 255;
-	clr.comp[1] = 255;
-	clr.comp[2] = 255;
-	clr.comp[3] = 255;
 }
 
 
