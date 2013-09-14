@@ -39,29 +39,6 @@ struct Vertex
 };
 
 
-static string textFileRead(const char* fileName)
-{
-	string fileString;
-	string line;
-	
-	ifstream file(fileName,ios_base::in);
-	
-	if (file.is_open()) 
-	{
-		while (!file.eof()) 
-		{
-			getline(file, line);
-		  	fileString.append(line);
-			fileString.append("\n");
-		}
-		file.close();
-	}
-	else
-		std::cerr << "Unable to open " << fileName << std::endl;
-    
-    return fileString;
-}
-
 #define pow2(X)  ((X) * (X))
 #define pow3(X)  ((X) * (X) * (X))
 #define poly3(A, B, C, X)  ((A) * (X) * (X) + (B) * (X) + (C))
