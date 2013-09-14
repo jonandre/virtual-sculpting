@@ -4,13 +4,13 @@
 GLContext::GLContext()
 {
 	LPCWSTR title = L"Virtual Sculpting";
-
+	
 	WNDCLASSW windowClass;
 	HWND hWnd;
 	DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
-
+	
 	hInstance = GetModuleHandle(NULL);
-
+	
 	windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
 	windowClass.lpfnWndProc = (WNDPROC) WndProc;
 	windowClass.cbClsExtra = 0;
@@ -41,7 +41,7 @@ Render *GLContext::GetObjectFromHWnd(HWND hWnd)
 	return reinterpret_cast<Render*>(GetWindowLongPtr(hWnd,GWLP_USERDATA));
 }
 
-LRESULT CALLBACK GLContext::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) 
+LRESULT CALLBACK GLContext::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	Render* pWnd = GetObjectFromHWnd(hWnd);
 	switch (message)
@@ -57,7 +57,7 @@ LRESULT CALLBACK GLContext::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 			break;
 		}
 	}
-
+	
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
@@ -66,7 +66,7 @@ void GLContext::SetInput(Input* input)
 	inp = input;
 }
 
-GLContext::GLContext(HWND hwnd) 
+GLContext::GLContext(HWND hwnd)
 {
 	this->hwnd = hwnd;
 	create30Context(); // Create a context given a HWND
@@ -75,23 +75,23 @@ GLContext::GLContext(HWND hwnd)
 	UpdateWindow(this->hwnd);
 }
 
-GLContext::~GLContext() 
+GLContext::~GLContext()
 {
 	delete render;
 	wglMakeCurrent(hdc, 0);
 	wglDeleteContext(hrc);
 	
-	ReleaseDC(hwnd, hdc);	
+	ReleaseDC(hwnd, hdc);
 }
 
-bool GLContext::create30Context() 
+bool GLContext::create30Context()
 {
 	running = true;
 	render = NULL;
 	hdc = GetDC(hwnd);
-
+	
 	PIXELFORMATDESCRIPTOR pfd;
-	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR)); 
+	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
 	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
 	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL; // | PFD_DRAW_TO_WINDOW;
 	pfd.iPixelType = PFD_TYPE_RGBA;
@@ -114,15 +114,15 @@ bool GLContext::create30Context()
 	if (error != GLEW_OK)
 		return false;
 	
-	int attributes[] = 
+	int attributes[] =
 	{
 		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
 		WGL_CONTEXT_MINOR_VERSION_ARB, 1,
-		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, 
+		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
 		0
 	};
 	
-	if (wglewIsSupported("WGL_ARB_create_context") == 1) 
+	if (wglewIsSupported("WGL_ARB_create_context") == 1)
 	{
 		hrc = wglCreateContextAttribsARB(hdc, NULL, attributes);
 		wglMakeCurrent(NULL, NULL);
@@ -132,7 +132,7 @@ bool GLContext::create30Context()
 	else
 		hrc = tempOGLWidget;
 	
-	int glVersion[2] = {-1, -1}; 
+	int glVersion[2] = {-1, -1};
 	glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]);
 	glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]);
 	
@@ -149,7 +149,7 @@ bool GLContext::create30Context()
 
 void GLContext::doMessage()
 {
-	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) 
+	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		if (msg.message == WM_QUIT)
 			running = false;
@@ -162,7 +162,6 @@ void GLContext::doMessage()
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
-
 }
 
 
@@ -172,7 +171,7 @@ bool GLContext::alive()
 }
 
 void GLContext::renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj)
-{	
+{
 	render->Draw(model, _tool_mesh, view, obj);
 	
 	SwapBuffers(hdc);

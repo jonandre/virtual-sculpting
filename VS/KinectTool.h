@@ -18,12 +18,12 @@ public:
 	TriangleMesh* GetToolMesh();
 	Shader* GetToolShader();
 	unsigned int GetPVMLocation();
-
+	
 private:
 	KinectTool();
 	float _start_z;
 	float _end_z;
-
+	
 	TriangleMesh* _msh;
 	KinectReader* _reader;
 	float* _tmp_blured_image;

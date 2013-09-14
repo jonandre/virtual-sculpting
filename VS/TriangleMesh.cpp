@@ -20,20 +20,20 @@ TriangleMesh::TriangleMesh(unsigned int xx, unsigned int yy, float start_x, floa
 	_index_cnt = (_x - 1) * (_y - 1) * 6;
 	_indexes = new unsigned int[_index_cnt];
 	
-	float x_step = (end_x - start_x) / float(xx);
-	float y_step = (end_y - start_y) / float(yy);
+	float x_step = (end_x - start_x) / (float)(xx);
+	float y_step = (end_y - start_y) / (float)(yy);
 	
 	for (unsigned int i = 0; i < _x; i++)
 		for (unsigned int j = 0; j < _y; j++)
 		{
 			_mesh[i * _y + j].coord[0] = start_x + i * x_step;
 			_mesh[i * _y + j].coord[1] = start_y + j * y_step;
-			_mesh[i * _y + j].coord[2] = _start_z; // - (rand()%30)/1.0f;
+			_mesh[i * _y + j].coord[2] = _start_z; // - (rand() % 30) / 1.0f;
 		}
 	unsigned int numIndices = 0;
 	
 	for (int x = 0; x != _x - 1; x++)
-		for (int z = 0; z != _y - 1; z++) 
+		for (int z = 0; z != _y - 1; z++)
 		{
 			int a = ( x      * _y) +  z;
 			int b = ((x + 1) * _y) +  z;
@@ -66,7 +66,6 @@ inline void TriangleMesh::UpdateVBO()
 void TriangleMesh::UpdateDepth(float* _depth_map)
 {
 	for (unsigned int i = 0; i < _x; i++)
-	{
 		for (unsigned int j = 0; j < _y; j++)
 		{
 			/* _mesh[i * _y + j].coord[2] = _start_z + ((_depth_map[(_y - j) * _x + i] + _depth_map[(_y - j - 1) * _x + i - 1] + 
@@ -88,10 +87,10 @@ void TriangleMesh::MakeVBO()
 	if (_vbo)
 		delete _vbo;
 	_vbo = new VBO(_mesh, 0, _indexes, _x * _y, _index_cnt);
-
+	
 	if (_vao)
 		delete _vao;
-
+	
 	_vao = new VAO();
 	_vao->bind(*_vbo);
 }

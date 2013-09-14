@@ -14,7 +14,7 @@ VoxelChunk::VoxelChunk()
 
 void VoxelChunk::CreateGeometry()
 {
-	unsigned int global_size = size * size * size;
+	unsigned int global_size = pow3(size);
 	//Each visual element is point
 	_points = new Point[global_size]; //currently we are not counting shared points between voxels
 	_colors = new Color[global_size];
@@ -24,16 +24,16 @@ void VoxelChunk::CreateGeometry()
 	_indexes = new unsigned int[global_size];
 	
 	//now we can generate geometry in given chunk - later it can be updated(color arrays, for example)
-
+	
 	Color __clr;
 	__clr.comp[0] = 255;
 	__clr.comp[1] = 255;
 	__clr.comp[2] = 255;
 	__clr.comp[3] = 0;
-
+	
 	Point pnt;
 	unsigned int index = 0;
-
+	
 	for (int i = 0; i != size; i++)
 	{
 		pnt.coord[0] = (float)(_lbl[0] + i) + 0.5f;
@@ -49,7 +49,6 @@ void VoxelChunk::CreateGeometry()
 			}
 		}
 	}
-
 }
 
 VoxelChunk::VoxelChunk(const Point& center, int lbl[3], int ufr[3])
@@ -122,7 +121,7 @@ void VoxelChunk::ClearMesh()
 inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm) //check neighbours, basically "is visible" for given cell
 {
 	unsigned int index = poly3(x, y, z, dimm);
-
+	
 	if (m_pBlocks[index] == 0)
 		return 0;
 	
@@ -132,7 +131,7 @@ inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned
 	if ((y == dimm - 1) || m_pBlocks[index + dimm] == 0)
 		++res;
 	res <<= 1;
-
+	
 	//bottom
 	if ((y == 0) || m_pBlocks[index - dimm] == 0)
 		 ++res;
@@ -142,7 +141,7 @@ inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned
 	if ((x == dimm - 1) || m_pBlocks[index + pow2(dimm)] == 0)
 		++res;
 	res <<= 1;
-
+	
 	//left
 	if ((x == 0) || m_pBlocks[index - pow2(dimm)] == 0)
 		++res;
@@ -157,12 +156,11 @@ inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned
 	if ((z == dimm - 1) || m_pBlocks[index + 1] == 0)
 		++res;
 	
-	//if (res == 63) //if cell has no neighbours - remove it. Hack, anyway. 
+	//if (res == 63) //if cell has no neighbours - remove it. Hack, anyway.
 	//{
-//		m_pBlocks[index] = 0;
+		//m_pBlocks[index] = 0;
 		//return 0;
 	//}
-	
 	
 	return res;
 }
@@ -207,7 +205,7 @@ inline void MapColor(Color* clr, unsigned char val, bool acted)
 	}
 }
 
-void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int dimm)//lower corner
+void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int dimm) //lower corner
 {
 	if (!_vao)
 		_vao = new VAO();
@@ -219,7 +217,7 @@ void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int
 	clr.comp[1] = 255;
 	clr.comp[2] = 255;
 	clr.comp[3] = 255;
-	int h_dimm = dimm>>1;
+	int h_dimm = dimm >> 1;
 	const int _local_to_global_i = h_dimm + _lbl[0];
 	const int _local_to_global_j = h_dimm + _lbl[1];
 	const int _local_to_global_k = h_dimm + _lbl[2];

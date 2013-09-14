@@ -12,7 +12,7 @@ bool Shader::loadVertexShader(const char* name)
 {
 	GLint Result = GL_FALSE;
 	int InfoLogLength;
-
+	
 	if (shader_vp == -1)
 	{
 		shader_vp = glCreateShader(GL_VERTEX_SHADER);
@@ -26,7 +26,7 @@ bool Shader::loadVertexShader(const char* name)
 			
 			glGetShaderiv(shader_vp, GL_COMPILE_STATUS, &Result);
 			glGetShaderiv(shader_vp, GL_INFO_LOG_LENGTH, &InfoLogLength);
-			if ( InfoLogLength > 0 )
+			if (InfoLogLength > 0)
 			{
 				std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
 				glGetShaderInfoLog(shader_vp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
@@ -112,7 +112,7 @@ bool Shader::loadGeometryShader(const char* name)
 void Shader::link()
 {
 	shader_id = glCreateProgram();
-
+	
 	if (shader_vp != -1)  glAttachShader(shader_id, shader_vp);
 	if (shader_gp != -1)  glAttachShader(shader_id, shader_gp);
 	if (shader_fp != -1)  glAttachShader(shader_id, shader_fp);
@@ -127,19 +127,19 @@ Shader::~Shader()
 		glDetachShader(shader_id, shader_fp);
 		glDeleteShader(shader_fp);
 	}
-
+	
 	if (shader_vp != -1)
 	{
 		glDetachShader(shader_id, shader_vp);
 		glDeleteShader(shader_vp);
 	}
-
+	
 	if (shader_gp != -1)
 	{
 		glDetachShader(shader_id, shader_gp);
 		glDeleteShader(shader_gp);
 	}
-    
+	
 	if (shader_id != -1)
 		glDeleteProgram(shader_id);
 }
@@ -154,7 +154,7 @@ void Shader::unbind()
 	glUseProgram(0);
 }
 
-unsigned int Shader::id() 
+unsigned int Shader::id()
 {
     return shader_id;
 }

@@ -44,3 +44,4 @@ private:
 	unsigned int internal_chunk_size;
 	unsigned int power_for_chunk;
 };
+

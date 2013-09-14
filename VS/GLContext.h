@@ -18,7 +18,7 @@ public:
 	//void setObject(glm::mat4& obj);
 	//void setProjection(glm::mat4& obj);
 	
-private:	
+private:
 	bool create30Context();
 	GLContext(HWND hwnd);
 	

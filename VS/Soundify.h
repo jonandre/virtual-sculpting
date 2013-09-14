@@ -16,7 +16,7 @@ private:
 	void GenerateAudioData(double frequency, int seconds);
 	ALboolean CheckALCError();
 	ALboolean CheckALError();
-
+	
 	ALCdevice* pDevice;
 	ALCcontext* pContext;
 	short* audioData;

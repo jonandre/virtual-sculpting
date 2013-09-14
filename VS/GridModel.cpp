@@ -85,7 +85,7 @@ inline float noise(float xin, float yin, float zin)
 			t##I *= t##I;											\
 			n##I = pow2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]);	\
 		}
-    
+	
 	__(1) __(2) __(3)
 	#undef __
 	
@@ -124,8 +124,6 @@ inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z,
 	
 	data[poly3(x, y, z, side)] = ((caves < 0.5) || (3.1 <= density)) ? 255 : 0;
 }
-
-///
 
 
 GridModel::GridModel(int power)
@@ -265,11 +263,11 @@ void GridModel::UpdateGrid()
 	for (i = 0; i < _dirty_chunks.size(); i++)
 	{
 		index = GetCellIndex((_dirty_chunks[i]->GetCenter()), x, y, z);
-				
+		
 		_dirty_chunks[i]->CreateMesh(_cells, _interacted, dimm);
 		if (_dirty_chunks[i]->GetVAO() != NULL)// If mesh creating was successfull.
 		{
-			_renderable_chunks[index] = _dirty_chunks[i]->GetVAO();			
+			_renderable_chunks[index] = _dirty_chunks[i]->GetVAO();
 			_modified_chunks.push_back(_dirty_chunks[i]);
 		}
 		else
@@ -348,7 +346,7 @@ int GridModel::UpdateCellAdd(int i, int j, int k, unsigned char val)
 	
 	unsigned char* current_voxel_ptr = &_cells[poly3(i, j, k, dimm)];
 	
-	if (1)//if surface interaction.
+	if (1) //if surface interaction.
 	{
 		#define __(X)  (X - (X >> power_for_chunk) * internal_chunk_size)
 		unsigned char alpha = ptr->GetVoxelAlpha(__(i), __(j), __(k)); //local index in chunk.

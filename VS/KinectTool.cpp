@@ -5,6 +5,7 @@
 #include "Shader.h"
 #include "GraphicsLib.h"
 
+
 KinectTool::KinectTool()
 {
 }

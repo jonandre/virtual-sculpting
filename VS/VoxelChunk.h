@@ -26,11 +26,11 @@ public:
 	void MarkDirty();
         unsigned char GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z); // In alpha chanel we have
 	void RecalcColor(unsigned char* voxels, unsigned int dim);
-
+	
 private:
 	void ClearMesh();
-	inline unsigned char EvaluateCell(unsigned char* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm);//check neighbours, basically "is visible" for given cell
-
+	inline unsigned char EvaluateCell(unsigned char* m_pBlocks, unsigned int x, unsigned int y, unsigned int z, unsigned int dimm); //check neighbours, basically "is visible" for given cell
+	
 	inline void SetColorForVoxel(unsigned int x, unsigned int y, unsigned int z, Color* clr);
 	void CreateGeometry();
 	void ClearGeometry();
@@ -43,16 +43,15 @@ private:
 	Point _center;
 	int _lbl[3];
 	int _ufr[3];
-
+	
 	Point* _points; //idea - we have fast access to chang some part of data. Visibility is defined by inices
 	Color* _colors;
-
+	
 	unsigned int _vertex_len;
 	unsigned int* _indexes;
 	unsigned int* _renderable_indexes;
 	unsigned int _renderable_indexes_count;
 	unsigned int size;
 	bool _dirty;
-
 };
 

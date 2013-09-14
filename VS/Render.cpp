@@ -88,36 +88,36 @@ void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4
 	{
 		vao_ptr = iter->second;
 		glBindVertexArray(vao_ptr->id());
-		 
+		
 		glDrawElements(
-			 GL_POINTS,      // mode
+			 GL_POINTS,          // mode
 			 vao_ptr->size(),    // count
-			 GL_UNSIGNED_INT,   // type
-			 (void*)0           // element array buffer offset
-		 );
+			 GL_UNSIGNED_INT,    // type
+			 (void*)0            // element array buffer offset
+		);
 		i++;
 	}
 	
 	glBindVertexArray(0);
 	shader->unbind();
 	
-	glm::mat4 pvm = projectionMatrix*view;
+	glm::mat4 pvm = projectionMatrix * view;
 	
 	glDisable(GL_CULL_FACE);
-	glEnable(GL_BLEND);	
+	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 	vao_ptr = tool->GetToolMesh()->GetVAO();
 	
-	tool->GetToolShader()->bind();	
+	tool->GetToolShader()->bind();
 	glUniformMatrix4fv(tool->GetPVMLocation(), 1, GL_FALSE, &(pvm[0][0]));
 	
 	glBindVertexArray(vao_ptr->id());
 	glDrawElements(
 			GL_TRIANGLES,      // mode
-			 vao_ptr->size(),    // count
-			 GL_UNSIGNED_INT,   // type
-			 (void*)0           // element array buffer offset
-		 );	
+			vao_ptr->size(),   // count
+			GL_UNSIGNED_INT,   // type
+			(void*)0           // element array buffer offset
+		 );
 	glBindVertexArray(0);
 	tool->GetToolShader()->unbind();
 	
@@ -134,3 +134,4 @@ void Render::Resize(int w, int h)
 	windowHeight = h;
 	projectionMatrix = glm::perspective(30.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4048.0f);
 }
+

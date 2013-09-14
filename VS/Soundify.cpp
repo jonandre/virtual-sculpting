@@ -10,19 +10,19 @@ Soundify::Soundify()
 	CheckALCError();
 	pContext = alcCreateContext(pDevice, NULL);
 	CheckALCError();
-
+	
 	alcMakeContextCurrent(pContext);
 	CheckALCError();
 	alGenBuffers(1, &buffer);
 	CheckALError();
 	alGenSources(1, &source);
 	CheckALError();
-
+	
 	alBufferData(buffer, AL_FORMAT_MONO16, audioData, frames, sampleRate);
 	CheckALError();
 	alSourcei(source, AL_BUFFER, buffer);
-	alSourcef(source, AL_PITCH,    1.0f);
-	alSourcef(source, AL_GAIN,    0.0f);
+	alSourcef(source, AL_PITCH,  1.0f);
+	alSourcef(source, AL_GAIN,   0.0f);
 	alSourcei(source,AL_LOOPING,AL_TRUE);
 }
 
@@ -44,7 +44,7 @@ void Soundify::Play()
 }
 
 void Soundify::GenerateAudioData(double frequency, int seconds)
-{	
+{
 	frames = seconds * sampleRate;
 	audioData = new short[frames];
 	unsigned int MaxValue = (1 << (sizeof(short) * 8 - 1)) - 1;
@@ -56,7 +56,7 @@ void Soundify::GenerateAudioData(double frequency, int seconds)
 Soundify::~Soundify()
 {
 	delete [] audioData;
-
+	
 	alDeleteBuffers(1, &buffer);
 	alDeleteSources(1, &source);
 	
