@@ -132,5 +132,5 @@ void Render::Resize(int w, int h)
 	glViewport(0, 0, w,  h);
 	windowWidth = w;
 	windowHeight = h;
-	projectionMatrix = glm::perspective(30.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4048.f);
+	projectionMatrix = glm::perspective(30.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4048.0f);
 }
