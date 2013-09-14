@@ -164,7 +164,7 @@ void KinectReader::ProcessDepth()
 			// Note: Using conditionals in this loop could degrade performance.
 			// Consider using a lookup table instead when writing production code.
 			//if (depth)
-			intensity = static_cast<float>(depth >= minDepth && depth < maxDepth ? ((depth - minDepth) - delta_depth) * float_per_depth_unit : 0.0f);
+			intensity = static_cast<float>((minDepth <= depth && depth < maxDepth) ? ((depth - minDepth) - delta_depth) * float_per_depth_unit : 0.0f);
 			
 			//if (t < 1000)
 			//	intensity = (rand()%delta_depth - delta_depth) * float_per_depth_unit;

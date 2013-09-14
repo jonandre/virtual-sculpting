@@ -179,9 +179,9 @@ inline void MapColor(Color* clr, unsigned char val, bool acted)
 	}
 	else
 	{
-		clr->comp[0] = 0;
-		clr->comp[1] = 250;
-		clr->comp[2] = 250;
+		clr->comp[0] = 231;
+		clr->comp[1] = 205;
+		clr->comp[2] = 156;
 	}
 }
 
@@ -193,10 +193,6 @@ void VoxelChunk::CreateMesh(unsigned char* m_pBlocks, bool* _acted, unsigned int
 	_dirty = false;
 	
 	Color clr;
-	clr.comp[0] = 255;
-	clr.comp[1] = 255;
-	clr.comp[2] = 255;
-	clr.comp[3] = 255;
 	int h_dimm = dimm >> 1;
 	const int _local_to_global_i = h_dimm + _lbl[0];
 	const int _local_to_global_j = h_dimm + _lbl[1];
