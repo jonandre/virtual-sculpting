@@ -1,4 +1,8 @@
 class VBO;
+
+/**
+ * Vertex array object
+ */
 class VAO
 {
 public:
