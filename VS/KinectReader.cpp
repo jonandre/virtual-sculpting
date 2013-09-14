@@ -141,10 +141,10 @@ void KinectReader::ProcessDepth()
 		int maxDepth = _max_depth;///(nearMode ? NUI_IMAGE_DEPTH_MAXIMUM_NEAR_MODE : NUI_IMAGE_DEPTH_MAXIMUM) >> NUI_IMAGE_PLAYER_INDEX_SHIFT;
 		
 		float * float_run = m_depth;
-		const NUI_DEPTH_IMAGE_PIXEL * pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(LockedRect.pBits);
+		const NUI_DEPTH_IMAGE_PIXEL* pBufferRun = reinterpret_cast<const NUI_DEPTH_IMAGE_PIXEL*>(LockedRect.pBits);
 		
 		// end pixel is start + width*height - 1
-		const NUI_DEPTH_IMAGE_PIXEL * pBufferEnd = pBufferRun + (cDepthWidth * cDepthHeight);
+		const NUI_DEPTH_IMAGE_PIXEL* pBufferEnd = pBufferRun + (cDepthWidth * cDepthHeight);
 		
 		float intensity = 0.0f;
 		int delta_depth =  maxDepth - minDepth;
