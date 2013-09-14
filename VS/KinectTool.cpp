@@ -236,7 +236,7 @@ void KinectTool::parallellise(long cpu, long beginning, long stop)
 {
 	long args_0 = (beginning | (stop << 9) | (cpu << 18));
 	long args_1 = (long)(this);
-	long* args = new long[2];
+	long* args = (long*)malloc(2 * sizeof(long));
 	args[0] = args_0;
 	args[1] = args_1;
 	if ((errno = pthread_create(this->threads + cpu, NULL, run, args)))
@@ -254,7 +254,7 @@ static void* run(void* args)
 	long beginning = long(((long*)args)[0]) & 511;
 	long stop = (long(((long*)args)[0]) >> 9) & 511;
 	long cpu = (long(((long*)args)[0]) >> 18) & 511;
-	delete args;
+	free(args);
 
 	long count, x, y;
 	int accum = 0;
