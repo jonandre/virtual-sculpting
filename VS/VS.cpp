@@ -28,61 +28,73 @@ inline double diffclock(clock_t end, clock_t start)
  */
 int main(int argc, char** argv)
 {
+	int acted = 0;
+	bool space_pressed = false;
+	GLContext* graphics;
+	Input* input;
+	GridModel* model;
+	unsigned int side;
+	KinectTool* kinect;
+	
 	(void) argc;
 	(void) argv;
 	
-	GLContext* cntx = new GLContext();
-	Input* inp = new Input();
-	cntx->SetInput(inp);
 	
-	unsigned int power = 8; // power of 2
+	/* Initialise GUI */
+	graphics = new GLContext();
+	input = new Input();
+	graphics->SetInput(input);
 	
-	GridModel* model = new GridModel(power);
-	unsigned int side = model->GetDimm();
-	inp->SetZoom(-(side * 4.0f));
-	inp->SetModel(model);
+	/* Initialise model */
+	model = new GridModel(8); /* power of 2 */
+	side = model->GetDimm();
+	input->SetZoom(-(side * 4.0f));
+	input->SetModel(model);
 	
+	/* Initialise Kinect */
 	#define SIDE  (size * 0.75f)
-	KinectTool* tool = new KinectTool(SIDE, SIDE, SIDE, -SIDE);
+	kinect = new KinectTool(SIDE, SIDE, SIDE, -SIDE);
 	#undef SIDE
 	
+	/* Initialise audio */
 	initialise_audio();
 	
-	int acted = 0;
-	bool space_pressed = false;
-	while (cntx->alive())
+	
+	/* Main loop */
+	while (graphics->alive())
 	{
 		#ifdef DEBUG_TIME
-			clock_t start = clock();
+			clock_t start = clock(), end;
 		#endif
 		
-		inp->UpdateFrame();
-		cntx->doMessage();
-		tool->DoToolUpdate();
+		input->UpdateFrame();
+		graphics->doMessage();
+		kinect->DoToolUpdate();
 		
-		acted = (space_pressed ^= inp->IsPressed(' '))
-			? tool->InteractModel(model, inp->GetObjectQ())
+		acted = (space_pressed ^= input->IsPressed(' '))
+			? kinect->InteractModel(model, input->GetObjectQ())
 			: 0;
 		
 		model->UpdateGrid();
-		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM());
+		graphics->renderScene(model, kinect, input->GetViewM(), input->GetObjectM());
 		
 		if (acted)
 			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
 		audio_set_gain(acted ? 1.0f : 0.0f);
 		
 		#ifdef DEBUG_TIME
-			clock_t end = clock();
+			end = clock();
 			std::cerr << "Frame time = " << diffclock(end, start) << " ms,  "
 				  << "Interacted: " << acted << std::endl;
 		#endif
 	}
 	
+	
 	terminate_audio();
 	delete model;
-	delete inp;
-	delete tool;
-	delete cntx;
+	delete input;
+	delete kinect;
+	delete graphics;
 	
 	return 0;
 }
