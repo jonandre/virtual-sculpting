@@ -270,24 +270,24 @@ static void* run(void* args)
 		Point local_dir_vector = dir_vector;
 		count = 0;
 		for (y = beginning; y < stop; y++)
-		for (x = 0; x < 640; x++)
-		{
-			//tmp = points[ x*480 + y ];
-			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
-			action_point = Rotate(points[x * 480 + y], inverse);
-			for (int delta = 0; delta < PAD_DEPTH; delta++)
+			for (x = 0; x < 640; x++)
 			{
-				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0] * delta;
-				tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1] * delta;
-				tmp.coord[2] = action_point.coord[2] + local_dir_vector.coord[2] * delta;
-				/*index =*/ grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
-				
-				if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
-					accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
-				else
-					break;
+				//tmp = points[ x*480 + y ];
+				//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
+				action_point = Rotate(points[x * 480 + y], inverse);
+				for (int delta = 0; delta < PAD_DEPTH; delta++)
+				{
+					tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0] * delta;
+					tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1] * delta;
+					tmp.coord[2] = action_point.coord[2] + local_dir_vector.coord[2] * delta;
+					/*index =*/ grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+					
+					if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
+						accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
+					else
+						break;
+				}
 			}
-		}
 		
 		cpu_output[cpu] = accum;
 		
