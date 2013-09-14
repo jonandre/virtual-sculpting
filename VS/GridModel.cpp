@@ -370,7 +370,7 @@ GridModel::~GridModel()
 {
 	delete [] _cells;
 	
-	for (int i = 0, n = chunk_dimm * chunk_dimm * chunk_dimm; i = n; i++)
+	for (int i = 0, n = pow3(chunk_dimm); i = n; i++)
 		delete _chunks[i];
 	
 	delete [] _chunks;
