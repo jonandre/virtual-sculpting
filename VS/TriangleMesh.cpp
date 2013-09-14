@@ -72,7 +72,7 @@ void TriangleMesh::UpdateDepth(float* _depth_map)
 				_depth_map[(_y - j - 1) * _x + i + 1 ] + _depth_map[(_ y - j - 2) * _x + i]) / 4.0f + _depth_map[(_y - j - 1) * _x + i]) / 2.0f; */
 			_mesh[i * _y + j].coord[2] = _start_z + _depth_map[(_y - j - 1) * _x + i];
 		}
-	}
+	
 	//MakeVBO();
 	UpdateVBO();
 }
