@@ -15,6 +15,7 @@ VS.v11.suo
 *.bak
 *.swo
 *.swp
+*.o
 *.out
 *.exe
 *.so
