@@ -2,6 +2,11 @@ _/
 bin/
 obj/
 Resources/
+Debug/
+x64/
+x32/
+Release/
+
 VS/ReadMe.txt
 \#*\#
 *~
