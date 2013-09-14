@@ -10,7 +10,7 @@ Input::Input() : _lbtn_pressed(false), zoom_val(0.0)
 	_obj_quat = glm::quat(glm::vec3(0.0));
 	_view_mat = glm::mat4(1.0f);
 	_model = NULL;
-	_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
+	_rotation_vector_obj = glm::vec3(0.0, 0.0, 0.0);
 }
 
 
@@ -24,10 +24,10 @@ void Input::OnKeyPressed(char c)
 	float rad_map = glm::pi<float>() / 180.0;
 	if (c == 'R')
 	{
-		_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
+		_rotation_vector_obj = glm::vec3(0.0, 0.0, 0.0);
 		_obj_quat = glm::quat();
 	}
-	else if (c == 'F')  _rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
+	else if (c == 'F')  _rotation_vector_obj = glm::vec3(0.0, 0.0, 0.0);
 	else if (c == 'I')  _model->ReInitModel(false);
 	else if (c == 'C')  _model->ReInitModel(true );
 	else if (c == 'D')  _rotation_vector_obj.y += 0.2f * rad_map;
@@ -81,7 +81,7 @@ void Input::UpdateFrame()
 
 glm::mat4 Input::GetViewM()
 {
-	return glm::translate(glm::mat4(1.0), glm::vec3(0.f, 0.f, zoom_val)) * _view_mat;
+	return glm::translate(glm::mat4(1.0), glm::vec3(0.0f, 0.0f, zoom_val)) * _view_mat;
 }
 
 void Input::SetViewM(const glm::mat4& mat)
@@ -130,3 +130,4 @@ void Input::OnMouseLBUp(int x, int y)
 	_angleXS = _angleX;
 	_angleYS = _angleY;
 }
+
