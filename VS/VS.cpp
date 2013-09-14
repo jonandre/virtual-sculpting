@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM()); //Do actual rendering.
 		
 		if (acted)
-		  snd.SetPitch(0.1 + glm::log2(acted * 1.0f) / 1000.0f);
+			snd.SetPitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
 		snd.SetGain(acted ? 1.0f : 0.0f);
 		
 		#ifdef DEBUG_TIME

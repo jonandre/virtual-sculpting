@@ -32,8 +32,8 @@ TriangleMesh::TriangleMesh(unsigned int xx, unsigned int yy, float start_x, floa
 		}
 	unsigned int numIndices = 0;
 	
-	for (int x = 0; x < _x - 1; x++)
-		for (int z = 0; z < _y - 1; z++) 
+	for (int x = 0; x != _x - 1; x++)
+		for (int z = 0; z != _y - 1; z++) 
 		{
 			int a = ( x      * _y) +  z;
 			int b = ((x + 1) * _y) +  z;

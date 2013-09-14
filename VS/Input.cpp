@@ -21,7 +21,7 @@ Input::~Input(void)
 
 void Input::OnKeyPressed(char c)
 {
-	float rad_map = glm::pi<float>() / 180.0;
+	float rad_map = glm::pi<float>() / 180.0f;
 	if (c == 'R')
 	{
 		_rotation_vector_obj = glm::vec3(0.0, 0.0, 0.0);

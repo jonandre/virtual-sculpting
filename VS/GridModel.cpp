@@ -25,15 +25,15 @@ inline float dot(float x, float y, float z, float* g)
 
 inline float noise(float xin, float yin, float zin)
 {
-	float F3, G3, t, X0, Y0, Z0, x0, y0, z0, s, x1, y1, z1, x2, y2, z2, x3, y3, z3, t0, t1, t2, t3, n0, n1, n2, n3;
+	float F3, G3, t, X0, Y0, Z0, x0, y0, z0, s, x1, y1, z1, x2, y2, z2, x3, y3, z3, t1, t2, t3, n0, n1, n2, n3;
 	int i, j, k, ii, jj, kk, i1, j1, k1, i2, j2, k2, gi0, gi1, gi2, gi3;
 	
 	F3 = 1.0f / 3.0f;
 	s = (xin + yin + zin) * F3;
-	i = xin + s;
-	j = yin + s;
-	k = zin + s;
-	G3 = 1.0 / 6.0;
+	i = (int)(xin + s);
+	j = (int)(yin + s);
+	k = (int)(zin + s);
+	G3 = 1.0f / 6.0f;
 	t = (i + j + k) * G3;
 	X0 = i - t;
 	Y0 = j - t;
@@ -60,12 +60,12 @@ inline float noise(float xin, float yin, float zin)
 	x1 = x0 - i1 + G3;
 	y1 = y0 - j1 + G3;
 	z1 = z0 - k1 + G3;
-	x2 = x0 - i2 + 2.0 * G3;
-	y2 = y0 - j2 + 2.0 * G3;
-	z2 = z0 - k2 + 2.0 * G3;
-	x3 = x0 - 1.0 + 3.0 * G3;
-	y3 = y0 - 1.0 + 3.0 * G3;
-	z3 = z0 - 1.0 + 3.0 * G3;
+	x2 = x0 - i2 + 2.0f * G3;
+	y2 = y0 - j2 + 2.0f * G3;
+	z2 = z0 - k2 + 2.0f * G3;
+	x3 = x0 - 1.0f + 3.0f * G3;
+	y3 = y0 - 1.0f + 3.0f * G3;
+	z3 = z0 - 1.0f + 3.0f * G3;
 	
 	ii = i & 255;
 	jj = j & 255;
@@ -76,22 +76,20 @@ inline float noise(float xin, float yin, float zin)
 	gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
 	gi3 = perm[ii + 1  + perm[jj + 1  + perm[kk + 1 ]]] % 12;
 	
-	#define _2(X) ((X) * (X))
-	#define __(I)								\
-		t##I = 0.6 - _2(x##I) - _2(y##I) - _2(z##I);			\
-		if (t##I < 0)							\
-			n##I = 0.0;						\
-		else								\
-		{								\
-			t##I *= t##I;						\
-			n##I = _2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]);	\
+	#define __(I)													\
+		t##I = 0.6f - pow2(x##I) - pow2(y##I) - pow2(z##I);			\
+		if (t##I < 0)												\
+			n##I = 0.0;												\
+		else														\
+		{															\
+			t##I *= t##I;											\
+			n##I = pow2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]);	\
 		}
     
 	__(1) __(2) __(3)
 	#undef __
-	#undef _2
 	
-	return 16.0 * (n0 + n1 + n2 + n3) + 1.0;
+	return 16.0f * (n0 + n1 + n2 + n3) + 1.0f;
 }
 
 inline float simplex_noise(int octaves, float x, float y, float z)
@@ -110,18 +108,18 @@ inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z,
 	float z_ = z / (side - 1.0f);
 	
 	if      (y_ <= 0.8)                 plateau_falloff = 1.0;
-	else if ((0.8 < y_) && (y_ < 0.9))  plateau_falloff = 1.0 - (y_ - 0.8) * 10.0;
+	else if ((0.8 < y_) && (y_ < 0.9))  plateau_falloff = 1.0f - (y_ - 0.8f) * 10.0f;
 	else                                plateau_falloff = 0.0;
 	
 	#define __(X, Y)  pow((X) * Y, 2)
-        centre_falloff = 0.2 / (__(x_ - 0.5, 1.5) + __(y_ - 1.0, 0.8) + __(z_ - 0.5, 1.5));
+	centre_falloff = 0.2f / (__(x_ - 0.5f, 1.5f) + __(y_ - 1.0f, 0.8f) + __(z_ - 0.5f, 1.5f));
 	#undef __
 	
-        caves = pow(simplex_noise(1, x_ * 5, y_ * 5, z_ * 5), 3);
+	caves = pow(simplex_noise(1, x_ * 5, y_ * 5, z_ * 5), 3);
 	
-	#define __(X)  (X + 1) * 3.0
-        density = simplex_noise(5, x_, y_ * 0.5, z_) * centre_falloff * plateau_falloff;
-        density *= pow(noise(__(x_), __(y_), __(z_)) + 0.4, 1.8);
+	#define __(X)  (X + 1) * 3.0f
+	density = simplex_noise(5, x_, y_ * 0.5f, z_) * centre_falloff * plateau_falloff;
+	density *= pow(noise(__(x_), __(y_), __(z_)) + 0.4f, 1.8f);
 	#undef __
 	
 	data[poly3(x, y, z, side)] = ((caves < 0.5) || (3.1 <= density)) ? 255 : 0;
@@ -200,6 +198,7 @@ GridModel::GridModel(int power)
 			}
 		}
 	}
+	#undef __
 }
 
 

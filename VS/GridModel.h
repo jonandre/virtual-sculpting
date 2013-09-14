@@ -33,7 +33,7 @@ private:
 	//std::vector<GridCell*> _dirty_cells;
 	inline bool EvaluateCell(unsigned int x, unsigned int y, unsigned int z);
 	
-        unsigned char* _cells;
+	unsigned char* _cells;
 	bool* _interacted;
 	VoxelChunk** _chunks;
 	std::vector<VoxelChunk*> _dirty_chunks;
