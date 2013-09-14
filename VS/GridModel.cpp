@@ -279,8 +279,7 @@ void GridModel::UpdateGrid()
 	_dirty_chunks.clear();
 }
 
- /* TODO fix name*/
-void GridModel::EnshureMarked(int i, int j, int k)
+void GridModel::EnsureMarked(int i, int j, int k)
 {
 	VoxelChunk* ptr = _chunks[poly3_shift(i, j, k, chunk_dimm, power_for_chunk)];
 	int limit = dimm - internal_chunk_size;
@@ -338,7 +337,7 @@ int GridModel::UpdateCellMelt(int i, int j, int k, unsigned char val)
 	_cells[poly] = (_cells[poly] > val) ? (_cells[poly] - val) : 0;
 	_interacted[poly] = true;
 	
-	EnshureMarked(i, j, k);
+	EnsureMarked(i, j, k);
 	return 1;
 }
 
@@ -364,7 +363,7 @@ int GridModel::UpdateCellAdd(int i, int j, int k, unsigned char val)
 	*current_voxel_ptr = (*current_voxel_ptr + val < 255) ? (*current_voxel_ptr + val) : 255;
 	
 	_interacted[poly3(i, j, k, dimm)] = true;
-	EnshureMarked(i, j, k);
+	EnsureMarked(i, j, k);
 	return 1;
 }
 

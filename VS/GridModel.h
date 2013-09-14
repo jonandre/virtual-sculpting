@@ -27,7 +27,7 @@ private:
 	unsigned int dimm;
 	int half_dimm;
 	unsigned int size;
-	void EnshureMarked(int i, int j, int k);
+	void EnsureMarked(int i, int j, int k);
 	
 	//std::map<unsigned int, RenderableCell*> _renderable_cells;
 	//std::vector<GridCell*> _dirty_cells;
