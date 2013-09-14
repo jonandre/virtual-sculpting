@@ -148,13 +148,13 @@ GridModel::GridModel(int power)
 	unsigned int iter = 0;
 	unsigned int tmp1, tmp2, tmp3;
 	float radius = 0.0f;
-	for (int i = 0; i < (unsigned int)dimm; i++)
+	for (int i = 0; i < (int)dimm; i++)
 	{
 		center.coord[0] = (float)(i - half_dimm);
-		for (int j = 0; j < (unsigned int)dimm; j++)
+		for (int j = 0; j < (int)dimm; j++)
 		{
 			center.coord[1] = (float)(j - half_dimm);
-			for (int k = 0; k < (unsigned int)dimm; k++)
+			for (int k = 0; k < (int)dimm; k++)
 			{
 				center.coord[2] = (float)(k - half_dimm);
 				iter = poly3(i, j, k, dimm);
@@ -179,13 +179,13 @@ GridModel::GridModel(int power)
 		center.coord[I] = (float)(tmp_lbl[I]) + _h_s; /* but here it is */      \
 		tmp_ufr[I] = tmp_lbl[I] + internal_chunk_size
 	
-	for (int i = 0; i < (unsigned int)chunk_dimm; i++)
+	for (int i = 0; i < (int)chunk_dimm; i++)
 	{
 		__(0, i);
-		for (int j = 0; j < (unsigned int)chunk_dimm; j++)
+		for (int j = 0; j < (int)chunk_dimm; j++)
 		{
 			__(1, j);
-			for (int k = 0; k < (unsigned int)chunk_dimm; k++)
+			for (int k = 0; k < (int)chunk_dimm; k++)
 			{
 				__(2, k);
 				iter = poly3(i, j, k, chunk_dimm);
@@ -203,9 +203,9 @@ GridModel::GridModel(int power)
 void GridModel::ReInitModel(bool clear)
 {
 	unsigned int iter;
-	for (int i = 0; i < (unsigned int)dimm; i++)
-		for (int j = 0; j < (unsigned int)dimm; j++)
-			for (int k = 0; k < (unsigned int)dimm; k++)
+	for (int i = 0; i < (int)dimm; i++)
+		for (int j = 0; j < (int)dimm; j++)
+			for (int k = 0; k < (int)dimm; k++)
 			{
 				iter = poly3(i, j, k, dimm);
 				
