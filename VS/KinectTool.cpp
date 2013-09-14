@@ -19,7 +19,7 @@ KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 	_reader = new KinectReader(start_d, start_d + (int)(_start_z - _end_z) * 2, _start_z - _end_z );
 	
 	_tmp_blured_image = new float[640 * 480];
-	memset(_tmp_blured_image, 0, 640 * 480 * sizeof(float) );
+	memset(_tmp_blured_image, 0, 640 * 480 * sizeof(float));
 	
 	_tool_shader = new Shader();
 	_tool_shader->loadFragmentShader("Shaders/mesh.frag");
@@ -54,7 +54,7 @@ inline void Blur(float* in_out, float* tmp)
 				tmp[j * 640 + i] += coeffs[dx + 2] * in_out[(j + dx) * 640 + i];
 		}
 	//Y
-	for (j = 2; j < 478; j++)
+	for (j = 2; j < 478; j++) /* TODO: is this lake of symmetri correct */
 		for (i = 2; i < 638; i++)
 		{
 			in_out[j * 640 + i] = 0.0f;
@@ -144,7 +144,6 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 				tmp.coord[1] = action_point.coord[1] + dir_vector.coord[1]*delta;
 				tmp.coord[2] = action_point.coord[2] + dir_vector.coord[2]*delta;
 				index = model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
-				
 				
 				if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
 					accum += model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
