@@ -52,7 +52,7 @@ int main(int argc, char** argv)
 	input->SetModel(model);
 	
 	/* Initialise Kinect */
-	#define SIDE  (size * 0.75f)
+	#define SIDE  (side * 0.75f)
 	kinect = new KinectTool(SIDE, SIDE, SIDE, -SIDE);
 	#undef SIDE
 	

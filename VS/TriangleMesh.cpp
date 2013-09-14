@@ -66,7 +66,7 @@ inline void TriangleMesh::UpdateVBO()
 
 void TriangleMesh::UpdateDepth(float* _depth_map)
 {
-	unsigned int x, y
+	unsigned int x, y;
 	
 	for (x = 0; x < _x; x++)
 		for (y = 0; y < _y; y++)
