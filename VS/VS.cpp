@@ -31,13 +31,13 @@ int main(int argc, char** argv)
 	(void) argc;
 	(void) argv;
 	
-	GLContext* cntx = new GLContext(); //Window+render.
-	Input* inp = new Input(); //Input system.
-	cntx->SetInput(inp); //Context redirects mouse+keyb to Input
+	GLContext* cntx = new GLContext();
+	Input* inp = new Input();
+	cntx->SetInput(inp);
 	
-	unsigned int power = 8;
+	unsigned int power = 8; // power of 2
 	
-	GridModel* model = new GridModel(power); //power of 2
+	GridModel* model = new GridModel(power);
 	unsigned int side = model->GetDimm();
 	inp->SetZoom(-(side * 4.0f));
 	inp->SetModel(model);
@@ -53,22 +53,19 @@ int main(int argc, char** argv)
 		#ifdef DEBUG_TIME
 			clock_t start = clock();
 		#endif
-		acted = 0;
 		
-		inp->UpdateFrame(); //Reset frame variables.
-		cntx->doMessage(); //Win message loop
+		inp->UpdateFrame();
+		cntx->doMessage();
 		
 		
-		tool->DoToolUpdate(); //Update tool state - like depthmap
+		tool->DoToolUpdate();
 		
-		if (inp->IsPressed(' '))
-			space_pressed ^= true;
+		space_pressed ^= inp->IsPressed(' ');
 		
-		if (space_pressed)
-			acted = tool->InteractModel(model, inp->GetObjectQ()); //obvious
+		acted = space_pressed ? tool->InteractModel(model, inp->GetObjectQ()) : 0;
 		
-		model->UpdateGrid(); //Update visual representation of model
-		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM()); //Do actual rendering.
+		model->UpdateGrid();
+		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM());
 		
 		if (acted)
 			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
