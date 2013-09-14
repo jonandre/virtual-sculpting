@@ -68,27 +68,27 @@ Soundify::~Soundify()
 
 ALboolean Soundify::CheckALCError()
 {
-  ALenum ErrCode;
-  string Err = "ALC error: ";
-  if ((ErrCode = alcGetError(pDevice)) != ALC_NO_ERROR)
-  {
-    Err += (char*)alcGetString(pDevice, ErrCode);
-    std::cerr<<Err.data()<<std::endl;
-    return AL_FALSE;
-  }
-  return AL_TRUE;
+	ALenum ErrCode;
+	string Err = "ALC error: ";
+	if ((ErrCode = alcGetError(pDevice)) != ALC_NO_ERROR)
+	{
+		Err += (char*)alcGetString(pDevice, ErrCode);
+		std::cerr << Err.data() << std::endl;
+		return AL_FALSE;
+	}
+	return AL_TRUE;
 }
 
 ALboolean Soundify::CheckALError()
 {
-  ALenum ErrCode;
-  string Err = "OpenAL error: ";
-  if ((ErrCode = alGetError()) != AL_NO_ERROR)
-  {
-    Err += (char*)alGetString(ErrCode);
-    std::cerr<<Err.data()<<std::endl;
-    return AL_FALSE;
-  }
-  return AL_TRUE;
+	ALenum ErrCode;
+	string Err = "OpenAL error: ";
+	if ((ErrCode = alGetError()) != AL_NO_ERROR)
+	{
+		Err += (char*)alGetString(ErrCode);
+		std::cerr << Err.data() << std::endl;
+		return AL_FALSE;
+	}
+	return AL_TRUE;
 }
 
