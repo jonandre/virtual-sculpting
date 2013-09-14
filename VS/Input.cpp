@@ -109,10 +109,10 @@ void Input::OnMouseMove(int x, int y)
 		glm::vec3 axis(_angleY, _angleX, 0);
 		
 		float angle = glm::length(axis);
-		if ( abs(angle) > 0.1)
+		if (abs(angle) > 0.1)
 		{
 			axis = glm::normalize(axis);			
-			_view_mat = glm::rotate(glm::mat4(1.0), angle, axis)*_view_mat;
+			_view_mat = glm::rotate(glm::mat4(1.0), angle, axis) * _view_mat;
 		}
 		_prevX = x;
 		_prevY = y;
