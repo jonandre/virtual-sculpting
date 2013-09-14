@@ -77,14 +77,14 @@ inline float noise(float xin, float yin, float zin)
 	gi2 = perm[ii + i2 + perm[jj + j2 + perm[kk + k2]]] % 12;
 	gi3 = perm[ii + 1  + perm[jj + 1  + perm[kk + 1 ]]] % 12;
 	
-	#define __(I)													\
-		t##I = 0.6f - pow2(x##I) - pow2(y##I) - pow2(z##I);			\
-		if (t##I < 0)												\
-			n##I = 0.0;												\
-		else														\
-		{															\
-			t##I *= t##I;											\
-			n##I = pow2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]);	\
+	#define __(I)                                                           \
+		t##I = 0.6f - pow2(x##I) - pow2(y##I) - pow2(z##I);             \
+		if (t##I < 0)                                                   \
+			n##I = 0.0;                                             \
+		else                                                            \
+		{                                                               \
+			t##I *= t##I;                                           \
+			n##I = pow2(t##I) * dot(x##I, y##I, z##I, grad[gi##I]); \
 		}
 	
 	__(0) __(1) __(2) __(3)
@@ -175,9 +175,9 @@ GridModel::GridModel(int power)
 	int tmp_ufr[3];
 	float _h_s = (float)(internal_chunk_size >> 1);
 	
-	#define __(I, X)								\
-		tmp_lbl[I] = (int)(X << power_for_chunk) - (int)(dimm / 2);		\
-		center.coord[I] = (float)(tmp_lbl[I]) + _h_s; /* but here it is */	\
+	#define __(I, X)                                                                \
+		tmp_lbl[I] = (int)(X << power_for_chunk) - (int)(dimm / 2);             \
+		center.coord[I] = (float)(tmp_lbl[I]) + _h_s; /* but here it is */      \
 		tmp_ufr[I] = tmp_lbl[I] + internal_chunk_size
 	
 	for (unsigned int i = 0; i < chunk_dimm; i++)
