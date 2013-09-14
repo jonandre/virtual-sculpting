@@ -7,16 +7,12 @@
 #include "GraphicsLib.h"
 #include "main.h"
 
-
-
 #define PAD_DEPTH 50
 #define DIR_Z_STEP 1.0f
 
 #define FALLBACK_CPU_COUNT 8
 
 static void* run(void* beginning_stop_cpu);
-
-
 
 /**
  * 
@@ -170,43 +166,22 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 	points = _msh->GetPoints();
 	inverse = glm::conjugate(quat);
 	
-	
 	//Can be easy paralelized. With one but - UpdateCell should be treated properly - it's nor thead safe for moment.
-	
-	
-	Point action_point;
-	unsigned int tmp1, tmp2, tmp3;
-	grid_dimm = model->GetDimm() - 1;
-	
-        unsigned char val = 128;
 	int accum = 0;
-	Point tmp;
-	Point dir_vector;
 	dir_vector.coord[0] = 0.0f;
 	dir_vector.coord[1] = 0.0f;
 	dir_vector.coord[2] = DIR_Z_STEP;
-	dir_vector = Rotate(dir_vector, inverse);
-	for (unsigned int i = 0; i < 640; i++)
-		for (unsigned int j = 0; j < 480; j++)
-		{
-			//tmp = points[i * 480 + j];
-			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
-			action_point = Rotate(points[i * 480 + j], inverse);
-			for (unsigned int delta = 0; delta < PAD_DEPTH; delta++)
-			{
-				tmp.coord[0] = action_point.coord[0] + dir_vector.coord[0] * delta;
-				tmp.coord[1] = action_point.coord[1] + dir_vector.coord[1] * delta;
-				tmp.coord[2] = action_point.coord[2] + dir_vector.coord[2] * delta;
-				model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
-				
-				if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
-					accum += model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
-				else
-					break;
-			}
-		}
-	return accum;
+	dir_vector = Rotate(dir_vector, inverse );
+	grid_model = model;
 	
+	pthread_barrier_wait(&(this->barrier)); /* Start threads */
+	
+	for (long cpu = 0; cpu < this->cpu_count; cpu++)
+	  accum += cpu_output[cpu];
+	
+	pthread_barrier_wait(&(this->barrier)); /* Wait for threads */
+	
+	return accum;
 }
 
 /**
