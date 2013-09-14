@@ -148,20 +148,20 @@ GridModel::GridModel(int power)
 	unsigned int iter = 0;
 	unsigned int tmp1, tmp2, tmp3;
 	float radius = 0.0f;
-	for (unsigned int i = 0; i < dimm; i++)
+	for (int i = 0; i < (unsigned int)dimm; i++)
 	{
-		center.coord[0] = (float)(i - half_dimm); //well, but not here =)
-		for (unsigned int j = 0; j < dimm; j++)
+		center.coord[0] = (float)(i - half_dimm);
+		for (int j = 0; j < (unsigned int)dimm; j++)
 		{
 			center.coord[1] = (float)(j - half_dimm);
-			for (unsigned int k = 0; k < dimm; k++)
+			for (int k = 0; k < (unsigned int)dimm; k++)
 			{
 				center.coord[2] = (float)(k - half_dimm);
 				iter = poly3(i, j, k, dimm);
 				
 				_cells[iter] = 0;
 				radius = sqrtf(pow2(center.coord[0]) + pow2(center.coord[1]) + pow2(center.coord[2]));
-				if (radius < dimm / 2 - 1)
+				if (radius < dimm / 2)
 					_cells[iter] = 255;
 				//floating_rock(i, j, k, _cells, dimm);
 				if (iter != GetCellIndex(center, tmp1, tmp2, tmp3))
@@ -179,13 +179,13 @@ GridModel::GridModel(int power)
 		center.coord[I] = (float)(tmp_lbl[I]) + _h_s; /* but here it is */      \
 		tmp_ufr[I] = tmp_lbl[I] + internal_chunk_size
 	
-	for (unsigned int i = 0; i < chunk_dimm; i++)
+	for (int i = 0; i < (unsigned int)chunk_dimm; i++)
 	{
 		__(0, i);
-		for (unsigned int j = 0; j < chunk_dimm; j++)
+		for (int j = 0; j < (unsigned int)chunk_dimm; j++)
 		{
 			__(1, j);
-			for (unsigned int k = 0; k < chunk_dimm; k++)
+			for (int k = 0; k < (unsigned int)chunk_dimm; k++)
 			{
 				__(2, k);
 				iter = poly3(i, j, k, chunk_dimm);
@@ -203,9 +203,9 @@ GridModel::GridModel(int power)
 void GridModel::ReInitModel(bool clear)
 {
 	unsigned int iter;
-	for (unsigned int i = 0; i < dimm; i++)
-		for (unsigned int j = 0; j < dimm; j++)
-			for (unsigned int k = 0; k < dimm; k++)
+	for (int i = 0; i < (unsigned int)dimm; i++)
+		for (int j = 0; j < (unsigned int)dimm; j++)
+			for (int k = 0; k < (unsigned int)dimm; k++)
 			{
 				iter = poly3(i, j, k, dimm);
 				
@@ -226,7 +226,7 @@ unsigned int GridModel::GetDimm()
 	return dimm;
 }
 
-inline unsigned int GridModel::GetCellIndex(const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z)
+inline unsigned int GridModel::GetCellIndex(const Point& pos, unsigned int& x, unsigned int& y, unsigned int& z)
 {
 	x = (unsigned int)((int)(pos.coord[0]) + half_dimm);
 	y = (unsigned int)((int)(pos.coord[1]) + half_dimm);

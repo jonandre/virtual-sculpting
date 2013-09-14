@@ -43,7 +43,11 @@ void initialise_audio()
 {
 	/* Generate wave to play */
 	for (int i = 0; i < FRAMES; i++) /* TODO add overtones for a cleaner sound */
-		audioData[i] = (short)(MAX_VALUE * sin((2 * glm::pi<double>() * AUDIO_FREQUENCY) / AUDIO_SAMPLE_RATE * i));
+	{
+		audioData[i] = 0;
+		for (int j = 1; j <= 4; j++)
+			audioData[i] = (short)(MAX_VALUE / 2 * sin(((i << j) * glm::pi<double>() * AUDIO_FREQUENCY) / AUDIO_SAMPLE_RATE * i) * pow(0.4f, j - 1));
+	}
 	
 	/* Open default audio playback device */
 	audioDevice = alcOpenDevice(NULL);                   check_alc_error();

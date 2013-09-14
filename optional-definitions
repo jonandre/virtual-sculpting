@@ -1,6 +1,6 @@
 DEBUG_TIME		Measure time intervals over loops
 
 AUDIO_SAMPLE_RATE	Audio sample rate (default: 44100)
-AUDIO_FREQUENCY		Audio frequency, in hertz (default: 1000)
+AUDIO_FREQUENCY		Audio frequency, in hertz (default: 440)
 AUDIO_DURATAION		Audio duration, in milliseconds (default: 1000)
 

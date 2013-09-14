@@ -1,5 +1,5 @@
-#include <NuiApi.h>
 #include "KinectReader.h"
+#include <NuiApi.h> /* FIXME must be included after "KinectReader.h" */
 #include "main.h"
 
 
@@ -89,8 +89,8 @@ HRESULT KinectReader::CreateFirstConnected()
     
     if ((m_pNuiSensor == NULL) || FAILED(hr))
     {
-	std::cerr << "No ready Kinect found!" << std::endl;
-        return E_FAIL;
+		std::cerr << "No ready Kinect found!" << std::endl;
+		return E_FAIL;
     }
     
     return hr;

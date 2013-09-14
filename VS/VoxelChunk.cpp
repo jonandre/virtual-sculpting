@@ -34,13 +34,13 @@ void VoxelChunk::CreateGeometry()
 	Point pnt;
 	unsigned int index = 0;
 	
-	for (unsigned int i = 0; i < size; i++)
+	for (int i = 0; i < size; i++)
 	{
 		pnt.coord[0] = (float)(_lbl[0] + i) + 0.5f;
-		for (unsigned int j = 0; j < size; j++)
+		for (int j = 0; j < size; j++)
 		{
 			pnt.coord[1] = (float)(_lbl[1] + j) + 0.5f;
-			for (unsigned int k = 0; k < size; k++)
+			for (int k = 0; k < size; k++)
 			{
 				pnt.coord[2] = (float)(_lbl[2] + k) + 0.5f;
 				index = poly3(i, j, k, size);

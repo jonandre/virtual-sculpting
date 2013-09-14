@@ -16,7 +16,7 @@
  * Audio frequency, in hertz
  */
 #ifndef AUDIO_FREQUENCY
-#define AUDIO_FREQUENCY  1000
+#define AUDIO_FREQUENCY  440
 #endif
 
 /**
