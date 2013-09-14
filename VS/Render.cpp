@@ -37,7 +37,6 @@ void Render::Init()
 void Render::SetupScene()
 {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	//glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	shader = new Shader();
@@ -67,7 +66,9 @@ inline double diffclock(clock_t end, clock_t start)
 
 void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4& obj)
 {
-	clock_t start = clock();
+	#ifdef DEBUG_TIME
+		clock_t start = clock();
+	#endif
 	
 	glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -120,9 +121,10 @@ void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4
 	glBindVertexArray(0);
 	tool->GetToolShader()->unbind();
 	
-	///
-	clock_t end = clock();
-	//std::cerr << "For ticks = " << i << ", tick time = " << diffclock(end, start) << " ms" << std::endl;
+	#ifdef DEBUG_TIME
+		clock_t end = clock();
+		std::cerr << "For ticks = " << i << ", tick time = " << diffclock(end, start) << " ms" << std::endl;
+	#endif
 }
 
 void Render::Resize(int w, int h)
