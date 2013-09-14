@@ -42,7 +42,9 @@ int main(int argc, char** argv)
 	inp->SetZoom(-(side * 4.0f));
 	inp->SetModel(model);
 	
-	KinectTool* tool = new KinectTool(side * 0.75f, side * 0.75f, side * 0.75f, -(side * 0.75f));
+	#define SIDE  (size * 0.75f)
+	KinectTool* tool = new KinectTool(SIDE, SIDE, SIDE, -SIDE);
+	#undef SIDE
 	
 	initialise_audio();
 	
@@ -56,13 +58,11 @@ int main(int argc, char** argv)
 		
 		inp->UpdateFrame();
 		cntx->doMessage();
-		
-		
 		tool->DoToolUpdate();
 		
-		space_pressed ^= inp->IsPressed(' ');
-		
-		acted = space_pressed ? tool->InteractModel(model, inp->GetObjectQ()) : 0;
+		acted = (space_pressed ^= inp->IsPressed(' '))
+			? tool->InteractModel(model, inp->GetObjectQ())
+			: 0;
 		
 		model->UpdateGrid();
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM());
@@ -73,8 +73,8 @@ int main(int argc, char** argv)
 		
 		#ifdef DEBUG_TIME
 			clock_t end = clock();
-			std::cerr << "Frame time = " << diffclock(end, start) << " ms, "
-				  << " Interacted: " << acted << std::endl;
+			std::cerr << "Frame time = " << diffclock(end, start) << " ms,  "
+				  << "Interacted: " << acted << std::endl;
 		#endif
 	}
 	
@@ -83,6 +83,7 @@ int main(int argc, char** argv)
 	delete inp;
 	delete tool;
 	delete cntx;
+	
 	return 0;
 }
 
