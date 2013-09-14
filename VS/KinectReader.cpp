@@ -1,7 +1,7 @@
+#include <NuiApi.h>
 #include "KinectReader.h"
 #include <NuiApi.h> /* FIXME must be included after "KinectReader.h" */
 #include "main.h"
-#include "NuiApi.h"
 
 
 KinectReader::KinectReader(void)
