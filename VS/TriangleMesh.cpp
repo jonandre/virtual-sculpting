@@ -39,13 +39,15 @@ TriangleMesh::TriangleMesh(unsigned int xx, unsigned int yy, float start_x, floa
 			unsigned int a = x      + y;
 			unsigned int b = x + _y + y;
 			
-			_indexes[numIndices++] = a + 1;
-			_indexes[numIndices++] = b;
-			_indexes[numIndices++] = a;
+			_indexes[numIndices + 0] = a + 1;
+			_indexes[numIndices + 1] = b;
+			_indexes[numIndices + 2] = a;
 			
-			_indexes[numIndices++] = a;
-			_indexes[numIndices++] = a + 1;
-			_indexes[numIndices++] = b + 1;
+			_indexes[numIndices + 3] = a;
+			_indexes[numIndices + 4] = a + 1;
+			_indexes[numIndices + 5] = b + 1;
+			
+			numIndices += 6;
 		}
 	
 	MakeVBO();
