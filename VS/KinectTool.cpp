@@ -255,8 +255,8 @@ static void* run(void* args)
 	long stop = (long(((long*)args)[0]) >> 9) & 511;
 	long cpu = (long(((long*)args)[0]) >> 18) & 511;
 	free(args);
-
-	long count, x, y;
+	
+	long x, y;
 	int accum = 0;
   
 	Point action_point;
@@ -268,7 +268,6 @@ static void* run(void* args)
 	{
 		pthread_barrier_wait(&(tool->barrier)); /* Wait for start cue */
 		Point local_dir_vector = dir_vector;
-		count = 0;
 		for (y = beginning; y < stop; y++)
 			for (x = 0; x < 640; x++)
 			{
