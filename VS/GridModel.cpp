@@ -132,7 +132,7 @@ inline static void floating_rock(unsigned int x, unsigned int y, unsigned int z,
 GridModel::GridModel(int power)
 {
 	dimm = 1 << power; //grid dimension
-	size = dimm * dimm * dimm; //total size
+	size = pow3(dimm); //total size
 	half_dimm = dimm >> 1;
 	_cells = new unsigned char[size]; //cells - voxels.
 	_interacted = new bool[size]; //array to store bool - if voxel was changed during this frame.
@@ -163,8 +163,8 @@ GridModel::GridModel(int power)
 				iter = i * dimm * dimm + j * dimm + k;
 				
 				_cells[iter] = 0;
-				radius = sqrtf(center.coord[0]*center.coord[0] + center.coord[1]*center.coord[1] + center.coord[2]*center.coord[2]);
-				if (radius < dimm/2 - 1)
+				radius = sqrtf(pow2(center.coord[0]) + pow2(center.coord[1]) + pow2(center.coord[2]));
+				if (radius < dimm / 2 - 1)
 					_cells[iter] = 255;
 				//floating_rock(i, j, k, _cells, dimm);
 				if (iter != GetCellIndex(center, tmp1, tmp2, tmp3))
@@ -180,17 +180,17 @@ GridModel::GridModel(int power)
 	float _h_s = (float)(internal_chunk_size >> 1);
 	for (int i = 0; i != chunk_dimm; i++)
 	{
-		tmp_lbl[0] = (int)(i << power_for_chunk) - (int)(dimm/2);
+		tmp_lbl[0] = (int)(i << power_for_chunk) - (int)(dimm / 2);
 		center.coord[0] = float(tmp_lbl[0]) + _h_s; //but here it is
 		tmp_ufr[0] = tmp_lbl[0] + internal_chunk_size;
 		for (int j = 0; j != chunk_dimm; j++)
 		{
-			tmp_lbl[1] = int(j<<power_for_chunk) - int(dimm/2);
+			tmp_lbl[1] = int(j << power_for_chunk) - int(dimm / 2);
 			center.coord[1] = float(tmp_lbl[1]) + _h_s;
 			tmp_ufr[1] = tmp_lbl[1] + internal_chunk_size;
 			for (int k = 0; k < chunk_dimm; k++)
 			{
-				tmp_lbl[2] = int(k<<power_for_chunk) - int(dimm/2);
+				tmp_lbl[2] = int(k << power_for_chunk) - int(dimm / 2);
 				center.coord[2] = float(tmp_lbl[2]) + _h_s;
 				tmp_ufr[2] = tmp_lbl[2] + internal_chunk_size;
 				
@@ -212,11 +212,11 @@ void GridModel::ReInitModel(bool clear)
 		for (int j = 0; j != dimm; j++)
 			for (int k = 0; k != dimm; k++)
 			{
-				iter = i * dimm * dimm + j * dimm + k;
+				iter = poly3(i, j, k, dimm);
 				
 				_cells[iter] = clear ? 0 : 255;
 				_interacted[iter] = false;
-				//floating_rock(i, j, k, _cells, dimm);				
+				//floating_rock(i, j, k, _cells, dimm);
 			}
 	
 	_dirty_chunks.clear();
@@ -231,11 +231,11 @@ unsigned int GridModel::GetDimm()
 	return dimm;
 }
 
-inline  unsigned int GridModel::GetCellIndex(const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z)
+inline unsigned int GridModel::GetCellIndex(const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z)
 {
-	x = (unsigned)((int)(pos.coord[0]) + half_dimm);
-	y = (unsigned)((int)(pos.coord[1]) + half_dimm);
-	z = (unsigned)((int)(pos.coord[2]) + half_dimm);
+	x = (unsigned int)((int)(pos.coord[0]) + half_dimm);
+	y = (unsigned int)((int)(pos.coord[1]) + half_dimm);
+	z = (unsigned int)((int)(pos.coord[2]) + half_dimm);
 	
 	return poly3(x, y, z, dimm);
 }
@@ -285,79 +285,42 @@ void GridModel::UpdateGrid()
 
 void GridModel::EnshureMarked(int i, int j, int k) /* TODO fix name*/
 {
-	VoxelChunk* ptr = _chunks[(i >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
+	VoxelChunk* ptr = _chunks[poly3_shift(i, j, k, chunk_dimm, power_of_chunk)];
+	int limit = dimm - internal_chunk_size;
 	
-	if (!(ptr->IsDirty()))
-	{
-		ptr->MarkDirty();
-		_dirty_chunks.push_back(ptr);
-	}
+	#define on_clean()				\
+		if (ptr->IsDirty()) == false)		\
+		{					\
+			ptr->MarkDirty();		\
+			_dirty_chunks.push_back(ptr);	\
+		}
+	
+	on_clean()
+	
 	// + side chunks
 	//why not in the prev. "if" - you can modify one more cell at border of dirty chunk, so you have to update 
-	//i
-	if (i && (i % internal_chunk_size == 0))
-	{
-		ptr = _chunks[((i - 1) >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
-		if ((ptr->IsDirty()) == false)
+	
+	#define if_clean(cond_a, cond_modand, I, J, K)
+		if ((cond_a) && ((cond_modand) % internal_chunk_size == 0))
 		{
-			ptr->MarkDirty();
-			_dirty_chunks.push_back(ptr);
+			ptr = _chunks[poly3_shift(I, J, K, chunk_dimm, power_of_chunk)];
+			on_clean()
 		}
-	}
-	if ((i < (dimm - internal_chunk_size)) && ((i + 1) % internal_chunk_size == 0))
-	{
-		ptr = _chunks[((i + 1) >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
-		if ((ptr->IsDirty()) == false)
-		{
-			ptr->MarkDirty();
-			_dirty_chunks.push_back(ptr);
-		}
-	}
-	//j
-	if (j && (j % internal_chunk_size == 0))
-	{
-		ptr = _chunks[((i) >> power_for_chunk) * chunk_dimm * chunk_dimm + ((j - 1) >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
-		if ((ptr->IsDirty()) == false)
-		{
-			ptr->MarkDirty();
-			_dirty_chunks.push_back(ptr);
-		}
-	}
-	if ((j < (dimm - internal_chunk_size)) && ((j + 1) % internal_chunk_size == 0))
-	{
-		ptr = _chunks[((i) >> power_for_chunk) * chunk_dimm * chunk_dimm + ((j + 1) >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
-		if ((ptr->IsDirty()) == false)
-		{
-			ptr->MarkDirty();
-			_dirty_chunks.push_back(ptr);
-		}
-	}
-	//k
-	if (k && (k % internal_chunk_size == 0))
-	{
-		ptr = _chunks[((i) >> power_for_chunk) * chunk_dimm * chunk_dimm + ((j) >> power_for_chunk) * chunk_dimm + ((k - 1) >> power_for_chunk)];
-		if (!(ptr->IsDirty()) == false)
-		{
-			ptr->MarkDirty();
-			_dirty_chunks.push_back(ptr);
-		}
-	}
-	if ((k < (dimm - internal_chunk_size)) && ((k + 1) % internal_chunk_size == 0))
-	{
-		ptr = _chunks[((i) >> power_for_chunk) * chunk_dimm * chunk_dimm + ((j) >> power_for_chunk) * chunk_dimm + ((k + 1) >> power_for_chunk)];
-		if ((ptr->IsDirty()) == false)
-		{
-			ptr->MarkDirty();
-			_dirty_chunks.push_back(ptr);
-		}
-	}
-
+	
+	if_clean(i,         i,     i - 1, j, k)
+	if_clean(i < limit, i + 1, i + 1, j, k)
+	
+	if_clean(j,         j,     i, j - 1, k)
+	if_clean(j < limit, j + 1, i, j + 1, k)
+	
+	if_clean(k,         k,     i, j, k - 1)
+	if_clean(k < limit, k + 1, i, j, k + 1)
 }
 
 
 int GridModel::UpdateCellMelt(int i, int j, int k, unsigned char val)
 {
-	VoxelChunk* ptr = _chunks[(i >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
+	VoxelChunk* ptr = _chunks[poly3_shift(i, j, k, chunk_dimm, power_for_chunk)];
 	
 	if (1) //if surface interaction.
 	{
@@ -365,18 +328,19 @@ int GridModel::UpdateCellMelt(int i, int j, int k, unsigned char val)
 		if (ptr->GetVAO() == NULL)
 			return 0;
 		
-		
 		// zero alpha means that either voxel is not visible or is empty
-		unsigned char alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
-			j - (j >> power_for_chunk) * internal_chunk_size , k - (k >> power_for_chunk) * internal_chunk_size); //local index in chunk.
+		#define __(X)  (X - (X >> power_for_chunk) * internal_chunk_size)
+		unsigned char alpha = ptr->GetVoxelAlpha(__(i), __(j), __(k)); //local index in chunk.
+		#undef __
 		
 		if (alpha == 0)
 			return 0;
 	}
 	
-	_cells[i * dimm * dimm+ j * dimm + k] = (_cells[i * dimm * dimm+ j * dimm + k] > val) ? (_cells[i * dimm * dimm + j * dimm + k] - val) : 0;
-	_interacted[i * dimm * dimm + j * dimm + k] = true;
-
+	int poly = poly3(i, j, k, dimm);
+	_cells[poly] = (_cells[poly] > val) ? (_cells[poly] - val) : 0;
+	_interacted[poly] = true;
+	
 	EnshureMarked(i, j, k);
 	return 1;
 }
@@ -384,28 +348,25 @@ int GridModel::UpdateCellMelt(int i, int j, int k, unsigned char val)
 
 int GridModel::UpdateCellAdd(int i, int j, int k, unsigned char val)
 {
-	VoxelChunk* ptr = _chunks[(i >> power_for_chunk) * chunk_dimm * chunk_dimm + (j >> power_for_chunk) * chunk_dimm + (k >> power_for_chunk)];
+	VoxelChunk* ptr = _chunks[poly3_shift(i, j, k, chunk_dimm, power_for_chunk)];
 	
-	unsigned char* current_voxel_ptr = &_cells[i * dimm * dimm + j * dimm + k];
+	unsigned char* current_voxel_ptr = &_cells[poly3(i, j, k, dimm)];
 	
 	if (1)//if surface interaction.
 	{
-		/*unsigned int index_x = i - (i >> power_for_chunk) * internal_chunk_size;
-		unsigned int index_y = j - (j >> power_for_chunk) * internal_chunk_size;
-		unsigned int index_z = k - (k >> power_for_chunk) * internal_chunk_size; //local index in chunk.*/
-	  
-		unsigned char alpha = ptr->GetVoxelAlpha(i - (i >> power_for_chunk) * internal_chunk_size,
-			j - (j >> power_for_chunk) * internal_chunk_size, k - (k >> power_for_chunk) * internal_chunk_size); //local index in chunk.
+		#define __(X)  (X - (X >> power_for_chunk) * internal_chunk_size)
+		unsigned char alpha = ptr->GetVoxelAlpha(__(i), __(j), __(k)); //local index in chunk.
+		#undef __
 		
-		if ((alpha == 0) && (*current_voxel_ptr != 0)) // if not visible and not empty
+		if ((alpha == 0) && *current_voxel_ptr) // if not visible and not empty
 			return 0;
 	}
 	
 	if (*current_voxel_ptr == 255)
 		return 0;
-	*current_voxel_ptr = (*current_voxel_ptr + val) < 255 ? *current_voxel_ptr + val : 255;
+	*current_voxel_ptr = (*current_voxel_ptr + val < 255) ? (*current_voxel_ptr + val) : 255;
 	
-	_interacted[i * dimm * dimm + j * dimm + k] = true;
+	_interacted[poly3(i, j, k, dimm)] = true;
 	EnshureMarked(i, j, k);
 	return 1;
 }
@@ -415,7 +376,7 @@ GridModel::~GridModel()
 {
 	delete [] _cells;
 	
-	for (int i = 0, n = chunk_dimm * chunk_dimm * chunk_dimm; i = n; i++ )
+	for (int i = 0, n = chunk_dimm * chunk_dimm * chunk_dimm; i = n; i++)
 		delete _chunks[i];
 	
 	delete [] _chunks;
