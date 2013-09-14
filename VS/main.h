@@ -13,6 +13,8 @@ using namespace std;
 #include "glm/gtc/matrix_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
 
+typedef unsigned char UINT8;
+
 struct Color
 {
 	unsigned char comp[4];
