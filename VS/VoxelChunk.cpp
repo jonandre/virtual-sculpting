@@ -125,41 +125,19 @@ inline unsigned char VoxelChunk::EvaluateCell(unsigned char* m_pBlocks, unsigned
 	if (m_pBlocks[index] == 0)
 		return 0;
 	
-	unsigned char res = 0; //Coding 00xxxxxx - where x is side
+	unsigned char res = 0;
 	
-	//top
-	if ((y == dimm - 1) || m_pBlocks[index + dimm] == 0)
-		++res;
-	res <<= 1;
-	
-	//bottom
-	if ((y == 0) || m_pBlocks[index - dimm] == 0)
-		 ++res;
-	res <<= 1;
-	
-	//right
-	if ((x == dimm - 1) || m_pBlocks[index + pow2(dimm)] == 0)
-		++res;
-	res <<= 1;
-	
-	//left
-	if ((x == 0) || m_pBlocks[index - pow2(dimm)] == 0)
-		++res;
-	res <<= 1;
-	
-	//back
-	if ((z == 0) || m_pBlocks[index - 1] == 0)
-		++res;
-	res <<= 1;
-	
-	//front
-	if ((z == dimm - 1) || m_pBlocks[index + 1] == 0)
-		++res;
+	if ((z == dimm - 1) || m_pBlocks[index +      1    ] == 0)  res |=  1; //front
+	if ((z == 0)        || m_pBlocks[index -      1    ] == 0)  res |=  2; //back
+	if ((x == 0)        || m_pBlocks[index - pow2(dimm)] == 0)  res |=  4; //left
+	if ((x == dimm - 1) || m_pBlocks[index + pow2(dimm)] == 0)  res |=  8; //right
+	if ((y == 0)        || m_pBlocks[index -      dimm ] == 0)  res |= 16; //bottom
+	if ((y == dimm - 1) || m_pBlocks[index +      dimm ] == 0)  res |= 32; //top
 	
 	//if (res == 63) //if cell has no neighbours - remove it. Hack, anyway.
 	//{
-		//m_pBlocks[index] = 0;
-		//return 0;
+	//	m_pBlocks[index] = 0;
+	//	return 0;
 	//}
 	
 	return res;
