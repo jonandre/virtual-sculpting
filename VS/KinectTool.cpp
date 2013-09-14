@@ -8,7 +8,7 @@
 
 #include "main.h"
 
-#define PAD_DEPTH 20
+#define PAD_DEPTH 50
 #define DIR_Z_STEP 1.0f
 
 #define FALLBACK_CPU_COUNT 8
@@ -180,29 +180,26 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 	unsigned int grid_size = model->GetSize();
 	unsigned int grid_dimm = model->GetDimm() - 1;
 	
-	unsigned int pad_depth = 50; //grid_dimm;
-	
         unsigned char val = 128;
 	int accum = 0;
 	Point tmp;
 	Point dir_vector;
-	const float dir_z_step = 1.0f;
 	dir_vector.coord[0] = 0.0f;
 	dir_vector.coord[1] = 0.0f;
-	dir_vector.coord[2] = dir_z_step;
+	dir_vector.coord[2] = DIR_Z_STEP;
 	dir_vector = Rotate(dir_vector, inverse);
 	unsigned int tmp_pad = 0;
 	for (unsigned int i = 0; i < 640; i++)
 		for (unsigned int j = 0; j < 480; j++)
 		{
 			//tmp = points[i * 480 + j];
-			//tmp.coord[2] -= dir_z_step * pad_depth;
+			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
 			action_point = Rotate(points[i * 480 + j], inverse);
-			for (unsigned int delta = 0; delta < pad_depth; delta++)
+			for (unsigned int delta = 0; delta < PAD_DEPTH; delta++)
 			{
-				tmp.coord[0] = action_point.coord[0] + dir_vector.coord[0]*delta;
-				tmp.coord[1] = action_point.coord[1] + dir_vector.coord[1]*delta;
-				tmp.coord[2] = action_point.coord[2] + dir_vector.coord[2]*delta;
+				tmp.coord[0] = action_point.coord[0] + dir_vector.coord[0] * delta;
+				tmp.coord[1] = action_point.coord[1] + dir_vector.coord[1] * delta;
+				tmp.coord[2] = action_point.coord[2] + dir_vector.coord[2] * delta;
 				index = model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
 				
 				if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
@@ -280,27 +277,25 @@ static void* run(void* args)
 		{
 			//tmp = points[ x*480 + y ];
 			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
-			action_point = Rotate( points[ x*480 + y ], inverse);
-			for ( int delta = 0; delta < PAD_DEPTH; delta++ )
+			action_point = Rotate(points[x * 480 + y], inverse);
+			for (int delta = 0; delta < PAD_DEPTH; delta++)
 			{
-				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0]*delta;
-				tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1]*delta;
-				tmp.coord[2] = action_point.coord[2] + local_dir_vector.coord[2]*delta;
+				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0] * delta;
+				tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1] * delta;
+				tmp.coord[2] = action_point.coord[2] + local_dir_vector.coord[2] * delta;
 				/*index =*/ grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
-		
-				if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
-				{
+				
+				if ((tmp1 <= grid_dimm) && (tmp2 <= grid_dimm) && (tmp3 <= grid_dimm)) //if we are in model bounds
 					accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
-				}
 				else
 					break;
 			}
 		}
-      
-		  cpu_output[cpu] = accum;
-      
-		  pthread_barrier_wait(&(tool->barrier)); /* Signal that thread complete */
-    }
-  return NULL;
+		
+		cpu_output[cpu] = accum;
+		
+		pthread_barrier_wait(&(tool->barrier)); /* Signal that thread complete */
+	}
+	return NULL;
 }
 
