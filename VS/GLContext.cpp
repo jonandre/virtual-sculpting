@@ -151,14 +151,12 @@ void GLContext::doMessage()
 {
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
-		if (msg.message == WM_QUIT)
-			running = false;
-		else
-			if      (msg.message == WM_KEYDOWN)      inp->OnKeyPressed(MapVirtualKey(msg.wParam, MAPVK_VK_TO_CHAR));
-			else if (msg.message == WM_LBUTTONDOWN)  inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
-			else if (msg.message == WM_LBUTTONUP)    inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
-			else if (msg.message == WM_MOUSEMOVE)    inp->OnMouseMove(msg.pt.x, msg.pt.y);
-			else if (msg.message == WM_MOUSEWHEEL)   inp->OnSroll(GET_WHEEL_DELTA_WPARAM(msg.wParam));
+		if      (msg.message == WM_QUIT)         running = false;
+		else if (msg.message == WM_KEYDOWN)      inp->OnKeyPressed(MapVirtualKey(msg.wParam, MAPVK_VK_TO_CHAR));
+		else if (msg.message == WM_LBUTTONDOWN)  inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
+		else if (msg.message == WM_LBUTTONUP)    inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
+		else if (msg.message == WM_MOUSEMOVE)    inp->OnMouseMove(msg.pt.x, msg.pt.y);
+		else if (msg.message == WM_MOUSEWHEEL)   inp->OnSroll(GET_WHEEL_DELTA_WPARAM(msg.wParam));
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
