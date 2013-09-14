@@ -1,12 +1,13 @@
+#include <errno.h>
 #include "KinectTool.h"
 #include "TriangleMesh.h"
 #include "KinectReader.h"
 #include "GridModel.h"
 #include "Shader.h"
 #include "GraphicsLib.h"
-
-
 #include "main.h"
+
+
 
 #define PAD_DEPTH 50
 #define DIR_Z_STEP 1.0f
@@ -185,7 +186,6 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 	dir_vector.coord[1] = 0.0f;
 	dir_vector.coord[2] = DIR_Z_STEP;
 	dir_vector = Rotate(dir_vector, inverse);
-	unsigned int tmp_pad = 0;
 	for (unsigned int i = 0; i < 640; i++)
 		for (unsigned int j = 0; j < 480; j++)
 		{
