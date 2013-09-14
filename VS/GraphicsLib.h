@@ -3,7 +3,7 @@
 #include "GL/glew.h"
 #include "GL/wglew.h"
 
-#ifdef _M_IX86
+#if defined(_M_IX86) && defined(WIN32)
 	#pragma comment(lib, "glew32.lib")
 
 #else
