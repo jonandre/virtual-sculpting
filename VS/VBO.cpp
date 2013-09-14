@@ -88,7 +88,7 @@ void VBO::UpdateVertexArray(const Point* vrt, unsigned int len)
 	glBufferData(GL_ARRAY_BUFFER, len * sizeof(Point), vrt, GL_STATIC_DRAW);
 }
 
-const unsigned int VBO::bind(unsigned int start) const
+unsigned int VBO::bind(unsigned int start) const
 {
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);

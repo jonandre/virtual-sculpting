@@ -3,8 +3,8 @@
 #include "main.h"
 #include <pthread.h>
 #include <sched.h> /* I think phreads-w32 has a built in way for getting the processor count */
+#include "TriangleMesh.h"
 
-class TriangleMesh;
 class KinectReader;
 class GridModel;
 class VAO;

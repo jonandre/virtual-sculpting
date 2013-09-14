@@ -14,7 +14,7 @@ public:
 	void UpdateColorArray(const Color* clr, unsigned int len);
 	void UpdateIndexArray(unsigned int* indices, unsigned int len);
 	void UpdateVertexArray(const Point* vrt, unsigned int len);
-	const unsigned int bind(unsigned int start = 0) const;
+	unsigned int bind(unsigned int start = 0) const;
 private:
 	VBO();
 	unsigned int vboID[5];

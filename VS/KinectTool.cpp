@@ -1,6 +1,5 @@
 #include <errno.h>
 #include "KinectTool.h"
-#include "TriangleMesh.h"
 #include "KinectReader.h"
 #include "GridModel.h"
 #include "Shader.h"

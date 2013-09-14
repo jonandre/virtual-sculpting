@@ -3,7 +3,7 @@
 
 GLContext::GLContext()
 {
-	LPCWSTR title = L"Virtual Sculpting";
+	LPCWSTR title = (LPCWSTR)L"Virtual Sculpting";
 	
 	WNDCLASSW windowClass;
 	HWND hWnd;
