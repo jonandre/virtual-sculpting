@@ -65,5 +65,5 @@ static string textFileRead(const char* fileName)
 #define pow2(X)  ((X) * (X))
 #define pow3(X)  ((X) * (X) * (X))
 #define poly3(A, B, C, X)  ((A) * (X) * (X) + (B) * (X) + (C))
-#define poly3_shift(A, B, C, X, S)  poly3((A) << (S), (B) << (S), (C) << (S), X)
+#define poly3_shift(A, B, C, X, S)  poly3((A) >> (S), (B) >> (S), (C) >> (S), X)
 
