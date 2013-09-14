@@ -48,7 +48,7 @@ KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 	
 	cpu_count = FALLBACK_CPU_COUNT;
 
-	/* Initialise threads  */
+	/* Initialise threads */
 	threads = (pthread_t*)malloc(this->cpu_count * sizeof(pthread_t));
 	pthread_barrier_init(&(this->barrier), NULL, this->cpu_count + 1);
 
