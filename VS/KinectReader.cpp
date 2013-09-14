@@ -169,7 +169,7 @@ void KinectReader::ProcessDepth()
 			//if (t < 1000)
 			//	intensity = (rand()%delta_depth - delta_depth) * float_per_depth_unit;
 			// Write out blue byte
-			*(float_run++) = intensity;
+			*float_run++ = intensity;
 			
 			// Increment our index into the Kinect's depth buffer
 			++pBufferRun;
