@@ -152,7 +152,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <LargeAddressAware>true</LargeAddressAware>
       <AdditionalLibraryDirectories>./Libs/;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>opengl32.lib;Kinect10.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>opengl32.lib;Kinect10.lib;pthreadVC2.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

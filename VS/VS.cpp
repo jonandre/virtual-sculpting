@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 		if (acted) //sonification
 		{
 			snd.SetGain(1.0f);
-			snd.SetPitch(0.1 + glm::log2(acted * 1.0f)/1000.0f);
+			snd.SetPitch(0.1f + glm::log2(acted * 1.0f)/1000.0f);
 		}
 		else
 			snd.SetGain(0.0f);

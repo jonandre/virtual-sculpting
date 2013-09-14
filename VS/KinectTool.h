@@ -1,6 +1,8 @@
 #pragma once
 //Incapsulates all necessary objects for kinect interaction + visual representation
 #include "main.h"
+#include <pthread.h>
+#include <sched.h> /* I think phreads-w32 has a built in way for getting the processor count */
 
 class TriangleMesh;
 class KinectReader;
@@ -18,6 +20,8 @@ public:
 	TriangleMesh* GetToolMesh();
 	Shader* GetToolShader();
 	unsigned int GetPVMLocation();
+
+	pthread_barrier_t barrier;
 private:
 	KinectTool();
 	float _start_z, _end_z;
@@ -27,5 +31,10 @@ private:
 	float* _tmp_blured_image;
 	Shader* _tool_shader;
 	int pvmLocMesh;
+	
+	int cpu_count;
+	pthread_t* threads;
+
+	void parallellise(long cpu, long beginning, long stop);
 };
 
