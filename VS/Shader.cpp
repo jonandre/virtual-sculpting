@@ -27,9 +27,12 @@ static string textFileRead(const char* fileName)
 }
 
 
-Shader::Shader(): shader_fp(~0U), shader_vp(~0U), shader_id(~0U), shader_gp(~0U)
+Shader::Shader()
 {
-
+	shader_fp = ~0U;
+	shader_vp = ~0U;
+	shader_id = ~0U;
+	shader_gp = ~0U;
 }
 
 bool Shader::loadVertexShader(const char* name)
