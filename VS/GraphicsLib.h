@@ -11,5 +11,5 @@
 		#pragma comment(lib, "glew64.lib")
 	#endif
 #endif
-#endif __LIBS
+#endif
 
