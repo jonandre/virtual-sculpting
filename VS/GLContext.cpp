@@ -38,7 +38,7 @@ GLContext::GLContext()
 
 Render *GLContext::GetObjectFromHWnd(HWND hWnd)
 {
-	return reinterpret_cast<Render*>(GetWindowLongPtr(hWnd,GWLP_USERDATA));
+	return reinterpret_cast<Render*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 }
 
 LRESULT CALLBACK GLContext::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
