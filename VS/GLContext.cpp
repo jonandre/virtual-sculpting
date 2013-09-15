@@ -36,7 +36,7 @@ GLContext::GLContext()
 	UpdateWindow(this->hwnd);
 }
 
-Render *GLContext::GetObjectFromHWnd(HWND hWnd)
+Render* GLContext::GetObjectFromHWnd(HWND hWnd)
 {
 	return reinterpret_cast<Render*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 }
@@ -136,14 +136,14 @@ bool GLContext::create30Context()
 	glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]);
 	glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]);
 	
-	std::cerr << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl; // Output which version of OpenGL we are using
+	std::cerr << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
 	
 	render = new Render();
 	render->Init();
 	
 	SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<long>(render));
 	
-	return true; // We have successfully created a context, return true
+	return true;
 }
 
 
@@ -156,7 +156,7 @@ void GLContext::doMessage()
 		else if (msg.message == WM_LBUTTONDOWN)  inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
 		else if (msg.message == WM_LBUTTONUP)    inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
 		else if (msg.message == WM_MOUSEMOVE)    inp->OnMouseMove(msg.pt.x, msg.pt.y);
-		else if (msg.message == WM_MOUSEWHEEL)   inp->OnSroll(GET_WHEEL_DELTA_WPARAM(msg.wParam));
+		else if (msg.message == WM_MOUSEWHEEL)   inp->OnScroll(GET_WHEEL_DELTA_WPARAM(msg.wParam));
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}

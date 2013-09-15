@@ -119,7 +119,7 @@ void Input::OnMouseMove(int x, int y)
 	}
 }
 
-void Input::OnSroll(int dx)
+void Input::OnScroll(int dx)
 {
 	zoom_val += dx / 15.0f;
 }

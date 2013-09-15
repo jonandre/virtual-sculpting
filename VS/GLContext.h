@@ -10,7 +10,7 @@ public:
 	~GLContext();
 	void renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4 view, glm::mat4 obj);
 	void doMessage();
-	void SetInput(Input*);
+	void SetInput(Input* input);
 	bool alive();
 	
 	void setupScene();

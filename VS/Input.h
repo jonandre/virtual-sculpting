@@ -15,7 +15,7 @@ public:
 	void OnMouseMove(int dx, int dy);
 	void OnMouseLBUp(int x, int y);
 	bool IsPressed(char c);
-	void OnSroll(int dx); /* TODO  refactor:  OnS{ => c}roll */
+	void OnScroll(int dx);
 	
 	glm::mat4 GetObjectM();
 	glm::quat GetObjectQ();
