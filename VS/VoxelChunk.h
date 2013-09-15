@@ -1,14 +1,13 @@
-/*
-This class is wrapper for visual representation of some block of our voxelgrid. Idea — split whole 3D array into chunks:
-128³ is splited in blocks of 32, for example. This is important in order to reduce amount of drawcalls — 4³ is MUCH less than 128³. But beware,
-it's a tradeoff — larger block is, more expencive update is.
-*/
 #pragma once
-
 #include "main.h"
 class VAO;
 class VBO;
 
+/**
+ * This class is wrapper for visual representation of some block of our voxelgrid. Idea — split whole 3D array into chunks:
+ * 128³ is splited in blocks of 32, for example. This is important in order to reduce amount of drawcalls — 4³ is MUCH less than 128³. But beware,
+ * it's a tradeoff — larger block is, more expencive update is.
+ */
 class VoxelChunk
 {
 public:
@@ -24,7 +23,7 @@ public:
 	const Point& GetCenter();
 	bool IsDirty();
 	void MarkDirty();
-        unsigned char GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z); // In alpha chanel we have
+	unsigned char GetVoxelAlpha(unsigned int x, unsigned int y, unsigned int z); // In alpha chanel we have
 	void RecalcColor(unsigned char* voxels, unsigned int dim);
 	
 private:

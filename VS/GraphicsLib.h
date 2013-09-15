@@ -1,3 +1,4 @@
+#pragma once
 #ifndef __LIBS
 #define __LIBS
 #include <GL/glew.h>

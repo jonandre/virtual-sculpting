@@ -13,7 +13,7 @@ TriangleMesh::TriangleMesh(unsigned int xx, unsigned int yy, float start_x, floa
 	float x_step = (end_x - start_x) / (float)(xx);
 	float y_step = (end_y - start_y) / (float)(yy);
 	unsigned int numIndices = 0;
-	unsigned int xn = (_x - 1) * _y, yn = _y - 1, x, y;
+	unsigned int xn = (xx - 1) * yy, yn = yy - 1, x, y;
 	
 	_mesh = new Point[xx * yy];
 	_vao = NULL;
@@ -22,30 +22,30 @@ TriangleMesh::TriangleMesh(unsigned int xx, unsigned int yy, float start_x, floa
 	_y = yy;
 	_start_z = start_z;
 	
-	_index_cnt = (_x - 1) * (_y - 1) * 6;
-	_indexes = new unsigned int[_index_cnt];
+	_index_cnt = (xx - 1) * (yy - 1) * 6;
+	this->indices = new unsigned int[_index_cnt];
 	
-	for (x = 0; x < _x; x++)
-		for (y = 0; y < _y; y++)
+	for (x = 0; x < xx; x++)
+		for (y = 0; y < yy; y++)
 		{
 			_mesh[x * _y + y].coord[0] = start_x + x * x_step;
 			_mesh[x * _y + y].coord[1] = start_y + y * y_step;
 			_mesh[x * _y + y].coord[2] = start_z; /* - (rand() % 30) / 1.0f */;
 		}
 	
-	for (x = 0; x < xn; x += _y)
+	for (x = 0; x < xn; x += yy)
 		for (y = 0; y < yn; y++)
 		{
 			unsigned int a = x      + y;
-			unsigned int b = x + _y + y;
+			unsigned int b = x + yy + y;
 			
-			_indexes[numIndices + 0] = a + 1;
-			_indexes[numIndices + 1] = b;
-			_indexes[numIndices + 2] = a;
+			this->indices[numIndices + 0] = a + 1;
+			this->indices[numIndices + 1] = b;
+			this->indices[numIndices + 2] = a;
 			
-			_indexes[numIndices + 3] = a;
-			_indexes[numIndices + 4] = a + 1;
-			_indexes[numIndices + 5] = b + 1;
+			this->indices[numIndices + 3] = a;
+			this->indices[numIndices + 4] = a + 1;
+			this->indices[numIndices + 5] = b + 1;
 			
 			numIndices += 6;
 		}
@@ -88,7 +88,7 @@ Point* TriangleMesh::GetPoints()
 void TriangleMesh::MakeVBO()
 {
 	if (_vbo)  delete _vbo;
-	_vbo = new VBO(_mesh, 0, _indexes, _x * _y, _index_cnt);
+	_vbo = new VBO(_mesh, 0, this->indices, _x * _y, _index_cnt);
 	
 	if (_vao)  delete _vao;
 	_vao = new VAO();
@@ -104,7 +104,7 @@ VAO* TriangleMesh::GetVAO()
 TriangleMesh::~TriangleMesh()
 {
 	delete [] _mesh;
-	delete [] _indexes;
+	delete [] this->indices;
 	if (_vbo)  delete _vbo;
 	if (_vao)  delete _vao;
 }

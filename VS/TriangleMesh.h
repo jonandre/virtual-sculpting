@@ -19,7 +19,7 @@ private:
 	Point* _mesh;
 	VAO* _vao;
 	VBO* _vbo;
-	unsigned int* _indexes;
+	unsigned int* indices;
 	unsigned int _x;
 	unsigned int _y;
 	unsigned int _index_cnt;

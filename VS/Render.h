@@ -1,8 +1,10 @@
+#pragma once
 class GridModel;
+#include <time.h>
 #include "Shader.h"
+#include "KinectTool.h"
 #include "main.h"
 
-class KinectTool;
 
 class Render
 {
