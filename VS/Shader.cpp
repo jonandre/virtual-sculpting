@@ -1,188 +1,193 @@
+#include "<stdio.h>"
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "Shader.h"
 #include "main.h"
 #include "GraphicsLib.h"
 
 
-static string textFileRead(const char* fileName)
-{
-	string fileString;
-	string line;
-	
-	ifstream file(fileName,ios_base::in);
-	
-	if (file.is_open()) 
-	{
-		while (!file.eof()) 
-		{
-			getline(file, line);
-		  	fileString.append(line);
-			fileString.append("\n");
-		}
-		file.close();
-	}
-	else
-		std::cerr << "Unable to open " << fileName << std::endl;
-    
-    return fileString;
-}
+static char* read_file(const char* fileName);
 
 
+/**
+ * Constructor
+ */
 Shader::Shader()
 {
-	shader_fp = ~0U;
-	shader_vp = ~0U;
-	shader_id = ~0U;
-	shader_gp = ~0U;
+	this->shaderProgram  = ~0U;
+	this->shaderVertex   = ~0U;
+	this->shaderFragment = ~0U;
+	this->shaderGeometry = ~0U;
 }
 
-bool Shader::loadVertexShader(const char* name)
-{
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
-	
-	if (shader_vp == ~0U)
-	{
-		shader_vp = glCreateShader(GL_VERTEX_SHADER);
-		string vsText = textFileRead(name);
-		
-		if (vsText.length())
-		{
-			const char *PointText = vsText.c_str();
-			glShaderSource(shader_vp, 1, &PointText, 0);
-			glCompileShader(shader_vp);
-			
-			glGetShaderiv(shader_vp, GL_COMPILE_STATUS, &Result);
-			glGetShaderiv(shader_vp, GL_INFO_LOG_LENGTH, &InfoLogLength);
-			if (InfoLogLength > 0)
-			{
-				std::vector<char> FragmentShaderErrorMessage(InfoLogLength + 1);
-				glGetShaderInfoLog(shader_vp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-				std::cerr << FragmentShaderErrorMessage.data() << std::endl;
-			}
-			
-			return true;
-		}
-	}
-	shader_vp = ~0U;
-	return false;
-}
 
-bool Shader::loadFragmentShader(const char* name)
-{
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
-	
-	if (shader_fp == ~0U)
-	{
-		shader_fp = glCreateShader(GL_FRAGMENT_SHADER);
-		string fsText = textFileRead(name);
-		
-		
-		if (fsText.length())
-		{
-			const char* fragmentText = fsText.c_str();
-			glShaderSource(shader_fp, 1, &fragmentText, 0);
-			glCompileShader(shader_fp);
-			
-			glGetShaderiv(shader_fp, GL_COMPILE_STATUS, &Result);
-			glGetShaderiv(shader_fp, GL_INFO_LOG_LENGTH, &InfoLogLength);
-			if (InfoLogLength > 0)
-			{
-				std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
-				glGetShaderInfoLog(shader_fp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-				std::cerr << FragmentShaderErrorMessage.data() << std::endl;
-				//printf("%s\n", &FragmentShaderErrorMessage[0]);
-			}
-			
-			return true;
-		}
-	}
-	
-	shader_fp = -1;
-	return false;
-}
-
-bool Shader::loadGeometryShader(const char* name)
-{
-	GLint Result = GL_FALSE;
-	int InfoLogLength;
-	
-	if (shader_gp == ~0U)
-	{
-		shader_gp = glCreateShader(GL_GEOMETRY_SHADER);
-		string fsText = textFileRead(name);
-		
-		
-		if (fsText.length())
-		{
-			const char *fragmentText = fsText.c_str();
-			glShaderSource(shader_gp, 1, &fragmentText, 0);
-			glCompileShader(shader_gp);
-			
-			glGetShaderiv(shader_gp, GL_COMPILE_STATUS, &Result);
-			glGetShaderiv(shader_gp, GL_INFO_LOG_LENGTH, &InfoLogLength);
-			if (InfoLogLength > 0)
-			{
-				std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
-				glGetShaderInfoLog(shader_gp, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-				std::cerr << FragmentShaderErrorMessage.data() << std::endl;
-				//printf("%s\n", &FragmentShaderErrorMessage[0]);
-			}
-			
-			return true;
-		}
-	}
-	shader_gp = -1;
-	return false;
-}
-
-void Shader::link()
-{
-	shader_id = glCreateProgram();
-	
-	if (shader_vp != ~0U)  glAttachShader(shader_id, shader_vp);
-	if (shader_gp != ~0U)  glAttachShader(shader_id, shader_gp);
-	if (shader_fp != ~0U)  glAttachShader(shader_id, shader_fp);
-	
-	glLinkProgram(shader_id);
-}
-
+/**
+ * Destructor
+ */
 Shader::~Shader()
 {
-	if (shader_fp != ~0U)
-	{
-		glDetachShader(shader_id, shader_fp);
-		glDeleteShader(shader_fp);
-	}
+	#define destroy_shader(SHADER)                                                  \
+		if (this->shader##SHADER != ~0U)                                        \
+		{                                                                       \
+			glDetachShader(this->shaderProgram, this->shader##SHADER);      \
+			glDeleteShader(this->shader##SHADER);                           \
+		}
 	
-	if (shader_vp != ~0U)
-	{
-		glDetachShader(shader_id, shader_vp);
-		glDeleteShader(shader_vp);
-	}
+	destroy_shader(Fragment)
+	destroy_shader(Vertex)
+	destroy_shader(Geometry)
 	
-	if (shader_gp != ~0U)
-	{
-		glDetachShader(shader_id, shader_gp);
-		glDeleteShader(shader_gp);
-	}
+	if (shaderProgram != ~0U)
+		glDeleteProgram(shaderProgram);
 	
-	if (shader_id != ~0U)
-		glDeleteProgram(shader_id);
+	#undef destroy_shader
 }
 
-void Shader::bind()
+
+/**
+ * Load shader
+ * 
+ * @param   name    The file name of the shader to load
+ * @param   shader  Pointer to shader variable
+ * @param   type    Shader type
+ * @return          Whether a shader was loaded
+ */
+static bool load_shader(const char* name, unsigned int* shader, int type)
 {
-	glUseProgram(shader_id);
+	GLint Result = GL_FALSE;
+	int InfoLogLength;
+	
+	if (*shader == ~0U)
+	{
+		*shader = glCreateShader(type);
+		const char* text = read_file(name);
+		
+		if (*text)
+		{
+			glShaderSource(*shader, 1, &text, 0);
+			glCompileShader(*shader);
+			free(text);
+			
+			glGetShaderiv(*shader, GL_COMPILE_STATUS, &Result);
+			glGetShaderiv(*shader, GL_INFO_LOG_LENGTH, &InfoLogLength);
+			
+			if (InfoLogLength > 0)
+			{
+				std::vector<char> error_message(InfoLogLength + 1);
+				glGetShaderInfoLog(*shader, InfoLogLength, NULL, &(error_message[0]));
+				std::cerr << error_message.data() << std::endl;
+			}
+			
+			return true;
+		}
+	}
+	
+	*shader = ~0U;
+	return false;
 }
 
-void Shader::unbind()
+
+/**
+ * Load vertex shader
+ * 
+ * @param  name  The file name of the shader to load
+ */
+bool Shader::LoadVertexShader(const char* name)
+{
+	return load_shader(name, &(this->shaderVertex), GL_VERTEX_SHADER);
+}
+
+/**
+ * Load fragment shader
+ * 
+ * @param  name  The file name of the shader to load
+ */
+bool Shader::LoadFragmentShader(const char* name)
+{
+	return load_shader(name, &(this->shaderFragment), GL_FRAGMENT_SHADER);
+}
+
+/**
+ * Load geometry shader
+ * 
+ * @param  name  The file name of the shader to load
+ */
+bool Shader::LoadGeometryShader(const char* name)
+{
+	return load_shader(name, &(this->shaderGeometry), GL_GEOMETRY_SHADER);
+}
+
+
+void Shader::Link()
+{
+	this->shaderProgram = glCreateProgram();
+	
+	if (this->shaderVertex   != ~0U)  glAttachShader(this->shaderProgram, this->shaderVertex);
+	if (this->shaderGeometry != ~0U)  glAttachShader(this->shaderProgram, this->shaderGeometry);
+	if (this->shaderFragment != ~0U)  glAttachShader(this->shaderProgram, this->shaderFragment);
+	
+	glLinkProgram(this->shaderProgram);
+}
+
+void Shader::Bind()
+{
+	glUseProgram(this->shaderProgram);
+}
+
+void Shader::Unbind()
 {
 	glUseProgram(0);
 }
 
-unsigned int Shader::id()
+
+/**
+ * Read a text file
+ * 
+ * @param   filename  The file name of the file to read
+ * @return            The content of the file
+ */
+static char* read_file(const char* filename)
 {
-    return shader_id;
+	FILE* file;
+	struct stat attr;
+	char* content;
+	long ptr = 0;
+	
+	/* Get file size and optimal I/O settings */
+	if (stat(filename, &attr))
+	{
+		perror("stat");
+		abort();
+	}
+	
+	/* Open file */
+	if ((file = fopen(filename, "r")) == NULL)
+	{
+		perror("fopen");
+		abort();
+	}
+	
+	/* Read file */
+	content = (char*)malloc(attr.st_size);
+	for (;;)
+	{
+		size_t read = fread(content + ptr, 1, attr->st_blksize, file);
+		if (read != attr->st_blksize)
+		{
+			if (feof(file))
+				break;
+			else
+			{
+				perror("fread");
+				abort();
+			}
+		}
+		ptr += read;
+	}
+	
+	/* Null terminate string and return */
+	*(content + ptr) = 0;
+	return content;
 }
 

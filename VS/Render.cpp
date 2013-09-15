@@ -28,14 +28,14 @@ void Render::SetupScene()
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST);
 	shader = new Shader();
-	shader->loadFragmentShader("Shaders/shader.frag");
-	shader->loadGeometryShader("Shaders/shader.geom");
-	shader->loadVertexShader("Shaders/shader.vert");
-	shader->link();
+	shader->LoadFragmentShader("Shaders/shader.frag");
+	shader->LoadGeometryShader("Shaders/shader.geom");
+	shader->LoadVertexShader("Shaders/shader.vert");
+	shader->Link();
 	
-	pMatrixLocation = glGetUniformLocation(shader->id(), "p");
-	mMatrixLocation = glGetUniformLocation(shader->id(), "m");
-	vMatrixLocation = glGetUniformLocation(shader->id(), "v");
+	pMatrixLocation = glGetUniformLocation(shader->shaderProgram, "p");
+	mMatrixLocation = glGetUniformLocation(shader->shaderProgram, "m");
+	vMatrixLocation = glGetUniformLocation(shader->shaderProgram, "v");
 	
 	projectionMatrix = glm::perspective(120.0f, (float)windowWidth / (float)windowHeight, 0.1f, 4048.0f);
 }
@@ -64,7 +64,7 @@ void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4
 	glDisable(GL_BLEND);
 	
 	int i = 0;
-	shader->bind();
+	shader->Bind();
 	glUniformMatrix4fv(pMatrixLocation, 1, GL_FALSE, &(projectionMatrix[0][0]));
 	glUniformMatrix4fv(mMatrixLocation, 1, GL_FALSE, &(obj[0][0]));
 	glUniformMatrix4fv(vMatrixLocation, 1, GL_FALSE, &(view[0][0]));
@@ -87,7 +87,7 @@ void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4
 	}
 	
 	glBindVertexArray(0);
-	shader->unbind();
+	shader->Unbind();
 	
 	glm::mat4 pvm = projectionMatrix * view;
 	
@@ -96,7 +96,7 @@ void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4
 	glDepthMask(GL_FALSE);
 	vao_ptr = tool->GetToolMesh()->GetVAO();
 	
-	tool->GetToolShader()->bind();
+	tool->GetToolShader()->Bind();
 	glUniformMatrix4fv(tool->GetPVMLocation(), 1, GL_FALSE, &(pvm[0][0]));
 	
 	glBindVertexArray(vao_ptr->id());
@@ -107,7 +107,7 @@ void Render::Draw(GridModel* model, KinectTool* tool, glm::mat4& view, glm::mat4
 			(void*)0           // element array buffer offset
 		 );
 	glBindVertexArray(0);
-	tool->GetToolShader()->unbind();
+	tool->GetToolShader()->Unbind();
 	
 	#ifdef DEBUG_TIME
 		clock_t end = clock();
