@@ -5,7 +5,7 @@
 #pragma GCC diagnostic pop
 #ifndef WITHOUT_KINECT
 struct INuiSensor;
-//#include "NuiImageCamera.h"
+//#include <NuiImageCamera.h>
 #endif
 struct Point;
 
