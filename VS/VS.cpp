@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 		#endif
 		
 		input   ->UpdateFrame();
-		graphics->doMessage();
+		graphics->DoMessage();
 		kinect  ->DoToolUpdate();
 		
 		acted = (space_pressed ^= input->IsPressed(' '))
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 			: 0;
 		
 		model->UpdateGrid();
-		graphics->renderScene(model, kinect, input->GetViewM(), input->GetObjectM());
+		graphics->RenderScene(model, kinect, input->GetViewM(), input->GetObjectM());
 		
 		if (acted)
 			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);

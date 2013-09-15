@@ -6,141 +6,141 @@
  */
 GLContext::GLContext()
 {
-	LPCWSTR title = (LPCWSTR)L"Virtual Sculpting";
-	
+	/* Create window */
+	LPCWSTR   title     = (LPCWSTR)L"Virtual Sculpting";
+	DWORD     dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+	HINSTANCE hInstance = GetModuleHandle(NULL);
 	WNDCLASSW windowClass;
-	DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 	
-	hInstance = GetModuleHandle(NULL);
-	
-	windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	windowClass.lpfnWndProc = (WNDPROC)WndProc;
-	//windowClass.cbClsExtra = 0;  /* TODO: I think this line can be removed */
-	//windowClass.cbWndExtra = 0;  /* TODO: I think this line can be removed */
-	windowClass.hInstance = hInstance;
-	windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	//windowClass.hbrBackground = NULL;  /* TODO: I think this line can be removed */
-	//windowClass.lpszMenuName = NULL;  /* TODO: I think this line can be removed */
+	memset(&windowClass, 0, sizeof(WNDCLASSW));
+	windowClass.style         = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
+	windowClass.lpfnWndProc   = (WNDPROC)WndProc;
+	windowClass.hInstance     = hInstance;
+	windowClass.hIcon         = LoadIcon(NULL, IDI_WINLOGO);
+	windowClass.hCursor       = LoadCursor(NULL, IDC_ARROW);
 	windowClass.lpszClassName = title;
 	
-	if (!RegisterClassW(&windowClass))
+	if (RegisterClassW(&windowClass) == false)
 		return;
 	
 	this->hwnd = CreateWindowExW(dwExStyle, title, title, WS_OVERLAPPEDWINDOW,
 				     CW_USEDEFAULT, 0, 512, 512, NULL, NULL, hInstance, NULL);
 	
-	create30Context();
 	
+	/* Create 3D */
+	Create3DContext();
+	
+	/* Display window */
 	ShowWindow(this->hwnd, SW_SHOW);
 	UpdateWindow(this->hwnd);
 }
+
 
 /**
  * Destructor
  */
 GLContext::~GLContext()
 {
-	delete render;
-	wglMakeCurrent(hdc, 0);
-	wglDeleteContext(hrc);
+	delete this->render;
+	wglMakeCurrent(this->device, 0);
+	wglDeleteContext(this->rendering);
 	
-	ReleaseDC(hwnd, hdc);
+	ReleaseDC(this->hwnd, this->device);
 }
 
-Render* GLContext::GetObjectFromHWnd(HWND hWnd)
-{
-	return reinterpret_cast<Render*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
-}
 
 LRESULT CALLBACK GLContext::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-	Render* pWnd = GetObjectFromHWnd(hWnd);
+	Render* pWnd = reinterpret_cast<Render*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+	
 	switch (message)
 	{
-		case WM_SIZE: // If our window is resizing
-		{
-			pWnd->Resize(LOWORD(lParam), HIWORD(lParam)); // Send the new window size to our OGLWidget
+		case WM_SIZE:
+			pWnd->Resize(LOWORD(lParam), HIWORD(lParam));
 			break;
-		}
+			
 		case WM_DESTROY:
-		{
 			PostQuitMessage(0);
 			break;
-		}
 	}
 	
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
+ 
 
-bool GLContext::create30Context()
+/**
+ * Initialise OpenGL context
+ */
+void GLContext::Create3DContext()
 {
-	running = true;
-	render = NULL;
-	hdc = GetDC(hwnd);
+	PIXELFORMATDESCRIPTOR pixelFormatDesciptor;
+	int pixelFormat;
+	HGLRC widget;
 	
-	PIXELFORMATDESCRIPTOR pfd;
-	memset(&pfd, 0, sizeof(PIXELFORMATDESCRIPTOR));
-	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
-	pfd.dwFlags = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL; // | PFD_DRAW_TO_WINDOW;
-	pfd.iPixelType = PFD_TYPE_RGBA;
-	pfd.cColorBits = 32;
-	pfd.cDepthBits = 32;
-	pfd.iLayerType = PFD_MAIN_PLANE;
+	this->running = true;
+	this->render = NULL;
+	this->device = GetDC(this->hwnd);
 	
-	int nPixelFormat = ChoosePixelFormat(hdc, &pfd);
-	if (nPixelFormat == 0)
-		return false;
 	
-	int bResult = SetPixelFormat(hdc, nPixelFormat, &pfd);
-	if (!bResult)
-		return false;
+	/* Configure OpenGL context */
+	memset(&pixelFormatDesciptor, 0, sizeof(PIXELFORMATDESCRIPTOR));
+	pixelFormatDesciptor.nSize      = sizeof(PIXELFORMATDESCRIPTOR);
+	pixelFormatDesciptor.dwFlags    = PFD_DOUBLEBUFFER | PFD_SUPPORT_OPENGL; // | PFD_DRAW_TO_WINDOW;
+	pixelFormatDesciptor.iPixelType = PFD_TYPE_RGBA;
+	pixelFormatDesciptor.cColorBits = 32;
+	pixelFormatDesciptor.cDepthBits = 32;
+	pixelFormatDesciptor.iLayerType = PFD_MAIN_PLANE;
 	
-	HGLRC tempOGLWidget = wglCreateContext(hdc);
-	wglMakeCurrent(hdc, tempOGLWidget);
+	if ((pixelFormat = ChoosePixelFormat(this->device, &pixelFormatDesciptor)) == 0)  return;
+	if (SetPixelFormat(this->device, pixelFormat, &pixelFormatDesciptor)       == 0)  return;
 	
-	GLenum error = glewInit();
-	if (error != GLEW_OK)
-		return false;
 	
-	int attributes[] =
-	{
-		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-		WGL_CONTEXT_MINOR_VERSION_ARB, 1,
-		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
-		0
-	};
+	widget = wglCreateContext(this->device);
+	wglMakeCurrent(this->device, widget);
+	
+	if (glewInit() != GLEW_OK)
+		return;
 	
 	if (wglewIsSupported("WGL_ARB_create_context") == 1)
 	{
-		hrc = wglCreateContextAttribsARB(hdc, NULL, attributes);
+		int attributes[] = {
+			WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
+			WGL_CONTEXT_MINOR_VERSION_ARB, 1,
+			WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB,
+			0};
+		
+		this->rendering = wglCreateContextAttribsARB(this->device, NULL, attributes);
 		wglMakeCurrent(NULL, NULL);
-		wglDeleteContext(tempOGLWidget);
-		wglMakeCurrent(hdc, hrc);
+		wglDeleteContext(widget);
+		wglMakeCurrent(this->device, this->rendering);
 	}
 	else
-		hrc = tempOGLWidget;
+		this->rendering = widget;
 	
+	
+	/* Print OpenGL version  */
 	int glVersion[2] = {-1, -1};
 	glGetIntegerv(GL_MAJOR_VERSION, &(glVersion[0]));
 	glGetIntegerv(GL_MINOR_VERSION, &(glVersion[1]));
-	
 	std::cerr << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
 	
-	render = new Render();
-	render->Init();
 	
-	SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<long>(render));
+	this->render = new Render();
+	this->render->Init();
 	
-	return true;
+	SetWindowLongPtr(this->hwnd, GWLP_USERDATA, reinterpret_cast<long>(this->render));
 }
 
 
-void GLContext::doMessage()
+/**
+ * Read all input messages
+ */
+void GLContext::DoMessage()
 {
+	MSG msg;
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
-		if      (msg.message == WM_QUIT)         running = false;
+		if      (msg.message == WM_QUIT)         this->running = false;
 		else if (msg.message == WM_KEYDOWN)      input->OnKeyPressed(MapVirtualKey(msg.wParam, MAPVK_VK_TO_CHAR));
 		else if (msg.message == WM_LBUTTONDOWN)  input->OnMouseLBDown(msg.pt.x, msg.pt.y);
 		else if (msg.message == WM_LBUTTONUP)    input->OnMouseLBUp(msg.pt.x, msg.pt.y);
@@ -152,10 +152,9 @@ void GLContext::doMessage()
 }
 
 
-void GLContext::renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4 view, glm::mat4 obj)
+void GLContext::RenderScene(GridModel* model, KinectTool* tool_mesh, glm::mat4 view, glm::mat4 obj)
 {
-	render->Draw(model, _tool_mesh, view, obj);
-	
-	SwapBuffers(hdc);
+	render->Draw(model, tool_mesh, view, obj);
+	SwapBuffers(this->device);
 }
 
