@@ -168,7 +168,7 @@ bool GLContext::alive()
 	return running;
 }
 
-void GLContext::renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj)
+void GLContext::renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4 view, glm::mat4 obj)
 {
 	render->Draw(model, _tool_mesh, view, obj);
 	

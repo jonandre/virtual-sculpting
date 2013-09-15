@@ -8,7 +8,7 @@ class GLContext
 public:
 	GLContext();
 	~GLContext();
-	void renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj);
+	void renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4 view, glm::mat4 obj);
 	void doMessage();
 	void SetInput(Input*);
 	bool alive();
