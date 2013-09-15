@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	/* Initialise GUI */
 	graphics = new GLContext();
 	input    = new Input();
-	graphics->SetInput(input);
+	graphics->input = input;
 	
 	/* Initialise model */
 	model = new GridModel(8); /* power of 2 */
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 	
 	
 	/* Main loop */
-	while (graphics->alive())
+	while (graphics->running)
 	{
 		#ifdef DEBUG_TIME
 			clock_t start = clock(), end;

@@ -1,39 +1,51 @@
 #include "GLContext.h"
 
 
+/**
+ * Constructor
+ */
 GLContext::GLContext()
 {
 	LPCWSTR title = (LPCWSTR)L"Virtual Sculpting";
 	
 	WNDCLASSW windowClass;
-	HWND hWnd;
 	DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 	
 	hInstance = GetModuleHandle(NULL);
 	
 	windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	windowClass.lpfnWndProc = (WNDPROC) WndProc;
-	windowClass.cbClsExtra = 0;
-	windowClass.cbWndExtra = 0;
+	windowClass.lpfnWndProc = (WNDPROC)WndProc;
+	//windowClass.cbClsExtra = 0;  /* TODO: I think this line can be removed */
+	//windowClass.cbWndExtra = 0;  /* TODO: I think this line can be removed */
 	windowClass.hInstance = hInstance;
 	windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hbrBackground = NULL;
-	windowClass.lpszMenuName = NULL;
+	//windowClass.hbrBackground = NULL;  /* TODO: I think this line can be removed */
+	//windowClass.lpszMenuName = NULL;  /* TODO: I think this line can be removed */
 	windowClass.lpszClassName = title;
 	
 	if (!RegisterClassW(&windowClass))
 		return;
 	
-	hWnd = CreateWindowExW(dwExStyle, title, title, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, 512, 512, NULL, NULL, hInstance, NULL);
+	this->hwnd = CreateWindowExW(dwExStyle, title, title, WS_OVERLAPPEDWINDOW,
+				     CW_USEDEFAULT, 0, 512, 512, NULL, NULL, hInstance, NULL);
 	
-	this->hwnd = hWnd;
-	
-	create30Context(); // Create a context given a HWND
+	create30Context();
 	
 	ShowWindow(this->hwnd, SW_SHOW);
 	UpdateWindow(this->hwnd);
+}
+
+/**
+ * Destructor
+ */
+GLContext::~GLContext()
+{
+	delete render;
+	wglMakeCurrent(hdc, 0);
+	wglDeleteContext(hrc);
+	
+	ReleaseDC(hwnd, hdc);
 }
 
 Render* GLContext::GetObjectFromHWnd(HWND hWnd)
@@ -59,20 +71,6 @@ LRESULT CALLBACK GLContext::WndProc(HWND hWnd, UINT message, WPARAM wParam, LPAR
 	}
 	
 	return DefWindowProc(hWnd, message, wParam, lParam);
-}
-
-void GLContext::SetInput(Input* input)
-{
-	inp = input;
-}
-
-GLContext::~GLContext()
-{
-	delete render;
-	wglMakeCurrent(hdc, 0);
-	wglDeleteContext(hrc);
-	
-	ReleaseDC(hwnd, hdc);
 }
 
 bool GLContext::create30Context()
@@ -124,8 +122,8 @@ bool GLContext::create30Context()
 		hrc = tempOGLWidget;
 	
 	int glVersion[2] = {-1, -1};
-	glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]);
-	glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]);
+	glGetIntegerv(GL_MAJOR_VERSION, &(glVersion[0]));
+	glGetIntegerv(GL_MINOR_VERSION, &(glVersion[1]));
 	
 	std::cerr << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl;
 	
@@ -143,21 +141,16 @@ void GLContext::doMessage()
 	while (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 	{
 		if      (msg.message == WM_QUIT)         running = false;
-		else if (msg.message == WM_KEYDOWN)      inp->OnKeyPressed(MapVirtualKey(msg.wParam, MAPVK_VK_TO_CHAR));
-		else if (msg.message == WM_LBUTTONDOWN)  inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
-		else if (msg.message == WM_LBUTTONUP)    inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
-		else if (msg.message == WM_MOUSEMOVE)    inp->OnMouseMove(msg.pt.x, msg.pt.y);
-		else if (msg.message == WM_MOUSEWHEEL)   inp->OnScroll(GET_WHEEL_DELTA_WPARAM(msg.wParam));
+		else if (msg.message == WM_KEYDOWN)      input->OnKeyPressed(MapVirtualKey(msg.wParam, MAPVK_VK_TO_CHAR));
+		else if (msg.message == WM_LBUTTONDOWN)  input->OnMouseLBDown(msg.pt.x, msg.pt.y);
+		else if (msg.message == WM_LBUTTONUP)    input->OnMouseLBUp(msg.pt.x, msg.pt.y);
+		else if (msg.message == WM_MOUSEMOVE)    input->OnMouseMove(msg.pt.x, msg.pt.y);
+		else if (msg.message == WM_MOUSEWHEEL)   input->OnScroll(GET_WHEEL_DELTA_WPARAM(msg.wParam));
 		TranslateMessage(&msg);
 		DispatchMessage(&msg);
 	}
 }
 
-
-bool GLContext::alive()
-{
-	return running;
-}
 
 void GLContext::renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4 view, glm::mat4 obj)
 {

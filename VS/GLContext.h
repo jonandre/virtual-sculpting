@@ -6,12 +6,21 @@
 class GLContext
 {
 public:
+	/**
+	 * Constructor
+	 */
 	GLContext();
+	
+	/**
+	 * Destructor
+	 */
 	~GLContext();
+	
 	void renderScene(GridModel* model, KinectTool* _tool_mesh, glm::mat4 view, glm::mat4 obj);
 	void doMessage();
-	void SetInput(Input* input);
-	bool alive();
+	
+	Input* input;
+	bool running;
 	
 	void setupScene();
 	
@@ -24,7 +33,6 @@ private:
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 	static Render* GetObjectFromHWnd(HWND hWnd);
 	Render* render;
-	Input* inp;
 	
 protected:
 	HINSTANCE hInstance;
@@ -32,6 +40,5 @@ protected:
 	HDC hdc; // Device context
 	HWND hwnd; // Window identifier
 	MSG msg;
-	bool running;
 };
 
