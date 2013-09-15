@@ -283,7 +283,7 @@ void GridModel::EnsureMarked(int i, int j, int k)
 	int limit = dimm - internal_chunk_size;
 	
 	#define on_clean()						\
-		if (ptr->IsDirty() == false)		\
+		if (ptr->IsDirty() == false)			\
 		{									\
 			ptr->MarkDirty();				\
 			_dirty_chunks.push_back(ptr);	\
