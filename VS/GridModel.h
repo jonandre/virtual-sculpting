@@ -1,12 +1,11 @@
 #pragma once
 #include <vector>
 #include <map>
-#include "Model.h"
 #include "main.h"
 class VoxelChunk;
 class VAO;
 
-class GridModel: public Model
+class GridModel
 {
 public:
 	GridModel();

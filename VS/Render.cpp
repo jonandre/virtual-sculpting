@@ -2,7 +2,6 @@
 #include "GraphicsLib.h"
 #include "GridModel.h"
 #include "VAO.h"
-#include "TriangleMesh.h"
 
 
 Render::Render(): shader(NULL)
