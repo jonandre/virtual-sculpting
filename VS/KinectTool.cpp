@@ -18,14 +18,15 @@ static void* run(void* beginning_stop_cpu);
 
 
 /**
- * 
+ * Default constructor
  */
 KinectTool::KinectTool()
 {
+	/* do nothing  */
 }
 
 /**
- * 
+ * Constructor
  */
 KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 {
@@ -63,6 +64,20 @@ KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 	}
 }
 
+/** 
+ * Destructor
+ */
+KinectTool::~KinectTool()
+{
+	delete _msh;
+	delete _reader;
+	delete [] _tmp_blured_image;
+	delete _tool_shader;
+	
+	pthread_barrier_destroy(&(this->barrier));
+	free(threads);
+}
+
 /**
  * 
  */
@@ -79,7 +94,7 @@ unsigned int KinectTool::GetPVMLocation()
 	return pvmLocMesh;
 }
 
-/** 
+/**
  * 
  */
 inline void Blur(float* in_out, float* tmp)
@@ -214,20 +229,6 @@ int KinectTool::InteractModel(GridModel* model, glm::quat quat)
 TriangleMesh* KinectTool::GetToolMesh()
 {
 	return _msh;
-}
-
-/** 
- * 
- */
-KinectTool::~KinectTool()
-{
-	delete _msh;
-	delete _reader;
-	delete [] _tmp_blured_image;
-	delete _tool_shader;
-	
-	pthread_barrier_destroy(&(this->barrier));
-	free(threads);
 }
 
 
