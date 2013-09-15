@@ -4,7 +4,7 @@
 
 
 #define FRAMES     (AUDIO_DURATION * AUDIO_SAMPLE_RATE / 1000)
-#define MAX_VALUE  ((1 << (sizeof(short) * 8 - 1)) - 1)
+#define MAX_VALUE  ((1 << (sizeof(short) * 8 - 2)) - 1)
 
 static short audioData[FRAMES];
 static ALCdevice* audioDevice;

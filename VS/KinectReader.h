@@ -1,7 +1,7 @@
 #pragma once
 #include <windows.h>
 struct INuiSensor;
-//#include "NuiImageCamera.h"
+//#include <NuiImageCamera.h>
 struct Point;
 
 

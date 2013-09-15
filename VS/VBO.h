@@ -1,3 +1,4 @@
+#pragma once
 struct Point;
 struct Color;
 struct Normal;

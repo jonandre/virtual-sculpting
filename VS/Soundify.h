@@ -1,6 +1,6 @@
 #pragma once
-#include "AL/al.h"
-#include "AL/alc.h"
+#include <AL/al.h>
+#include <AL/alc.h>
 #pragma comment(lib, "libOpenAL32.dll.a")
 
 
