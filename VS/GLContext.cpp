@@ -66,15 +66,6 @@ void GLContext::SetInput(Input* input)
 	inp = input;
 }
 
-GLContext::GLContext(HWND hwnd)
-{
-	this->hwnd = hwnd;
-	create30Context(); // Create a context given a HWND
-	
-	ShowWindow(this->hwnd, SW_SHOW);
-	UpdateWindow(this->hwnd);
-}
-
 GLContext::~GLContext()
 {
 	delete render;

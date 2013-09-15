@@ -20,7 +20,6 @@ public:
 	
 private:
 	bool create30Context();
-	GLContext(HWND hwnd);
 	
 	static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 	static Render* GetObjectFromHWnd(HWND hWnd);
