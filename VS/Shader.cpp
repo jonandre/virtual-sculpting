@@ -3,6 +3,9 @@
 #include "GraphicsLib.h"
 
 
+/**
+ * 
+ */
 static string textFileRead(const char* fileName)
 {
 	string fileString;
@@ -27,6 +30,9 @@ static string textFileRead(const char* fileName)
 }
 
 
+/**
+ * 
+ */
 Shader::Shader()
 {
 	shader_fp = ~0U;
@@ -35,6 +41,9 @@ Shader::Shader()
 	shader_gp = ~0U;
 }
 
+/**
+ * 
+ */
 bool Shader::loadVertexShader(const char* name)
 {
 	GLint Result = GL_FALSE;
@@ -67,6 +76,9 @@ bool Shader::loadVertexShader(const char* name)
 	return false;
 }
 
+/**
+ * 
+ */
 bool Shader::loadFragmentShader(const char* name)
 {
 	GLint Result = GL_FALSE;
@@ -102,6 +114,9 @@ bool Shader::loadFragmentShader(const char* name)
 	return false;
 }
 
+/**
+ * 
+ */
 bool Shader::loadGeometryShader(const char* name)
 {
 	GLint Result = GL_FALSE;
@@ -136,6 +151,9 @@ bool Shader::loadGeometryShader(const char* name)
 	return false;
 }
 
+/**
+ * 
+ */
 void Shader::link()
 {
 	shader_id = glCreateProgram();
@@ -147,6 +165,9 @@ void Shader::link()
 	glLinkProgram(shader_id);
 }
 
+/**
+ * 
+ */
 Shader::~Shader()
 {
 	if (shader_fp != ~0U)
@@ -171,16 +192,25 @@ Shader::~Shader()
 		glDeleteProgram(shader_id);
 }
 
+/**
+ * 
+ */
 void Shader::bind()
 {
 	glUseProgram(shader_id);
 }
 
+/**
+ * 
+ */
 void Shader::unbind()
 {
 	glUseProgram(0);
 }
 
+/**
+ * 
+ */
 unsigned int Shader::id()
 {
     return shader_id;

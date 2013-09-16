@@ -79,7 +79,7 @@ KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 }
 
 /**
- * Returns the used toolShader
+ * 
  */
 Shader* KinectTool::GetToolShader()
 {
@@ -260,6 +260,9 @@ void KinectTool::parallellise(long cpu, long beginning, long stop)
 }
 
 
+/**
+ * 
+ */
 static void* run(void* args)
 {
 	KinectTool* tool = (KinectTool*)(((long*)args)[1]);
