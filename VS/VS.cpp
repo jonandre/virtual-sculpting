@@ -39,7 +39,6 @@ int main(int argc, char** argv)
 	(void) argc;
 	(void) argv;
 	
-	
 	/* Initialise GUI */
 	graphics = new GLContext();
 	input    = new Input();
@@ -67,21 +66,31 @@ int main(int argc, char** argv)
 			clock_t start = clock(), end;
 		#endif
 		
-		input   ->UpdateFrame();
-		graphics->DoMessage();
-		kinect  ->DoToolUpdate();
+		/* Rotates the mesh */
+		input   ->UpdateFrame();		
+		/* Reades al input changes */
+		graphics->DoMessage();		
+		/* Uppdates the kinect data */
+		kinect  ->DoToolUpdate();	
 		
+		/* Runs the intersection between the voxel model and the kinect mesh */
 		acted = (space_pressed ^= input->IsPressed(' '))
 			? kinect->InteractModel(model, input->GetObjectQ())
 			: 0;
 		
+		/* Updates the voxel model */
 		model->UpdateGrid();
+
+		/* Show the graphics */
 		graphics->RenderScene(model, kinect, input->GetViewM(), input->GetObjectM());
 		
+		/* Audio */
 		if (acted)
 			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
 		audio_set_gain(acted ? 1.0f : 0.0f);
 		
+
+
 		#ifdef DEBUG_TIME
 			end = clock();
 			std::cerr << "Frame time = " << diffclock(end, start) << " ms,  "

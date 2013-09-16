@@ -182,7 +182,6 @@
     <ClInclude Include="KinectReader.h" />
     <ClInclude Include="KinectTool.h" />
     <ClInclude Include="main.h" />
-    <ClInclude Include="Mesh.h" />
     <ClInclude Include="Render.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Soundify.h" />

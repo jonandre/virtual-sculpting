@@ -235,7 +235,9 @@ inline unsigned int GridModel::GetCellIndex(const Point& pos, unsigned int& x, u
 	return poly3(x, y, z, dimm);
 }
 
-
+/**
+ *
+ */
 void GridModel::UpdateGrid()
 {
 	unsigned int i, j;
@@ -247,7 +249,7 @@ void GridModel::UpdateGrid()
 	{
 		not_dirty = true;
 		for (j = 0; j < _dirty_chunks.size(); j++)
-			if ( _dirty_chunks[j] == _modified_chunks[i])
+			if (_dirty_chunks[j] == _modified_chunks[i])
 			{
 				not_dirty = false;
 				break;

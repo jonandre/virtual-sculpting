@@ -6,16 +6,20 @@
 #include "GraphicsLib.h"
 #include "main.h"
 
-
-
+/* How thick the removing is*/
 #define PAD_DEPTH 50
+
 #define DIR_Z_STEP 1.0f
 
+/* The amount of CPU:s */
 #define FALLBACK_CPU_COUNT 8
 
+/* The kinect input size */ 
+#define KINECTHEIGHT 480
+#define KINECTWIDTH 640
+
+
 static void* run(void* beginning_stop_cpu);
-
-
 
 /**
  * 
@@ -25,27 +29,39 @@ KinectTool::KinectTool()
 }
 
 /**
+ * Constructor
  * 
+ * @param  half_x	
+ * @param  half_y	
+ * @param  start_z  
+ * @param  end_z	
  */
 KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 {
-	_msh = new TriangleMesh(640, 480, -half_x, -half_y, half_x, half_y, start_z);
+	int start_d = 800;
+
+	/* Creats the triangel mesh*/
+	_msh = new TriangleMesh(KINECTWIDTH, KINECTHEIGHT, -half_x, -half_y, half_x, half_y, start_z);
 	_start_z = start_z;
 	_end_z = end_z;
-	int start_d = 800;
 	
 	_reader = new KinectReader(start_d, start_d + (int)(_start_z - _end_z) * 2, _start_z - _end_z);
+
+	/*  */
+	_tmp_blured_image = new float[KINECTWIDTH * KINECTHEIGHT];
+	memset(_tmp_blured_image, 0, KINECTWIDTH * KINECTHEIGHT * sizeof(float));
 	
-	_tmp_blured_image = new float[640 * 480];
-	memset(_tmp_blured_image, 0, 640 * 480 * sizeof(float));
-	
+	/* Initilises the shaders */
 	_tool_shader = new Shader();
 	_tool_shader->loadFragmentShader("Shaders/mesh.frag");
 	_tool_shader->loadGeometryShader("Shaders/mesh.geom");
 	_tool_shader->loadVertexShader("Shaders/mesh.vert");
 	_tool_shader->link();
+
+	/* http://www.opengl.org/sdk/docs/man/xhtml/glGetUniformLocation.xml */
 	pvmLocMesh = glGetUniformLocation(_tool_shader->id(), "pvm");
 	
+	/* Setts the how many cpu's */
 	cpu_count = FALLBACK_CPU_COUNT;
 
 	/* Initialise threads */
@@ -56,21 +72,19 @@ KinectTool::KinectTool(float half_x, float half_y, float start_z, float end_z)
 	long beginning = 0, stop, i;
 	for (i = 1; i <= cpu_count; i++)
 	{
-		stop = i * 480 / cpu_count;
+		stop = i * KINECTHEIGHT / cpu_count;
 		parallellise(i - 1, beginning, stop);
 		beginning = stop;
-		//sched_setscheduler(0, SCHED_FIFO);
 	}
 }
 
 /**
- * 
+ * Returns the used toolShader
  */
 Shader* KinectTool::GetToolShader()
 {
 	return _tool_shader;
 }
-
 /**
  * 
  */
