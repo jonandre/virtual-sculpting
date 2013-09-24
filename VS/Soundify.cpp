@@ -5,10 +5,13 @@
 
 #define FRAMES     (AUDIO_DURATION * AUDIO_SAMPLE_RATE / 1000)
 #define MAX_VALUE  ((1 << (sizeof(short) * 8 - 2)) - 1)
+#define CHANNELS   6
+#define FORMAT     "AL_FORMAT_51CHN16"
 
-static short audioData[FRAMES];
+static short audioData[FRAMES * CHANNELS];
 static ALCdevice* audioDevice;
 static ALCcontext* audioContext;
+static int channels = (1 << 0);
 
 static ALuint audioBuffer;
 static ALuint audioSource;
@@ -42,11 +45,12 @@ inline void check_al_error()
 void initialise_audio()
 {
 	/* Generate wave to play */
-	for (int i = 0; i < FRAMES; i++) /* TODO add overtones for a cleaner sound */
+	for (int i = 0; i < FRAMES * CHANNELS; i++) /* TODO add overtones for a cleaner sound */
 	{
 		audioData[i] = 0;
-		for (int j = 1; j <= 4; j++)
-			audioData[i] = (short)(MAX_VALUE / 2 * sin(((i << j) * glm::pi<double>() * AUDIO_FREQUENCY) / AUDIO_SAMPLE_RATE * i) * pow(0.4f, j - 1));
+		if ((1 << (i % CHANNELS)) & channels)
+			for (int j = 1; j <= 4; j++)
+				audioData[i] = (short)(MAX_VALUE / 2 * sin(((i << j) * glm::pi<double>() * AUDIO_FREQUENCY) / AUDIO_SAMPLE_RATE * i) * pow(0.4f, j - 1));
 	}
 	
 	/* Open default audio playback device */
@@ -61,7 +65,8 @@ void initialise_audio()
 	alGenSources(1, &audioSource);                       check_al_error();
 	
 	/* Configure audio playback */
-	alBufferData(audioBuffer, AL_FORMAT_MONO16, audioData, FRAMES, AUDIO_SAMPLE_RATE);
+	ALenum eBufferFormat = alGetEnumValue(FORMAT);
+	alBufferData(audioBuffer, eBufferFormat, audioData, FRAMES, AUDIO_SAMPLE_RATE);
 	check_al_error();
 	alSourcei(audioSource, AL_BUFFER,  audioBuffer);
 	alSourcef(audioSource, AL_PITCH,   1.0f);
