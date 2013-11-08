@@ -1,9 +1,4 @@
-#pragma once
 class VBO;
-
-/**
- * Vertex array object
- */
 class VAO
 {
 public:
@@ -11,11 +6,10 @@ public:
 	~VAO();
 	unsigned int id();
 	unsigned int size();
-	void bind(const VBO& vbo);
+	void bind ( const VBO& );
 	
 private:
 	unsigned int vaoID[1];
 	unsigned int sz;
 	unsigned int counter;
 };
-

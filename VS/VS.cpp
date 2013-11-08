@@ -1,110 +1,168 @@
-#include <time.h>
 #include "GridModel.h"
 #include "GLContext.h"
+#include <time.h>
 #include "KinectTool.h"
 #include "TriangleMesh.h"
 #include "Soundify.h"
 
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <Winsock.h>
+#include <Windows.h>
+#include <iostream>
+#include <MMSystem.h>
 
-/**
- * Calculate the difference, in milliseconds, between two time points
- * 
- * @param   end    The later time point
- * @param   start  The earlier time point
- * @return         The difference in milliseconds
- */
-inline double diffclock(clock_t end, clock_t start)
+#pragma comment(lib, "ws2_32.lib")
+
+void hand_on(bool a, bool b);
+void hand_off(bool a, bool b);
+
+inline double diffclock( clock_t clock1, clock_t clock2 ) 
 {
-	return (end - start) * 1000. / CLOCKS_PER_SEC;
+	double diffticks = clock1 - clock2;
+    double diffms    = diffticks / ( CLOCKS_PER_SEC / 1000 );
+
+    return diffms;
 }
 
-
-/**
- * Main method
- * 
- * @param   argc  The number of command line arguments
- * @param   argv  Command line arguments
- * @return        Exit value, zero on success
- */
-int main(int argc, char** argv)
+int main( int argc, UINT8** argv) 
 {
-	int          acted         = 0;
-	bool         space_pressed = false;
-	GLContext*   graphics;
-	Input*       input;
-	GridModel*   model;
-	unsigned int side;
-	KinectTool*  kinect;
+	GLContext* cntx = new GLContext();//Window+render.
+	Input* inp = new Input();//Input system.
+	cntx->SetInput( inp );//Context redirects mouse+keyb to Input
 	
-	(void) argc;
-	(void) argv;
-	
-	/* Initialise GUI */
-	graphics = new GLContext();
-	input    = new Input();
-	graphics->input = input;
-	
-	/* Initialise model */
-	model = new GridModel(8); /* power of 2 */
-	side  = model->GetDimm();
-	input->SetZoom(-(side * 4.0f));
-	input->SetModel(model);
-	
-	/* Initialise Kinect */
-	#define SIDE  (side * 0.75f)
-	kinect = new KinectTool(SIDE, SIDE, SIDE, -SIDE);
-	#undef SIDE
-	
-	/* Initialise audio */
-	initialise_audio();
-	
-	
-	/* Main loop */
-	while (graphics->running)
-	{
-		#ifdef DEBUG_TIME
-			clock_t start = clock(), end;
-		#endif
-		
-		/* Rotates the mesh */
-		input   ->UpdateFrame();		
-		/* Reades al input changes */
-		graphics->DoMessage();		
-		/* Uppdates the kinect data */
-		kinect  ->DoToolUpdate();	
-		
-		/* Runs the intersection between the voxel model and the kinect mesh */
-		acted = (space_pressed ^= input->IsPressed(' '))
-			? kinect->InteractModel(model, input->GetObjectQ())
-			: 0;
-		
-		/* Updates the voxel model */
-		model->UpdateGrid();
 
-		/* Show the graphics */
-		graphics->RenderScene(model, kinect, input->GetViewM(), input->GetObjectM());
+	unsigned int power = 8;
+
+	GridModel* model = new GridModel(power);//power of 2
+	unsigned int side = model->GetDimm();
+	inp->SetZoom(-(side*4.0f));
+	inp->SetModel( model );
+
+	model->UpdateGrid();// update visual representation of model
+	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*.75f, -(side*.75f));
+
+	Soundify snd;
+	snd.Play();
+
+	int acted = 0;
+
+	/* Windows socket startup */
+	WSADATA wsaData;
+	WSAStartup(0x0202, &wsaData);
+
+
+	void** speech_thread_args = (void**)malloc(2 * sizeof(void*));
+	speech_thread_args[0] = (void*)tool;
+	speech_thread_args[1] = (void*)inp;
+	pthread_t speechThread;
+	pthread_create(&speechThread, NULL, SpeechThreed, speech_thread_args);
+	
+    
+
+	while (cntx->alive())
+	{	
+		clock_t start = clock();
+		acted = 0;
+
+		inp->UpdateFrame();		//Reset frame variables.
+		cntx->doMessage();		//Win message loop
+
+
+		tool->DoToolUpdate();	//update tool state - like depthmap
 		
-		/* Audio */
+		if ( inp->IsPressed(' ') )
+		{
+			inp->space_pressed = !(inp->space_pressed);
+		}
+
+		if ( inp->space_pressed )
+			tool->StartInteractModel( model, inp->GetObjectQ());//obvious
+		
+		
+		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM());// do actual rendering.
+
+		if ( inp->space_pressed )
+			acted = tool->StopInteractModel( );//obvious
+
+		model->UpdateGrid();			// update visual representation of model
+		
+		///
+		//static int tmp = 0;
+		//tmp++;
+		//acted = (rand()%100) > 10 ? (rand()%3000) : 0;
+		//acted = tmp;
+		///
+
 		if (acted)
-			audio_set_pitch(0.1f + glm::log2(acted * 1.0f) / 1000.0f);
-		audio_set_gain(acted ? 1.0f : 0.0f);
-		
-
-
-		#ifdef DEBUG_TIME
-			end = clock();
-			std::cerr << "Frame time = " << diffclock(end, start) << " ms,  "
-				  << "Interacted: " << acted << std::endl;
-		#endif
+			hand_on(inp->useHaptics, inp->useSound);
+		else
+			hand_off(inp->useHaptics, inp->useSound);
+			
 	}
-	
-	
-	terminate_audio();
+
+	snd.SetGain(0.0f);
+
 	delete model;
-	delete input;
-	delete kinect;
-	delete graphics;
-	
+	delete inp;
+	delete tool;
+	delete cntx;
 	return 0;
 }
 
+int hand_is_on = 1;
+
+
+void hand_on(bool a, bool b)
+{
+	if (!hand_is_on)
+	{
+		if (a == true)
+		{
+			system("C:/Python33/python.exe gloves.py on");
+		}
+		
+		if (b == true){
+			//PlaySound(TEXT("VS-start-sound.wav"), NULL, SND_ASYNC); 
+			PlaySound(TEXT("VS-midle-sound.wav"), NULL, SND_LOOP | SND_ASYNC);
+		}
+		/*
+		std::cerr << "Send on" << std::endl;
+		sendto(sock, hand_on_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
+		std::cerr << "Send on again" << std::endl;
+		sendto(sock, hand_on_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
+		std::cerr << "Send on done" << std::endl << std::endl;
+		*/
+		hand_is_on = 1;
+	} 
+	//else if (hand_is_on == 1)
+		
+}
+
+/**
+ * Send signal to the Arduino to turn off feedback actions
+ */
+void hand_off(bool a, bool b)
+{
+	if (hand_is_on)
+	{
+		if (a == true)
+		{
+			system("C:/Python33/python.exe gloves.py off");
+		}
+		if (b == true){
+			PlaySound(NULL, 0, 0);
+			PlaySound(TEXT("VS-end-sound.wav"), NULL, SND_ASYNC); 
+		}
+		/*
+			std::cerr << "Send off" << std::endl;
+			sendto(sock, hand_off_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
+			std::cerr << "Send off again" << std::endl;
+			sendto(sock, hand_off_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
+			std::cerr << "Send off done" << std::endl << std::endl;
+		*/
+		hand_is_on = 0;
+	}
+}

@@ -1,0 +1,31 @@
+﻿<grammar version="1.0" xml:lang="en-US" root="rootRule" tag-format="semantics/1.0-literals" xmlns="http://www.w3.org/2001/06/grammar">
+  <rule id="rootRule">
+    <one-of>
+      <item>
+        <tag>START</tag>
+        <one-of>
+          <item> begin </item>
+          <item> begin sculpting</item>
+        </one-of>
+      </item>
+      <item>
+        <tag>STOP</tag>
+        <one-of>
+          <item> stop </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>LEFT</tag>
+        <one-of>
+          <item> rotate left </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>RIGHT</tag>
+        <one-of>
+          <item> rotate right </item>
+        </one-of>
+      </item>
+    </one-of>
+  </rule>
+</grammar>

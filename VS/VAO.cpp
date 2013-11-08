@@ -1,10 +1,9 @@
 #include "VAO.h"
 #include "VBO.h"
 #include "GraphicsLib.h"
+
 #include "main.h"
-
-
-VAO::VAO()
+VAO::VAO( )
 {
 	sz = 0;
 	glGenVertexArrays(1, &vaoID[0]);
@@ -18,10 +17,10 @@ unsigned int VAO::id()
 }
 
 
-void VAO::bind(const VBO& vbo)
+void VAO::bind ( const VBO& vbo)
 {
 	sz = vbo.size();
-	glBindVertexArray(vaoID[0]);
+	glBindVertexArray(vaoID[0]);	
 	vbo.bind(counter);
 	++counter;
 	glBindVertexArray(0);
@@ -32,8 +31,7 @@ unsigned int VAO::size()
 	return sz;
 }
 
-VAO::~VAO()
-{
-	glDeleteVertexArrays(1, &vaoID[0]);
+VAO::~VAO( )
+{	
+	glDeleteVertexArrays(1, &vaoID[0]);	
 }
-

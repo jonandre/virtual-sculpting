@@ -44,4 +44,3 @@ void VoxelBlock::SetDensity(float dens)
 {
 	_density = dens;
 }
-
