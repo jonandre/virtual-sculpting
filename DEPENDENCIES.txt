@@ -1,0 +1,4 @@
+Kinect SDK and Toolkit: http://www.microsoft.com/en-us/kinectforwindows/develop/developer-downloads.aspx
+Instal in C:\Program Files\Microsoft SDKs\Kinect\v1.7\inc
+
+OpenAL: http://openal.en.softonic.com/
