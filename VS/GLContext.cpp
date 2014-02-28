@@ -7,7 +7,7 @@ GLContext::GLContext()
 
 	WNDCLASSW windowClass;
 	HWND hWnd;
-	DWORD dwExStyle = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+	DWORD dwExStyle = WS_EX_APPWINDOW ;
 
 	hInstance = GetModuleHandle(NULL);
 
@@ -30,9 +30,13 @@ GLContext::GLContext()
 	#define SCREEN_WIDTH  1920
 	#define SCREEN_HEIGHT 1080
 
-	hWnd = CreateWindowExW(dwExStyle, title, title, NULL | WS_MAXIMIZE,
-				     0, 0, 1920, 1080, NULL, NULL, hInstance, NULL);
+	//hWnd = CreateWindowExW(NULL, title, WS_OVERLAPPEDWINDOW,
+	//			     0, 0, 1920, 1080, NULL, NULL, hInstance, NULL);
+	
+	hWnd = CreateWindowExW(NULL, title, NULL, WS_EX_TOPMOST | WS_POPUP,
+				     0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, NULL, NULL, hInstance, NULL);
 
+	
 	this->hwnd = hWnd;
 
 	create30Context(); // Create a context given a HWND
@@ -146,6 +150,7 @@ bool GLContext::create30Context()
 	
 	render = new Render();
 	render->Init();
+	render->Resize( 1920, 1080 );
 
 	SetWindowLongPtr( hwnd, GWLP_USERDATA, reinterpret_cast<long>(render));
 
@@ -197,9 +202,11 @@ bool GLContext::alive()
 	return running;
 }
 
-void GLContext::renderScene( GridModel* model, KinectTool* _tool_mesh, glm::mat4& view, glm::mat4& obj )
+void GLContext::renderScene( GridModel* model, KinectTool* _tool_mesh, 
+							glm::mat4& view, glm::mat4& obj, TextureMappedFont* font1, 
+							TextureMappedFont* font2, TextureMappedFont* font3)
 {	
-	render->Draw( model, _tool_mesh, view, obj );
+	render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
 	
 	SwapBuffers(hdc);
 }

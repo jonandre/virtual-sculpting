@@ -9,10 +9,12 @@ class Input
 public:
 	Input();
 	~Input();
-	
-	bool useHaptics;
-	bool useSound;
 
+
+	void Back(void);
+
+
+	
 	void OnKeyPressed( char c );
 	void OnMouseLBDown( int x, int y );
 	void OnMouseMove( int dx, int dy );
@@ -30,8 +32,40 @@ public:
 
 	void UpdateFrame();
 
-	bool space_pressed;
 	glm::vec3 _rotation_vector_obj;
+	
+	GridModel* _model;
+
+	void newGridModel(bool);
+
+	void rotateYGridModel(int);
+	void rotateXGridModel(int);
+	void rotateZGridModel(int);
+
+	void rotateFaster();
+	void rotateSlower();
+
+	void freezGridModel();
+	void clearRotationGridModel();
+
+	void rotate90DegreesRightY();
+	void rotate90DegreesLeftY();
+
+	void rotateTopView();
+	void rotateRightView();
+	void rotateLeftView();
+	void rotateBottomView();
+	void rotateBackView();
+
+	void cameraRotationViewFront();
+	void cameraRotationViewBack();
+	void cameraRotationViewTop();
+	void cameraRotationViewBottom();
+	void cameraRotationViewLeft();
+	void cameraRotationViewRight();
+
+	void Quit();
+	
 
 private:
 	int _mouseStartX;
@@ -48,8 +82,11 @@ private:
 	glm::quat _obj_quat;
 	glm::mat4 _view_mat;
 	float zoom_val;
-	vector<char> _pressed_keys;
 
-	GridModel* _model;
+	
+	int rx;
+	int ry;
+	int rz;
+
 };
 

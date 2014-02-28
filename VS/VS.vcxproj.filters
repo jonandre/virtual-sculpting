@@ -13,6 +13,51 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{17e741f5-bf42-48a0-acba-8facb6fed7ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Vertex">
+      <UniqueIdentifier>{0f0962fd-693b-47f0-93c2-4663fad6e653}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Fragment">
+      <UniqueIdentifier>{ea6cef6a-23a3-4328-885d-212dc1f89039}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\Geometry">
+      <UniqueIdentifier>{82a25ecc-ac77-4552-b291-646b08f3f25d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shaders">
+      <UniqueIdentifier>{a67d2831-fdc7-499d-8caa-1bd6e6c8780f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Mesh">
+      <UniqueIdentifier>{3b913c72-c821-4ec0-909e-5f64216f519a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Tool">
+      <UniqueIdentifier>{021b43e4-e5f4-404e-ab30-9f3f6274d6d9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Audio">
+      <UniqueIdentifier>{999c4ea9-92cb-4246-8163-3ab69cc23889}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Text">
+      <UniqueIdentifier>{4a82b7e5-d71d-4504-adca-4d616960b084}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Rendering">
+      <UniqueIdentifier>{b8933c9f-6ee1-4fd9-aeae-95f1e6e904d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Input">
+      <UniqueIdentifier>{3168e42a-e5f9-4728-a5de-bea227f96a93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Python">
+      <UniqueIdentifier>{55bae4a1-5c99-4dc6-9347-4834208d640f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sound Files">
+      <UniqueIdentifier>{5bbebe1b-c7fd-4f4c-acc6-1831d5712359}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DLLs">
+      <UniqueIdentifier>{e40bd668-6942-4cab-8e03-d51bc905847e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Speech Librery">
+      <UniqueIdentifier>{c47d1dfd-6e9b-427b-99c3-d672b384f0a6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
@@ -69,57 +114,30 @@
     <ClCompile Include="KinectAudioStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureMappedFont.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GLSLShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="load_bmp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mat_matr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Stage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GridModel.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="main.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GraphicsLib.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VAO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VBO.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="GLContext.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Input.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VoxelBlock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="VoxelChunk.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="TriangleMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectReader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="KinectTool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Soundify.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
@@ -128,11 +146,147 @@
     <ClInclude Include="resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="GLSLShader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectTool.h">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Header Files\Shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelBlock.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelChunk.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
     <ClInclude Include="KinectAudioStream.h">
-      <Filter>Header Files</Filter>
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="load_bmp.h">
+      <Filter>Header Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="TriangleMesh.h">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>Header Files\Text</Filter>
+    </ClInclude>
+    <ClInclude Include="Render.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="GLContext.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureMappedFont.h">
+      <Filter>Header Files\Text</Filter>
     </ClInclude>
     <ClInclude Include="SpeechController.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="Soundify.h">
+      <Filter>Header Files\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="KinectReader.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Header Files\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="GridModel.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="GraphicsLib.h">
+      <Filter>Header Files\Rendering</Filter>
+    </ClInclude>
+    <ClInclude Include="VAO.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="VBO.h">
+      <Filter>Header Files\Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="mat_matr.h">
+      <Filter>Header Files\Tool</Filter>
+    </ClInclude>
+    <ClInclude Include="Stage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Lines.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\x64\Release\font.vert">
+      <Filter>Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\x64\Release\Shaders\mesh.vert">
+      <Filter>Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\x64\Release\Shaders\shader.vert">
+      <Filter>Shaders\Vertex</Filter>
+    </None>
+    <None Include="..\x64\Release\font.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\x64\Release\Shaders\mesh.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\x64\Release\Shaders\shader.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\x64\Release\Shaders\mesh.geom">
+      <Filter>Shaders\Geometry</Filter>
+    </None>
+    <None Include="..\x64\Release\Shaders\shader.geom">
+      <Filter>Shaders\Geometry</Filter>
+    </None>
+    <None Include="..\x64\Release\gloves.py">
+      <Filter>Python</Filter>
+    </None>
+    <None Include="..\x64\Release\random.py">
+      <Filter>Python</Filter>
+    </None>
+    <None Include="..\x64\Release\sound.py">
+      <Filter>Python</Filter>
+    </None>
+    <None Include="..\x64\Release\freeglut.dll">
+      <Filter>DLLs</Filter>
+    </None>
+    <None Include="..\x64\Release\glew32.dll">
+      <Filter>DLLs</Filter>
+    </None>
+    <None Include="..\x64\Release\pthreadGC2.dll">
+      <Filter>DLLs</Filter>
+    </None>
+    <None Include="..\x64\Release\soft_oal.dll">
+      <Filter>DLLs</Filter>
+    </None>
+    <None Include="..\x64\Release\SpeechCommands.grxml">
+      <Filter>Speech Librery</Filter>
+    </None>
+    <None Include="..\x64\Release\lines.frag">
+      <Filter>Shaders\Fragment</Filter>
+    </None>
+    <None Include="..\x64\Release\lines.vert">
+      <Filter>Shaders\Vertex</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="..\x64\Release\VS-end-sound.wav">
+      <Filter>Sound Files</Filter>
+    </Media>
+    <Media Include="..\x64\Release\VS-midle-sound.wav">
+      <Filter>Sound Files</Filter>
+    </Media>
+    <Media Include="..\x64\Release\VS-start-sound.wav">
+      <Filter>Sound Files</Filter>
+    </Media>
   </ItemGroup>
 </Project>

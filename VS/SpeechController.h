@@ -1,33 +1,80 @@
 #pragma once
 #include <stdio.h>
 #include "Input.h"
-/* Speech start */
+
 /// <summary>
 /// Represents possible actions for Speech, such as moving stoping,
 /// rotating to the left, etc.
 /// </summary>
 enum SpeechAction
 {
-    SpeechActionStart,
-    SpeechActionStop,
-    SpeechActionRotateRight,
-    SpeechActionRotateLeft,
+	////// Stage 1 //////
+	SpeechActionModel,
+	SpeechActionCamera,
+	SpeechActionSound,
+	SpeechActionHaptics,
+
+	////// Stage 2 //////
+	SpeechActionReinitiate, 
+	SpeechActionSpin,
+	SpeechActionRotate,
+	
+	////// Stage 3 || 4 || 5 //////
+    SpeechActionRight,
+    SpeechActionLeft,
+
+	////// Stage 3 //////
+    SpeechActionUp,
+    SpeechActionDown,
+	SpeechActionClockwise,
+	SpeechActionCounterClockwise,
+	SpeechActionFreezRotation,
+	SpeechActionFaster,
+	SpeechActionSlower,
+	
+	////// Stage 3 || 4 //////
+	SpeechActionClearRotation,
+
+	////// Stage 4 || 5 //////
+	SpeechActionFront,
+	SpeechActionTop,
+	SpeechActionBottom,
+	SpeechActionRear,
+
+	////// Stage 6 || 7 //////
+	SpeechActionON,
+	SpeechActionOFF,
+
+
+	////// Stage 2 || 3 || 4 || 5 || 6 || 7 //////
+	SpeechActionBack, 
+
+	////// AL stages //////
+    SpeechActionBegin,
+    SpeechActionEnd,
+	SpeechActionQuit,
+
+	/* Not used right now 
+	SpeechActionRotate90Right,
+	SpeechActionRotate90Left,
+	*/
     SpeechActionNone
 };
-/* Speech end */
 
 class SpeechController
 {
-public:
-	SpeechController(Input* input);
-	~SpeechController(void);
-	/* Speech start */
+	public:
+		
+		void RemoveSound2(void);
+		void RemoveHaptics2(void);
 
-	/// <summary>
-    /// Makes the program performs the specified action.
-    /// </summary>
-	/* Speech end */
-    void DoAction(SpeechAction action);
-	Input* input;
+		SpeechController(Input* input);
+		~SpeechController(void);
+
+		/// <summary>
+		/// Makes the program performs the specified action.
+		/// </summary>
+		void DoAction(SpeechAction action);
+		Input* input;
 };
 

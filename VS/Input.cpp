@@ -1,92 +1,222 @@
 #include "Input.h"
 #include "GridModel.h"
+#include "Stage.h"
+
+
+static const float DEGREES_PER_SECOND_PER_SECOND = glm::pi<float>() * 30.f / 1000.f / 180.f;
+#define DEGREES_PER_SECOND DEGREES_PER_SECOND_PER_SECOND
+
+static glm::vec3 rotation = glm::vec3(1.f, 0.f, 0.f);
+static float rotation_speed = 0.f;
+static bool rotation_freeze = false;
+
+float fps_procentage = 1.f;
+bool fps_regulation = true;
+
+glm::mat4 transformation = glm::mat4(1.f);
+
 
 Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 {
 	_angleXS = 0;
 	_angleYS = 0;
-	//_obj_mat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f));
 	_obj_quat = glm::quat( glm::vec3(0.0));
 	_view_mat = glm::mat4(1.0f);
 	_model = NULL;
 	_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
-	space_pressed = false;
+	this->rx = 0;
+	this->ry = 0;
+	this->rz = 0;
 }
-
 
 Input::~Input(void)
 {
 } 
 
-void Input::OnKeyPressed( char c )
+void Input::Back(void)
 {
-	float rad_map = glm::pi<float>()/180.0;
-	if ( c == 'R' )
-	{
-		_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
-		_obj_quat = glm::quat();
-	}
-	else if (c == 'F')
-	{
-		_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
-	}
-	else if (c == 'I')
-		_model->ReInitModel( false );
-	else if (c == 'C')
-		_model->ReInitModel( true );
-	else if (c == 'D')
-		_rotation_vector_obj.y += 0.2f*rad_map;
-	else if (c == 'A')
-		_rotation_vector_obj.y -= 0.2f*rad_map;
-	else if (c == 'W')
-		_rotation_vector_obj.x += 0.2f*rad_map;
-	else if (c == 'S')
-		_rotation_vector_obj.x -= 0.2f*rad_map;
-	else if (c == 'Q')
-		_rotation_vector_obj.z += 0.2f*rad_map;
-	else if (c == 'E')
-		_rotation_vector_obj.z -= 0.2f*rad_map;
-
-	else if (c == 'K')
-		if (useHaptics == true)
-			useHaptics = false;
-		else
-			useHaptics = true;
-	else if (c == 'L')
-		if (useSound == true)
-			useSound = false;
-		else
-			useSound = true;
-
-	else if (c == '4')
-	{
-		_view_mat = glm::rotate( glm::mat4(1.0), -90.0f, glm::vec3(0.0, 1.0, 0.0) );
-	}
-	else if (c == '6')
-		_view_mat = glm::rotate( glm::mat4(1.0), 90.0f, glm::vec3(0.0, 1.0, 0.0) );
-	else if (c == '2')
-		_view_mat = glm::rotate( glm::mat4(1.0), -90.0f, glm::vec3( 1.0, 0.0, 0.0) );
-	else if (c == '8')
-		_view_mat = glm::rotate( glm::mat4(1.0), 90.0f, glm::vec3(1.0, 0.0, 0.0) );
-	else if (c == '5')
-		_view_mat = glm::mat4(1.0);
-	else
-		_pressed_keys.push_back(c);
+	actedIndex[0] = 0;
+	SetBackStage(true);
 	
 }
-
-
-bool Input::IsPressed( char c )
+void Input::newGridModel(bool b)
 {
-	for (int i = 0; i < _pressed_keys.size(); i++)
-	{
-		if ( _pressed_keys[i] == c )
-			return true;
-	}
-
-	return false;
+	_model->ReInitModel( b );
 }
 
+
+
+void Input::freezGridModel()
+{
+	rotation_freeze = true;
+}
+void Input::clearRotationGridModel()
+{
+	_obj_quat = glm::quat(glm::mat4(1.f));
+}
+
+void Input::rotateYGridModel(int directionRight)
+{
+	ry = directionRight;
+}
+void Input::rotateXGridModel(int directionUp)
+{
+	rx = directionUp;
+}
+void Input::rotateZGridModel(int directionClockwise)
+{
+	rz = directionClockwise;
+}
+void Input::rotateFaster(void)
+{
+	rotation_speed *= 2.0f;
+}
+void Input::rotateSlower(void)
+{
+	rotation_speed /= 2.0f;
+}
+
+void Input::rotateTopView()
+{
+	_obj_quat = glm::quat();
+
+	_rotation_vector_obj = glm::vec3(glm::pi<float>()/2,0.0,0.0);
+	_obj_quat = glm::normalize(_obj_quat * glm::quat(_rotation_vector_obj));
+	_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
+	freezGridModel();
+}
+void Input::rotateRightView()
+{
+	_obj_quat = glm::quat();
+
+	_rotation_vector_obj = glm::vec3(0.0,glm::pi<float>()/2,0.0);
+	_obj_quat = glm::normalize(_obj_quat * glm::quat(_rotation_vector_obj));
+	freezGridModel();
+}
+void Input::rotateLeftView()
+{
+	_obj_quat = glm::quat();
+
+	_rotation_vector_obj = glm::vec3(0.0,-glm::pi<float>()/2,0.0);
+	_obj_quat = glm::normalize(_obj_quat * glm::quat(_rotation_vector_obj));
+	freezGridModel();
+}
+void Input::rotateBottomView()
+{
+	_obj_quat = glm::quat();
+	
+	_rotation_vector_obj = glm::vec3(-glm::pi<float>()/2,0.0,0.0);
+	_obj_quat = glm::normalize(_obj_quat * glm::quat(_rotation_vector_obj));
+	freezGridModel();
+}
+void Input::rotateBackView()
+{
+	_obj_quat = glm::quat();
+
+	_rotation_vector_obj = glm::vec3(0.0,glm::pi<float>(),0.0);
+	_obj_quat = glm::normalize(_obj_quat * glm::quat(_rotation_vector_obj));
+	freezGridModel();
+}
+
+void Input::cameraRotationViewFront()
+{
+	_view_mat = glm::mat4(1.0);
+}
+void Input::cameraRotationViewBack()
+{
+	_view_mat = glm::rotate( glm::mat4(1.0), 180.0f, glm::vec3(0.0, 1.0, 0.0) );
+}
+void Input::cameraRotationViewTop()
+{
+	_view_mat = glm::rotate( glm::mat4(1.0), 90.0f, glm::vec3(1.0, 0.0, 0.0) );
+}
+void Input::cameraRotationViewBottom()
+{
+	_view_mat = glm::rotate( glm::mat4(1.0), -90.0f, glm::vec3( 1.0, 0.0, 0.0) );
+}
+void Input::cameraRotationViewLeft()
+{
+	_view_mat = glm::rotate( glm::mat4(1.0), 90.0f, glm::vec3(0.0, 1.0, 0.0) );
+}
+void Input::cameraRotationViewRight()
+{
+	_view_mat = glm::rotate( glm::mat4(1.0), -90.0f, glm::vec3(0.0, 1.0, 0.0) );
+}
+
+/** Quit program **/
+void Input::Quit()
+{
+	RemoveSound();
+
+	if (hapticsConnected)
+		RemoveHaptics();
+	_exit(0);
+}
+
+
+
+void Input::OnKeyPressed( char c )
+{
+	switch (c)
+	{
+		// Clear rotation...
+		case 'R':
+			clearRotationGridModel();
+		case 'F':
+			freezGridModel();	//Freeze
+			break;
+
+		case 'I':   newGridModel(false);		break;
+		case 'C':   newGridModel(true);			break;
+			
+		/// X Vertical rotation
+		case 'W':  rotateXGridModel(+1);		break;
+		case 'S':  rotateXGridModel(-1);		break;
+
+		/// Y Horizontal rotation
+		case 'D':  rotateYGridModel(+1);		break;
+		case 'A':  rotateYGridModel(-1);		break;
+
+		/// Z Clockwise rotation
+		case 'Q':  rotateZGridModel(-1);		break;
+		case 'E':  rotateZGridModel(+1);		break;
+			
+		// Rotation increase/decrease
+		case 'G':  rotateFaster();				break;
+		case 'V':  rotateSlower();				break;
+
+		/// Haptics
+		case 'H':  SetHapticsStage(true);		break;
+		case 'J':  SetHapticsStage(false);		break;
+
+		/// Haptics
+		case 'K':  SetSoundStage(true);			break;
+		case 'L':  SetSoundStage(false);		break;
+
+		/// Camera
+		case '4':  cameraRotationViewLeft();    break;
+		case '6':  cameraRotationViewRight();   break;
+		case '2':  cameraRotationViewBottom();  break;
+		case '8':  cameraRotationViewTop();		break;
+		case '5':  cameraRotationViewFront();	break;
+
+		case '\t':  viewDrawStage ^= true;		break;
+
+		/// ESC
+		case '\033':  Quit();					break;
+		case 'P': speechON ^= true;				break;
+		case 'O': hapticsConnected ^= true;			break;
+			
+		/// ON OFF sculpting
+		case ' ':
+			SetPressedStage(GetPressedStage() ^ true);
+			break;
+		case 'X':
+			fps_regulation ^= true;
+			break;
+		
+	}
+}
 void Input::OnMouseLBDown( int x, int y )
 {
 	_mouseStartX = x;
@@ -96,24 +226,123 @@ void Input::OnMouseLBDown( int x, int y )
 	_lbtn_pressed = true;
 }
 
+/** 
+ * Get projection matrix
+ */
 glm::mat4 Input::GetObjectM()
 {
+	//return transformation;
 	return glm::toMat4(_obj_quat);
 }
 
+/** 
+ * Get projection quaterion
+ */
 glm::quat Input::GetObjectQ()
 {
-	return glm::normalize(_obj_quat);
+	//return glm::normalize(_obj_quat);
+	//return glm::quat(transformation);
+	return _obj_quat;
 }
 
+glm::mat4 createRotationMatrix(glm::vec3, float);
+
+/** 
+ * Get projection quaterion
+ */
 void Input::UpdateFrame()
 {
+	float ACCELERATION = 10.0f * DEGREES_PER_SECOND_PER_SECOND;
+	
+	if (rotation_freeze)
 	{
-		_obj_quat = glm::normalize(_obj_quat * glm::quat(_rotation_vector_obj));
+		rotation_speed = 0;
+		rotation_freeze = false;
 	}
-	_pressed_keys.clear();
+	
+	if (rx != 0)
+	{
+		glm::vec3 v = this->rx * ACCELERATION * glm::vec3(1.f, 0.f, 0.f);
+		v += rotation_speed * rotation;
+		rotation_speed = glm::length(v);
+		if (rotation_speed * rotation_speed > 0.000001f)
+			rotation = glm::normalize(v);
+		else
+		{
+			rotation = glm::vec3(1, 0, 0);
+			rotation_speed = 0;
+		}
+	}
+	if (ry != 0)
+	{
+		glm::vec3 v = this->ry * ACCELERATION * glm::vec3(0.f, -1.f, 0.f);
+		v += rotation_speed * rotation;
+		rotation_speed = glm::length(v);
+		if (rotation_speed * rotation_speed > 0.000001f)
+			rotation = glm::normalize(v);
+		else
+		{
+			rotation = glm::vec3(1, 0, 0);
+			rotation_speed = 0;
+		}
+	}
+	if (rz != 0)
+	{
+		glm::vec3 v = this->rz * ACCELERATION * glm::vec3(0.f, 0.f, 1.f);
+		v += rotation_speed * rotation;
+		rotation_speed = glm::length(v);
+		if (rotation_speed * rotation_speed > 0.000001f)
+			rotation = glm::normalize(v);
+		else
+		{
+			rotation = glm::vec3(1, 0, 0);
+			rotation_speed = 0;
+		}
+	}
+	rx = ry = rz = 0;
+
+	if (rotation_speed > 360.f * DEGREES_PER_SECOND)
+		rotation_speed = 360.f * DEGREES_PER_SECOND;
+
+	if (fps_regulation)
+		transformation = createRotationMatrix(rotation, rotation_speed * fps_procentage);
+	else
+		transformation = createRotationMatrix(rotation, rotation_speed);
+
+	_obj_quat = glm::quat(transformation * glm::toMat4(_obj_quat));
 }
 
+
+inline glm::mat4 createRotationMatrix(glm::vec3 direction, float theta)
+{
+	glm::mat4 m = glm::mat4();
+
+	float x = direction[0];
+	float y = direction[1];
+	float z = direction[2];
+
+	float cos = glm::cos(theta);
+	float sin = glm::sin(theta);
+	float _cos = 1.f - cos;
+
+	m[0][0] = x * x * _cos + cos;
+	m[1][0] = x * y * _cos + z * sin;
+	m[2][0] = x * z * _cos - y * sin;
+
+	m[0][1] = y * x * _cos - z * sin;
+	m[1][1] = y * y * _cos + cos;
+	m[2][1] = y * z * _cos + x * sin;
+
+	m[0][2] = z * x * _cos + y * sin;
+	m[1][2] = z * y * _cos - x * sin;
+	m[2][2] = z * z * _cos + cos;
+	
+	m[0][3] = m[1][3] = m[2][3] = 0;
+	m[3][0] = m[3][1] = m[3][2] = 0;
+	m[3][3] = 1;
+
+	return m;
+}
 
 
 glm::mat4 Input::GetViewM()
@@ -131,10 +360,12 @@ void Input::SetZoom( float val )
 	zoom_val = val;
 }
 
+
 void Input::SetModel( GridModel* md )
 {
 	_model = md;
 }
+
 
 void Input::OnMouseMove( int x, int y )
 {
@@ -156,11 +387,13 @@ void Input::OnMouseMove( int x, int y )
 	}
 }
 
+
 void Input::OnSroll( int dx )
 {
 	float step = 8.0f*float(dx)/120;
 	zoom_val += step;
 }
+
 
 void Input::OnMouseLBUp( int x, int y )
 {

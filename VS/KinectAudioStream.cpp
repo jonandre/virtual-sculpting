@@ -443,7 +443,7 @@ DWORD WINAPI KinectAudioStream::CaptureThread()
             }
         } 
 		while (OutputBufferStruct.dwStatus & DMO_OUTPUT_DATA_BUFFERF_INCOMPLETE);
-		Sleep(10); //sleep 10ms
+		Sleep(3); //sleep 10ms
     }
 
     SetEvent(m_hDataReady);

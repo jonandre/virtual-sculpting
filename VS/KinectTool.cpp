@@ -4,38 +4,46 @@
 #include "GridModel.h"
 #include "Shader.h"
 #include "GraphicsLib.h"
-
 #include "main.h"
 
 #define PAD_DEPTH 50
 #define DIR_Z_STEP 1.0f;
-
 #define FALLBACK_CPU_COUNT 4
-
-static void* run(void* beginning_stop_cpu);
-
-
-KinectTool::KinectTool()
-{
-}
 
 KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 {
+	/* Creats a vertex grid mesh out of triengels */
 	_msh = new TriangleMesh(640, 480, -half_x, -half_y, half_x, half_y, start_z);
+	printf("Kinect grid created. \n");
+
+	/* Initilizing size values of grid.*/
 	_start_z = start_z;
 	_end_z = end_z;
 	int start_d = 800;
 
+	/* Initilizes the kinect reader. */
 	_reader = new KinectReader(start_d, start_d+int(_start_z - _end_z)*2, _start_z - _end_z );
+	printf("Kinect Reader initilized. With min_depth 800, max_depth, dist. \n");
 
+	/* Bluring grid image */ 
 	_tmp_blured_image = new float[640*480];
 	memset( _tmp_blured_image, 0, 640*480*sizeof(float) );
 
+	/* Initilizing Kinect tool shaders */
 	_tool_shader = new Shader();
+	printf("Kinect Tool Shader: Initilized... ");
 	_tool_shader->loadFragmentShader("Shaders/mesh.frag");
+	printf("Kinect Tool \"Fregament\" Shader: Initilized... ");
 	_tool_shader->loadGeometryShader("Shaders/mesh.geom");
+	printf("Kinect Tool \"Geometery\" Shader: Initilized... ");
 	_tool_shader->loadVertexShader("Shaders/mesh.vert");
+	printf("Kinect Tool \"Vertex\" Shader: Initilized... \n");
 	_tool_shader->link();
+	printf("Kinect Tool Shader: Linked... \n");
+
+	/*	Getting shader returns an integer that represents 
+		the location of a specific uniform variable within 
+		a program object.  */ 
 	pvmLocMesh = glGetUniformLocation(_tool_shader->id(), "pvm");
 
 	
@@ -47,13 +55,14 @@ KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 	for (cpu_count = 1; cpu_count <= 480; cpu_count++)
 	  if (CPU_ISSET(cpu_count, &cpu_set) == 0)
 	    break;*/
-	cpu_count = 6;
+	cpu_count = 8;
 	cpu_count = ((cpu_count <= 0) && (cpu_count <= 480)) ? cpu_count : FALLBACK_CPU_COUNT;
 	
 	/* Initialise threads  */
 	threads = (pthread_t*)malloc(this->cpu_count * sizeof(pthread_t));
 	pthread_barrier_init(&(this->barrier), NULL, this->cpu_count + 1);
-	
+	printf("Initialise threads... \n");
+
 	/* Start threads */
 	long beginning = 0, stop, i;
 	for (i = 1; i <= cpu_count; i++)
@@ -63,13 +72,19 @@ KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 		beginning = stop;
 		//sched_setscheduler(0, SCHED_FIFO);
 	}
+	printf("Start threads... \n");
 }
 
+/**
+ * Return this tool shader
+ */
 Shader* KinectTool::GetToolShader()
 {
 	return _tool_shader;
 }
-
+/**
+ * Return lokation of mersh I gess
+ */
 unsigned int KinectTool::GetPVMLocation()
 {
 	return pvmLocMesh;
@@ -112,19 +127,27 @@ HANDLE hEvents[eventCount];
 
 void KinectTool::DoToolUpdate()
 {
+	/* Creats an array of depth */
 	_reader->ProcessDepth();//both can be paralelized, but
 	//sync point here for process depth.
 	//memfence, in a way
-	float* depth_ptr = _reader->GetDepth();//Flikers
+	
+	/* Gets the depth map from the last frame */
+	float* depth_ptr = _reader->GetDepth(); //Flikers
+	
 	//Blur.	
 	//Blur( depth_ptr, _tmp_blured_image );//Makes it emen more flikering, but it should be done.
 	//memfence again
+	
+	/* Uppdates the trinegel mesh */
 	_msh->UpdateDepth( depth_ptr );
 	//memfence again
 	//or you can combine both calls into one ( basically same happens there ), BUT with blur I see no way to do it.
 	//So the best way to parralelize it - SIMD-like paralelization inside of each function.
 
-	
+	// Wait for 0ms, just quickly test if it is time to process a skeleton
+    if ( WAIT_OBJECT_0 == WaitForSingleObject(_reader->m_hNextSkeletonEvent, 0) )
+        _reader->ProcessSkeleton();
 }
 
 inline Point Rotate( const Point& v, const glm::quat& q )//looks to be fast.
@@ -135,7 +158,7 @@ inline Point Rotate( const Point& v, const glm::quat& q )//looks to be fast.
 	res.coord[1] = q.z * v.coord[0] - v.coord[2] * q.x;
 	res.coord[2] = q.x * v.coord[1] - v.coord[0] * q.y;
 	//again cross
-	static Point res1;
+	Point res1;
 	res1.coord[0] = q.y * res.coord[2] - res.coord[1] * q.z;
 	res1.coord[1] = q.z * res.coord[0] - res.coord[2] * q.x;
 	res1.coord[2] = q.x * res.coord[1] - res.coord[0] * q.y;
@@ -162,19 +185,15 @@ static Point dir_vector;
 static GridModel* grid_model;
 static int cpu_output[480];
 
-
 void KinectTool::StartInteractModel( GridModel* model, glm::quat quat )
 {
 	//for loop for each point, rotated by inverse of quat
 	points = _msh->GetPoints();
 	inverse = glm::conjugate(quat);
 	
-
 	//Can be easy paralelized. With one but - UpdateCell should be treated properly - it's nor thead safe for moment.
-
 	grid_dimm = model->GetDimm() - 1;
 
-	
 	dir_vector.coord[0] = 0.0f;
 	dir_vector.coord[1] = 0.0f;
 	dir_vector.coord[2] = DIR_Z_STEP;
@@ -182,8 +201,6 @@ void KinectTool::StartInteractModel( GridModel* model, glm::quat quat )
 	grid_model = model;
 	
 	pthread_barrier_wait(&(this->barrier)); /* Start threads */
-	
-
 }
 
 int KinectTool::StopInteractModel()
@@ -225,7 +242,7 @@ void* SpeechThreed(void* args)
 	Input* input = (Input*)(args_[1]);
 	free(args);
 
-	printf("Thread started.");
+	printf("Thread started. \n");
 
 	for(;;)
 	{
@@ -241,19 +258,6 @@ void* SpeechThreed(void* args)
 		{
 			self->_reader->ProcessSpeech(input);
 		}
-	/*
-	if (PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            // If a dialog message will be taken care of by the dialog proc
-            if ((hWndApp != NULL) && IsDialogMessageW(hWndApp, &msg))
-            {
-                continue;
-            }
-
-            TranslateMessage(&msg);
-            DispatchMessageW(&msg);
-        }
-		*/
 	/* Speech end */
 	}
 
@@ -271,9 +275,6 @@ void KinectTool::parallellise(long cpu, long beginning, long stop)
 	{
 		perror("pthread_create");
 		abort();
-	}
-	else
-	{
 	}
 }
 
@@ -315,9 +316,7 @@ static void* run(void* args)
 				/*index =*/ grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
 		
 				if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
-				{
 					accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
-				}
 				else
 					break;
 			}

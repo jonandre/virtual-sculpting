@@ -34,10 +34,10 @@ private:
 	inline bool EvaluateCell( unsigned int x, unsigned int y, unsigned int z );
 
 	UINT8* _cells;
-	bool* _interacted;
+	//bool* _interacted;
 	VoxelChunk** _chunks;
 	std::vector< VoxelChunk* > _dirty_chunks;
-	std::vector< VoxelChunk* > _modified_chunks;
+	//std::vector< VoxelChunk* > _modified_chunks;
 	std::map< unsigned int, VAO* > _renderable_chunks;
 	unsigned int chunk_dimm;
 	unsigned int chunk_size;

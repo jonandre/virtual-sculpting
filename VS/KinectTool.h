@@ -12,6 +12,8 @@ class Shader;
 
 void* SpeechThreed(void*);
 
+static void* run(void* beginning_stop_cpu);
+
 class KinectTool
 {
 public:
@@ -26,8 +28,10 @@ public:
 
 	pthread_barrier_t barrier;
 	KinectReader* _reader;
+
 private:
 	KinectTool();
+
 	float _start_z, _end_z;
 
 	TriangleMesh* _msh;
