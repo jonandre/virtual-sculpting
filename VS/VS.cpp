@@ -1,5 +1,11 @@
+#define SDLCONTEXT
+
 #include "GridModel.h"
+#ifdef SDLCONTEXT
+#include "SDLContext.h"
+#else
 #include "GLContext.h"
+#endif
 #include <time.h>
 #include "KinectTool.h"
 #include "TriangleMesh.h"
@@ -108,14 +114,18 @@ inline double diffclock( clock_t clock1, clock_t clock2 )
     return diffms;
 }
 
-int main( int argc, UINT8** argv) 
+int main( int argc, char** argv) 
 {
 	/* Intilising the stage */
 	printf("Initilising stage... \n");
 	new Stage();
 
 	/* Initates the screen and its context */
+	#ifdef SDLCONTEXT
+	SDLContext* cntx = new SDLContext();//Window+render.
+	#else
 	GLContext* cntx = new GLContext();//Window+render.
+	#endif
 	
 	/* Initilaizes the input */
 	Input* inp = new Input();//Input system.
@@ -127,7 +137,9 @@ int main( int argc, UINT8** argv)
 	unsigned int side = model->GetDimm();
 	inp->SetZoom(-(side*4.0f));
 	inp->SetModel( model );
+	std::cout << "Model initialized" << std::endl;
 	model->UpdateGrid();// update visual representation of model
+	std::cout << "Grid updated" << std::endl;
 
 	/* Initilizes the tool */
 	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*.75f+ 100, -(side*.75f));
@@ -153,6 +165,8 @@ int main( int argc, UINT8** argv)
     
 	PlaySound(TEXT("VS-midle-sound.wav"), NULL, SND_LOOP | SND_ASYNC);
 	
+	std::cout << "Starting main loop" << std::endl;
+
 	clock_t start = clock();
 	while (cntx->alive())
 	{

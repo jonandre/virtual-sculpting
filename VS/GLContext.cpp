@@ -132,6 +132,7 @@ bool GLContext::create30Context()
 
 	if (wglewIsSupported("WGL_ARB_create_context") == 1) 
 	{
+		std::cout << "ARB context creation supported" << std::endl;
 		hrc = wglCreateContextAttribsARB(hdc, NULL, attributes);
 		wglMakeCurrent(NULL, NULL);
 		wglDeleteContext(tempOGLWidget);

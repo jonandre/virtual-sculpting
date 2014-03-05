@@ -256,6 +256,8 @@ GridModel::GridModel( int power )
 		}
 	}
 
+	std::cout << "GridModel initalized" << std::endl;
+
 	/* init mutex*/
 #ifdef USE_SPINLOCK
 	pthread_spin_init(&spinlock, 0);
@@ -333,6 +335,7 @@ void GridModel::UpdateGrid()
 	}
 	_modified_chunks.clear();
 	*/
+
 	for( i = 0; i < _dirty_chunks.size(); i++ )
 	{
 		index = GetCellIndex( (_dirty_chunks[i]->GetCenter() ), x, y, z);
@@ -343,8 +346,9 @@ void GridModel::UpdateGrid()
 			_renderable_chunks[index] = _dirty_chunks[i]->GetVAO();			
 			//_modified_chunks.push_back(_dirty_chunks[i]);
 		}
-		else
+		else {
 			_renderable_chunks.erase( index );
+		}
 	}
 
 	_dirty_chunks.clear();

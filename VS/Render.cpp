@@ -67,7 +67,7 @@ void Render::SetupScene()
 	mMatrixLocation = glGetUniformLocation(shader->id(), "m");
 	vMatrixLocation = glGetUniformLocation(shader->id(), "v");
 
-	
+	printf("Scene set up \n");
 }
 
 inline double diffclock( clock_t clock1, clock_t clock2 ) 

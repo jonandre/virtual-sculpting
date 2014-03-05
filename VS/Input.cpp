@@ -27,6 +27,8 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 	this->rx = 0;
 	this->ry = 0;
 	this->rz = 0;
+	
+	std::cout << "Input Initialized" << std::endl;
 }
 
 Input::~Input(void)
