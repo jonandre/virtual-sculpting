@@ -39,9 +39,11 @@ SDLContext::SDLContext()
 	SDL_Init(SDL_INIT_EVERYTHING);
 	checkSDLError(__LINE__);
 
-	//SCREEN_WIDTH = 800;
-	//SCREEN_HEIGHT = 600;
-	SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
+	SCREEN_WIDTH = 4096;
+	SCREEN_HEIGHT = 2400;
+	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
 	SDL_GetWindowSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
 	std::cout << "Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
 	checkSDLError(__LINE__);
