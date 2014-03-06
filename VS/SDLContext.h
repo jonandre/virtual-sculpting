@@ -1,4 +1,13 @@
 #pragma once
+
+#define VIC4K
+
+#ifdef VIC4K
+	#define STEREO true
+#else
+	#define STEREO false
+#endif
+
 #include "Render.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
@@ -20,11 +29,15 @@ private:
 	SDL_Window* window;
 	SDL_Renderer* renderer;
 	SDL_GLContext context;
+
+	SDL_Window* windowRight;
+	SDL_Renderer* rendererRight;
+	SDL_GLContext contextRight;
+
 	Render* render;
 	Input* inp;
 
-	int SCREEN_WIDTH 
-		;
+	int SCREEN_WIDTH;
 	int SCREEN_HEIGHT;
 
 protected:

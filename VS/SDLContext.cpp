@@ -13,48 +13,51 @@ void inline checkSDLError(int line = -1) {
 
 SDLContext::SDLContext()
 {
-	/*LPCWSTR title = L"Virtual Sculpting";
-
-	WNDCLASSW windowClass;
-	HWND hWnd;
-	DWORD dwExStyle = WS_EX_APPWINDOW ;
-
-	hInstance = GetModuleHandle(NULL);
-
-	windowClass.style = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;
-	windowClass.lpfnWndProc = (WNDPROC) WndProc;
-	windowClass.cbClsExtra = 0;
-	windowClass.cbWndExtra = 0;
-	windowClass.hInstance = hInstance;
-	windowClass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
-	windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	windowClass.hbrBackground = NULL;
-	windowClass.lpszMenuName = NULL;
-	windowClass.lpszClassName = title;
-
-	if (!RegisterClassW(&windowClass)) {
-		return;
-	}*/
-
 	SDL_Init(SDL_INIT_EVERYTHING);
 	checkSDLError(__LINE__);
 
+	// Main Window
+#ifdef VIC4K
 	SCREEN_WIDTH = 4096;
 	SCREEN_HEIGHT = 2400;
-	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
+#else
+	SCREEN_WIDTH = 1920;
+	SCREEN_HEIGHT = 1080;
+#endif
+	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
+#ifndef VIC4K
+		| SDL_WINDOW_FULLSCREEN_DESKTOP
+#endif
+		);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
 	SDL_GetWindowSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
-	std::cout << "Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
+	std::cout << "Main Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
 	checkSDLError(__LINE__);
-
-	running = true;
-	render = NULL;
-
+	
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
 	context = SDL_GL_CreateContext(window);
 	checkSDLError(__LINE__);
 
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
+	GLenum error = glewInit();
+	if (error != GLEW_OK) {
+		std::cout << "FATAL: Could not init GLEW" << std::endl;
+		std::cout << "Error: " << glewGetErrorString(error) << std::endl;
+	}
+
+#if (STEREO)
+	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+	windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
+	rendererRight = SDL_CreateRenderer(windowRight, -1, SDL_RENDERER_ACCELERATED);
+	//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
+	SDL_GetWindowSize(windowRight, &SCREEN_WIDTH, &SCREEN_HEIGHT);
+	std::cout << "Right Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
+	checkSDLError(__LINE__);
+	contextRight = SDL_GL_CreateContext(windowRight);
+	checkSDLError(__LINE__);
+
+	// Post-context creation flags
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -71,29 +74,26 @@ SDLContext::SDLContext()
 		std::cout << "Error: " << glewGetErrorString(error) << std::endl;
 	}
 
-	/*int attributes[] = 
-	{
-		WGL_CONTEXT_MAJOR_VERSION_ARB, 4,
-		WGL_CONTEXT_MINOR_VERSION_ARB, 1,
-		WGL_CONTEXT_FLAGS_ARB, WGL_CONTEXT_FORWARD_COMPATIBLE_BIT_ARB, 
-		0
-	};
+	wglShareLists((HGLRC)context, (HGLRC)contextRight);
+#endif
 
-	if (glewIsSupported("GL_ARB_create_context") == 1) 
-	{
-		wglCreateContextAttribsARB(hdc, NULL, attributes);
-		wglMakeCurrent(NULL, NULL);
-		wglDeleteContext(tempOGLWidget);
-		wglMakeCurrent(hdc, hrc);
-	}
-	else 
-	{
-		hrc = tempOGLWidget; 
-	}*/
+	SDL_GL_MakeCurrent(window, context);
 
-	if (glewIsSupported("GL_ARB_create_context") == 1) {
-		std::cout << "ARB context creation supported" << std::endl;
-	}
+	
+	// Post-context creation flags
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32); // Lel
+	checkSDLError(__LINE__);
+
+	running = true;
+	render = NULL;
 
 	int glVersion[2] = {-1, -1}; 
 	glGetIntegerv(GL_MAJOR_VERSION, &glVersion[0]);
@@ -118,6 +118,7 @@ void SDLContext::SetInput( Input* input)
 SDLContext::~SDLContext() 
 {
 	SDL_GL_DeleteContext(context);
+	if (stereo) SDL_GL_DeleteContext(contextRight);
 	SDL_Quit();
 	delete render;
 }
@@ -174,5 +175,15 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
 
 	SDL_GL_SwapWindow(window);
+
+	if (stereo) {
+		SDL_GL_MakeCurrent(windowRight, context);
+
+		render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
+
+		SDL_GL_SwapWindow(windowRight);
+
+		SDL_GL_MakeCurrent(window, context);
+	}
 }
 
