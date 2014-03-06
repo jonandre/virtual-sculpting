@@ -1,0 +1,232 @@
+﻿<grammar version="1.0" xml:lang="en-US" root="rootRule" tag-format="semantics/1.0-literals" xmlns="http://www.w3.org/2001/06/grammar">
+  <rule id="rootRule">
+    <one-of>
+      <!--  Stage 1  -->
+      <item>
+        <tag>MODEL</tag>
+        <one-of>
+          <item> model </item>
+          <item> select model </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 1  -->
+      <item>
+        <tag>CAMERA</tag>
+        <one-of>
+          <item> camera </item>
+          <item> select camera </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 1  -->
+      <item>
+        <tag>SOUND</tag>
+        <one-of>
+          <item> sound </item>
+          <item> select sound </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 1  -->
+      <item>
+        <tag>HAPTICS</tag>
+        <one-of>
+          <item> haptics </item>
+          <item> select haptics </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 2 || 3 || 4 || 5 || 6 || 7 -->
+      <item>
+        <tag>BACK</tag>
+        <one-of>
+          <item> clear selection </item>
+        </one-of>
+      </item>
+
+
+      <!--  Stage 2  -->
+      <item>
+        <tag>REINITIATE</tag>
+        <one-of>
+          <item> reinitiate </item>
+        </one-of>
+      </item>
+      
+      <!--  Stage 2  -->
+      <item>
+        <tag>SPIN</tag>
+        <one-of>
+          <item> spin </item>
+        </one-of>
+      </item>
+      
+      <!--  Stage 2  -->
+      <item>
+        <tag>ROTATE</tag>
+        <one-of>
+          <item> rotate </item>
+        </one-of>
+      </item>
+
+
+      <!--  Stage 3  -->
+      <item>
+        <tag>UP</tag>
+        <one-of>
+          <item> up </item>
+          <item> rotate up </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 3  -->
+      <item>
+        <tag>DOWN</tag>
+        <one-of>
+          <item> down </item>
+          <item> rotate down </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 3  -->
+      <item>
+        <tag>CLOCKWISE</tag>
+        <one-of>
+          <item> clockwise </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 3  -->
+      <item>
+        <tag>COUNTER_CLOCKWISE</tag>
+        <one-of>
+          <item> counter clockwise </item>
+        </one-of>
+      </item>
+      
+      <!--  Stage 3  -->
+      <item>
+        <tag>FREEZ</tag>
+        <one-of>
+          <item> freeze </item>
+          <item> freeze spining</item>
+        </one-of>
+      </item>
+      
+      <!--  Stage 3 || 4 -->
+      <item>
+        <tag>CLEAR</tag>
+        <one-of>
+          <item> clear </item>
+          <item> clear model</item>
+        </one-of>
+      </item>
+
+
+      <!--  Front  4 -->
+      <item>
+        <tag>FRONT</tag>
+        <one-of>
+          <item> front </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>TOP</tag>
+        <one-of>
+          <item> top </item>
+          <item> rotate top </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>RIGHT</tag>
+        <one-of>
+          <item> right </item>
+          <item> rotate right </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>LEFT</tag>
+        <one-of>
+          <item> left </item>
+          <item> rotate left </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>BOTTOM</tag>
+        <one-of>
+          <item> bottom </item>
+        </one-of>
+      </item>
+      <item>
+        <tag>REAR</tag>
+        <one-of>
+          <item> rear </item>
+        </one-of>
+      </item>
+
+      <!--  Stage 6  || 7-->
+      <item>
+        <tag>ON</tag>
+        <one-of>
+          <item> turn on </item>
+        </one-of>
+      </item>
+      <!--  Stage 6 -->
+      <item>
+        <tag>OFF</tag>
+        <one-of>
+          <item> turn off </item>
+        </one-of>
+      </item>
+
+
+
+      <!--  Stage 3 -->
+      <item>
+        <tag>FASTER</tag>
+        <one-of>
+          <item> faster </item>
+          <item> spin faster </item>
+        </one-of>
+      </item>
+
+
+      <!--  Stage 3 -->
+      <item>
+        <tag>SLOWER</tag>
+        <one-of>
+          <item> slower </item>
+          <item> spin slower </item>
+        </one-of>
+      </item>
+      
+      
+
+      <!--  Stage Every -->
+      <item>
+        <tag>START</tag>
+        <one-of>
+          <item> start sculpting</item>
+        </one-of>
+      </item>
+      <item>
+        <tag>END</tag>
+        <one-of>
+          <item> end sculpting</item>
+        </one-of>
+      </item>
+        
+
+      
+      <!--  Quit   -->
+      <item>
+        <tag>QUIT</tag>
+        <one-of>
+          <item> quit program </item>
+        </one-of>
+      </item>
+      
+    </one-of>
+  </rule>
+</grammar>

@@ -1,4 +1,4 @@
-//#define SDLCONTEXT
+#define SDLCONTEXT
 
 #include "GridModel.h"
 #ifdef SDLCONTEXT
