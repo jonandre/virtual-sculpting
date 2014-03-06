@@ -39,6 +39,19 @@ SDLContext::SDLContext()
 	SDL_Init(SDL_INIT_EVERYTHING);
 	checkSDLError(__LINE__);
 
+	//SCREEN_WIDTH = 800;
+	//SCREEN_HEIGHT = 600;
+	SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP, &window, &renderer);
+	SDL_GetWindowSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
+	std::cout << "Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
+	checkSDLError(__LINE__);
+
+	running = true;
+	render = NULL;
+
+	context = SDL_GL_CreateContext(window);
+	checkSDLError(__LINE__);
+
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
 	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
 	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
@@ -48,19 +61,6 @@ SDLContext::SDLContext()
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32); // Lel
-	checkSDLError(__LINE__);
-
-	SCREEN_WIDTH = 800;
-	SCREEN_HEIGHT = 600;
-	SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL /*| SDL_WINDOW_FULLSCREEN_DESKTOP*/, &window, &renderer);
-	SDL_GetWindowSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
-	std::cout << "Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
-	checkSDLError(__LINE__);
-
-	running = true;
-	render = NULL;
-
-	context = SDL_GL_CreateContext(window);
 	checkSDLError(__LINE__);
 
 	GLenum error = glewInit();
@@ -126,7 +126,7 @@ void SDLContext::doMessage()
 	SDL_Event e;
 	while (SDL_PollEvent(&e) != 0) 
 	{
-			if (e.type == SDL_QUIT) 
+		if (e.type == SDL_QUIT || (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)) 
 			{
 				running = false;
 			}
