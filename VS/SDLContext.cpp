@@ -144,14 +144,14 @@ void SDLContext::doMessage()
 			{
 				running = false;
 			}
-			/*else 
+			else 
 			{
-				if ( msg.message == WM_KEYDOWN )
-				{
-					UINT8 c = MapVirtualKey(msg.wParam ,MAPVK_VK_TO_CHAR);					
-					inp->OnKeyPressed(c);
+				if ( e.type == SDL_KEYDOWN )
+				{			
+					std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
+					inp->OnKeyPressed(e.key.keysym.sym);
 				}
-				else if ( msg.message == WM_LBUTTONDOWN )
+				/*else if ( msg.message == WM_LBUTTONDOWN )
 				{
 					inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
 				}
@@ -166,10 +166,10 @@ void SDLContext::doMessage()
 				else if ( msg.message == WM_MOUSEWHEEL )
 				{
 					inp->OnSroll( GET_WHEEL_DELTA_WPARAM(msg.wParam) );
-				}
+				}*/
 			}
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);*/
+//			TranslateMessage(&msg);
+//			DispatchMessage(&msg);
 		}
 }
 
