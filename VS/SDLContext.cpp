@@ -16,6 +16,8 @@ SDLContext::SDLContext()
 	SDL_Init(SDL_INIT_EVERYTHING);
 	checkSDLError(__LINE__);
 
+	std::cout << "Number of displays detected: " << SDL_GetNumVideoDisplays() << std::endl;
+
 	// Main Window
 #ifdef VIC4K
 	SCREEN_WIDTH = 4096;
@@ -25,7 +27,7 @@ SDLContext::SDLContext()
 	SCREEN_HEIGHT = 1080;
 #endif
 	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
-#ifndef VIC4K
+#ifdef VIC4K
 		| SDL_WINDOW_FULLSCREEN_DESKTOP
 #endif
 		);
@@ -45,36 +47,38 @@ SDLContext::SDLContext()
 		std::cout << "Error: " << glewGetErrorString(error) << std::endl;
 	}
 
-#if (STEREO)
-	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-	windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
-	rendererRight = SDL_CreateRenderer(windowRight, -1, SDL_RENDERER_ACCELERATED);
-	//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
-	SDL_GetWindowSize(windowRight, &SCREEN_WIDTH, &SCREEN_HEIGHT);
-	std::cout << "Right Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
-	checkSDLError(__LINE__);
-	contextRight = SDL_GL_CreateContext(windowRight);
-	checkSDLError(__LINE__);
+#if (STEREO > 0)
+	{
+		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
+		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
+		rendererRight = SDL_CreateRenderer(windowRight, -1, SDL_RENDERER_ACCELERATED);
+		//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
+		SDL_GetWindowSize(windowRight, &SCREEN_WIDTH, &SCREEN_HEIGHT);
+		std::cout << "Right Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
+		checkSDLError(__LINE__);
+		contextRight = SDL_GL_CreateContext(windowRight);
+		checkSDLError(__LINE__);
 
-	// Post-context creation flags
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-	SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-	SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32); // Lel
-	checkSDLError(__LINE__);
+		// Post-context creation flags
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		SDL_GL_SetAttribute(SDL_GL_ACCELERATED_VISUAL, 1);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32); // Lel
+		checkSDLError(__LINE__);
 
-	GLenum error = glewInit();
-	if (error != GLEW_OK) {
-		std::cout << "FATAL: Could not init GLEW" << std::endl;
-		std::cout << "Error: " << glewGetErrorString(error) << std::endl;
+		GLenum error = glewInit();
+		if (error != GLEW_OK) {
+			std::cout << "FATAL: Could not init GLEW" << std::endl;
+			std::cout << "Error: " << glewGetErrorString(error) << std::endl;
+		}
+
+		wglShareLists((HGLRC)context, (HGLRC)contextRight);
 	}
-
-	wglShareLists((HGLRC)context, (HGLRC)contextRight);
 #endif
 
 	SDL_GL_MakeCurrent(window, context);
@@ -107,6 +111,11 @@ SDLContext::SDLContext()
 
 	//ShowWindow(this->hwnd, SW_SHOW);
     //UpdateWindow(this->hwnd);
+
+	FPS = 1.0f;
+	lastTick = SDL_GetTicks();
+	lastFPSTick = lastTick;
+
 	std::cout << "SDLContext initialized" << std::endl;
 }
 
@@ -118,7 +127,9 @@ void SDLContext::SetInput( Input* input)
 SDLContext::~SDLContext() 
 {
 	SDL_GL_DeleteContext(context);
-	if (stereo) SDL_GL_DeleteContext(contextRight);
+#if (STEREO > 0)
+	SDL_GL_DeleteContext(contextRight);
+#endif
 	SDL_Quit();
 	delete render;
 }
@@ -171,12 +182,12 @@ bool SDLContext::alive()
 void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh, 
 							glm::mat4& view, glm::mat4& obj, TextureMappedFont* font1, 
 							TextureMappedFont* font2, TextureMappedFont* font3)
-{	
+{
 	render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
 
 	SDL_GL_SwapWindow(window);
 
-	if (stereo) {
+#if (STEREO > 0)
 		SDL_GL_MakeCurrent(windowRight, context);
 
 		render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
@@ -184,6 +195,19 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 		SDL_GL_SwapWindow(windowRight);
 
 		SDL_GL_MakeCurrent(window, context);
+#endif
+
+	// FPS Control
+	int tick = SDL_GetTicks();
+	int deltaTick = tick - lastTick;
+	float frameTime = ((float) deltaTick)/1000.0f;
+	FPS = FPS*0.9f + (1.0f/frameTime)*0.1f;
+	lastTick = tick;
+
+	if (tick - lastFPSTick > FPSPeriod) {
+		std::cout << "FPS: " << FPS << std::endl;
+
+		lastFPSTick = tick;
 	}
 }
 

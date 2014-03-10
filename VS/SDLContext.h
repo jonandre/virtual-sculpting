@@ -1,11 +1,11 @@
 #pragma once
 
-#define VIC4K
+//#define VIC4K
 
 #ifdef VIC4K
-	#define STEREO true
+	#define STEREO 1
 #else
-	#define STEREO false
+	#define STEREO 1
 #endif
 
 #include "Render.h"
@@ -40,6 +40,10 @@ private:
 	int SCREEN_WIDTH;
 	int SCREEN_HEIGHT;
 
+	int lastTick;
+	int lastFPSTick;
+	static const int FPSPeriod = 1000;
+	float FPS;
 protected:
 	bool running;
 };
