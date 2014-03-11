@@ -9,9 +9,9 @@ class KinectTool;
 class StereoRender
 {
 public:
-	const float FOV = 30.0f;
-	const float ZNEAR = 0.1f;
-	const float ZFAR = 4048.f;
+	static const float FOV;
+	static const float ZNEAR;
+	static const float ZFAR;
 
 	Shader* shader;
 	StereoRender();

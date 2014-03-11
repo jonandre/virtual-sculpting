@@ -1,6 +1,6 @@
 #pragma once
 
-//#define VIC4K
+#define VIC4K
 
 #ifdef VIC4K
 	#define STEREO 1

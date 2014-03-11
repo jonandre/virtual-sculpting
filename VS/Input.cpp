@@ -362,6 +362,11 @@ void Input::SetZoom( float val )
 	zoom_val = val;
 }
 
+float Input::GetZoom ()
+{
+	return zoom_val;
+}
+
 
 void Input::SetModel( GridModel* md )
 {

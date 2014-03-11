@@ -9,6 +9,10 @@
 #include "texturemappedfont.h"
 #include "Stage.h"
 
+const float StereoRender::FOV = 30.0f;
+const float StereoRender::ZNEAR = 0.1f;
+const float StereoRender::ZFAR = 4048.f;
+
 StereoRender::StereoRender() : shader(NULL)
 {
 	windowWidth = 512;

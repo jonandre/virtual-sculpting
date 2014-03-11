@@ -30,6 +30,8 @@ public:
 	void SetZoom( float val );
 	void SetModel( GridModel* );
 
+	float GetZoom ();
+
 	void UpdateFrame();
 
 	glm::vec3 _rotation_vector_obj;

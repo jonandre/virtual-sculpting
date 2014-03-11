@@ -1,4 +1,6 @@
 #include "SDLContext.h"
+#include "GridModel.h"
+
 
 const float DEG_TO_RAD = ((2.0*M_PI) / 360.0);
 
@@ -19,23 +21,28 @@ SDLContext::SDLContext()
 
 	std::cout << "Number of displays detected: " << SDL_GetNumVideoDisplays() << std::endl;
 
+	int hackPixels = 0;
+
 	// Main Window
 #ifdef VIC4K
 	SCREEN_WIDTH = 4096;
 	SCREEN_HEIGHT = 2400;
 #else
 	// Comment screen width/height settings to get fullscreen
-	SCREEN_WIDTH = 800;
-	SCREEN_HEIGHT = 600;
+	SCREEN_WIDTH = 1920;
+	SCREEN_HEIGHT = 1080;
 #endif
-	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
-#ifdef VIC4K
+	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH-hackPixels, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
+#ifndef VIC4K
+#if (STEREO == 0)
 		| SDL_WINDOW_FULLSCREEN_DESKTOP
+#endif
 #endif
 		);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	SDL_GetWindowSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
-	std::cout << "Main Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
+	int w, h;
+	SDL_GetWindowSize(window, &w, &h);
+	std::cout << "Main Window created, size: " << w << " x " << h << std::endl;
 	checkSDLError(__LINE__);
 	
 	SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 0);
@@ -51,10 +58,10 @@ SDLContext::SDLContext()
 #if (STEREO > 0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
+		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH-hackPixels, 0, SCREEN_WIDTH+hackPixels, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
 		rendererRight = SDL_CreateRenderer(windowRight, -1, SDL_RENDERER_ACCELERATED);
-		SDL_GetWindowSize(windowRight, &SCREEN_WIDTH, &SCREEN_HEIGHT);
-		std::cout << "Right Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
+		SDL_GetWindowSize(windowRight, &w, &h);
+		std::cout << "Right Window created, size: " << w << " x " << h << std::endl;
 		checkSDLError(__LINE__);
 		contextRight = SDL_GL_CreateContext(windowRight);
 		checkSDLError(__LINE__);
@@ -191,14 +198,17 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	
 
 #if (STEREO > 0)
+	unsigned int side = model->GetDimm();
+
 	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
 	float radians = DEG_TO_RAD * render->FOV / 2.0;
 	float wd2     = render->ZNEAR * glm::tan(radians);
-	float focus = 2.0f;
+	float focus = -1.0f*inp->GetZoom();
 	float ndfl = render->ZNEAR / focus;
-	float eyeDistance3D = 0.07f;
+	float eyeDistance3D = float(side)/8.0f;
 
 	float left, right, top, bottom;
+
 
 	//Left eye
 	left = -ratio * wd2 + 0.5 * eyeDistance3D * ndfl;
@@ -206,6 +216,7 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	top = wd2;
 	bottom = -wd2;
 	glm::mat4 leftProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
+	glm::mat4 leftEye = glm::translate(glm::mat4(1.0f), glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
 
 	//Right eye
 	left = -ratio * wd2 - 0.5 * eyeDistance3D * ndfl;
@@ -213,17 +224,18 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	top = wd2;
 	bottom = -wd2;
 	glm::mat4 rightProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
+	glm::mat4 rightEye = glm::translate(glm::mat4(1.0f), -glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
 
 	render->SetProjections(leftProj, rightProj);
 
 
-	render->Draw(model, _tool_mesh, view, obj, font1, font2, font3, true);
+	render->Draw(model, _tool_mesh, leftEye*view, obj, font1, font2, font3, true);
 
 	SDL_GL_SwapWindow(window);
 
 	SDL_GL_MakeCurrent(windowRight, context);
 
-	render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3, false);
+	render->Draw( model, _tool_mesh, rightEye*view, obj, font1, font2 , font3, false);
 
 	SDL_GL_SwapWindow(windowRight);
 

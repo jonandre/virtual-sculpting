@@ -135,6 +135,7 @@ int main( int argc, char** argv)
 	unsigned int power = 8;
 	GridModel* model = new GridModel(power);//power of 2
 	unsigned int side = model->GetDimm();
+	std::cout << "Model side is " << side << std::endl;
 	inp->SetZoom(-(side*4.0f));
 	inp->SetModel( model );
 	std::cout << "Model initialized" << std::endl;
