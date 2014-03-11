@@ -8,7 +8,12 @@
 	#define STEREO 1
 #endif
 
-#include "Render.h"
+#if (STEREO > 0)
+	#include "StereoRender.h"
+#else
+	#include "Render.h"
+#endif
+
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "GraphicsLib.h"
@@ -34,7 +39,12 @@ private:
 	SDL_Renderer* rendererRight;
 	SDL_GLContext contextRight;
 
+#if (STEREO > 0)
+	StereoRender* render;
+#else
 	Render* render;
+#endif
+
 	Input* inp;
 
 	int SCREEN_WIDTH;

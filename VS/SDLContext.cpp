@@ -1,5 +1,6 @@
 #include "SDLContext.h"
 
+const float DEG_TO_RAD = ((2.0*M_PI) / 360.0);
 
 void inline checkSDLError(int line = -1) {
 	const char* error = SDL_GetError();
@@ -23,8 +24,9 @@ SDLContext::SDLContext()
 	SCREEN_WIDTH = 4096;
 	SCREEN_HEIGHT = 2400;
 #else
-	SCREEN_WIDTH = 1920;
-	SCREEN_HEIGHT = 1080;
+	// Comment screen width/height settings to get fullscreen
+	SCREEN_WIDTH = 800;
+	SCREEN_HEIGHT = 600;
 #endif
 	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
 #ifdef VIC4K
@@ -32,7 +34,6 @@ SDLContext::SDLContext()
 #endif
 		);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-	//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
 	SDL_GetWindowSize(window, &SCREEN_WIDTH, &SCREEN_HEIGHT);
 	std::cout << "Main Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
 	checkSDLError(__LINE__);
@@ -52,7 +53,6 @@ SDLContext::SDLContext()
 		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
 		rendererRight = SDL_CreateRenderer(windowRight, -1, SDL_RENDERER_ACCELERATED);
-		//SDL_CreateWindowAndRenderer(SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS, &window, &renderer);
 		SDL_GetWindowSize(windowRight, &SCREEN_WIDTH, &SCREEN_HEIGHT);
 		std::cout << "Right Window created, size: " << SCREEN_WIDTH << " x " << SCREEN_HEIGHT << std::endl;
 		checkSDLError(__LINE__);
@@ -68,7 +68,7 @@ SDLContext::SDLContext()
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32); // Lel
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 		checkSDLError(__LINE__);
 
 		GLenum error = glewInit();
@@ -93,7 +93,7 @@ SDLContext::SDLContext()
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32); // Lel
+	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 	checkSDLError(__LINE__);
 
 	running = true;
@@ -104,14 +104,19 @@ SDLContext::SDLContext()
 	glGetIntegerv(GL_MINOR_VERSION, &glVersion[1]);
 
 	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl; // Output which version of OpenGL we are using
-	
-	render = new Render();
+
+	// Scene rendering
+#if (STEREO > 0)
+	render = new StereoRender();
 	render->Init();
 	render->Resize( SCREEN_WIDTH, SCREEN_HEIGHT );
+#else
+	render = new Render();
+	render->Init();
+	render->Resize(SCREEN_WIDTH, SCREEN_HEIGHT);
+#endif
 
-	//ShowWindow(this->hwnd, SW_SHOW);
-    //UpdateWindow(this->hwnd);
-
+	// FPS count
 	FPS = 1.0f;
 	lastTick = SDL_GetTicks();
 	lastFPSTick = lastTick;
@@ -183,18 +188,50 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 							glm::mat4& view, glm::mat4& obj, TextureMappedFont* font1, 
 							TextureMappedFont* font2, TextureMappedFont* font3)
 {
-	render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
+	
+
+#if (STEREO > 0)
+	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
+	float radians = DEG_TO_RAD * render->FOV / 2.0;
+	float wd2     = render->ZNEAR * glm::tan(radians);
+	float focus = 2.0f;
+	float ndfl = render->ZNEAR / focus;
+	float eyeDistance3D = 0.07f;
+
+	float left, right, top, bottom;
+
+	//Left eye
+	left = -ratio * wd2 + 0.5 * eyeDistance3D * ndfl;
+	right = ratio * wd2 + 0.5 * eyeDistance3D * ndfl;
+	top = wd2;
+	bottom = -wd2;
+	glm::mat4 leftProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
+
+	//Right eye
+	left = -ratio * wd2 - 0.5 * eyeDistance3D * ndfl;
+	right = ratio * wd2 - 0.5 * eyeDistance3D * ndfl;
+	top = wd2;
+	bottom = -wd2;
+	glm::mat4 rightProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
+
+	render->SetProjections(leftProj, rightProj);
+
+
+	render->Draw(model, _tool_mesh, view, obj, font1, font2, font3, true);
 
 	SDL_GL_SwapWindow(window);
 
-#if (STEREO > 0)
-		SDL_GL_MakeCurrent(windowRight, context);
+	SDL_GL_MakeCurrent(windowRight, context);
 
-		render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3);
+	render->Draw( model, _tool_mesh, view, obj, font1, font2 , font3, false);
 
-		SDL_GL_SwapWindow(windowRight);
+	SDL_GL_SwapWindow(windowRight);
 
-		SDL_GL_MakeCurrent(window, context);
+	SDL_GL_MakeCurrent(window, context);
+#else
+	render->Draw(model, _tool_mesh, view, obj, font1, font2, font3);
+
+	SDL_GL_SwapWindow(window);
 #endif
 
 	// FPS Control

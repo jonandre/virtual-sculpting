@@ -191,7 +191,10 @@ GridModel::GridModel( int power )
 	//_interacted = new bool[size];//array to store bool - if voxel was changed during this frame.
 	//memset( _interacted, 0, size*sizeof(bool) );
 
-	power_for_chunk = max( unsigned(power-4), unsigned(4) );//chunk_size
+	unsigned int max = unsigned(power - 4);
+	if (max < unsigned(4)) max = unsigned(4);
+
+	power_for_chunk = max;//chunk_size
 	unsigned int _chunk_power = power - power_for_chunk;
 	chunk_dimm = 1<<_chunk_power;//dimension for array of chunk
 	chunk_size = chunk_dimm*chunk_dimm*chunk_dimm;
