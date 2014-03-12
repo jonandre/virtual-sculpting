@@ -179,6 +179,7 @@
     <ClCompile Include="Soundify.cpp" />
     <ClCompile Include="SpeechController.cpp" />
     <ClCompile Include="Stage.cpp" />
+    <ClCompile Include="StereoKinectHeadTracking.cpp" />
     <ClCompile Include="StereoRender.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="TextureMappedFont.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="SpeechController.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StereoKinectHeadTracking.h" />
     <ClInclude Include="StereoRender.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="TextureMappedFont.h" />
