@@ -1,6 +1,9 @@
 #pragma once
 
-#include "NuiApi.h"
+#include "Windows.h"
+
+struct INuiSensor;
+
 #include <iostream>
 #include <string>
 
@@ -15,8 +18,12 @@ public:
 
 	void Update();
 
+	const Vector4* GetHeadPosition();
+
 private:
 	bool m_ready;
+
+	Vector4* m_headPosition;
 
 	INuiSensor* m_pNuiSensor;
 

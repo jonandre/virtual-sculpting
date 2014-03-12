@@ -6,8 +6,11 @@
 #else
 #include "GLContext.h"
 #endif
+
 #include <time.h>
 #include "KinectTool.h"
+#include "StereoKinectHeadTracking.h"
+#include "KinectReader.h"
 #include "TriangleMesh.h"
 #include "Soundify.h"
 #include "texturemappedfont.h"
@@ -144,6 +147,10 @@ int main( int argc, char** argv)
 
 	/* Initilizes the tool */
 	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*.75f+ 100, -(side*.75f));
+
+	/* Initializes head tracking */
+	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
+	tool->_reader->Init(headTracking);
 	
 	/* Initilizes the the font and text */
 	int fontSize = 20;
@@ -175,7 +182,11 @@ int main( int argc, char** argv)
 		cntx->doMessage();		//Win message loop
 
 		tool->DoToolUpdate();	//update tool state - like depthmap
-		
+		headTracking->Update();
+
+		//
+		headTracking->GetHeadPosition();
+		//
 
 		if ( GetPressedStage() )
 			tool->StartInteractModel( model, inp->GetObjectQ());//obvious

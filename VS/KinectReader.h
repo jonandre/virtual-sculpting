@@ -20,6 +20,8 @@ struct Point;
 #include <sphelper.h>
 /* Voice Recognition End */
 
+#include "StereoKinectHeadTracking.h"
+
 /// <summary>
 /// Application class for using kinect.
 /// </summary>
@@ -27,9 +29,11 @@ class KinectReader
 {
 public:
     /// Constructor
-	KinectReader( unsigned int min_depth, unsigned int max_depth, float dist );
+	KinectReader( unsigned int min_depth, unsigned int max_depth, float dist);
     /// Destructor
 	~KinectReader();
+
+	void Init(StereoKinectHeadTracking* headTracking);
 
 	float* GetDepth();
 	void ProcessDepth();
@@ -85,7 +89,7 @@ private:
 	float*					m_depth;
 	
     /// Create the first connected Kinect found.
-	HRESULT                 CreateFirstConnected();
+	HRESULT                 CreateFirstConnected(StereoKinectHeadTracking* headTracking);
 
 	/* Depth */ 
 	HANDLE                  m_hNextDepthFrameEvent;

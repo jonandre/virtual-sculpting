@@ -19,7 +19,7 @@ KinectReader::KinectReader(void)
 	
 }
 
-KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, float dist ):
+KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, float dist):
     m_pKinectAudioStream(NULL),
     m_pSpeechStream(NULL),
     m_pSpeechRecognizer(NULL),
@@ -42,7 +42,7 @@ KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, floa
 	_active_depth = dist;
 
 	/* Initilizes when first connected */ 
-	CreateFirstConnected();
+	//CreateFirstConnected();
 }
 
 /**
@@ -75,11 +75,16 @@ KinectReader::~KinectReader(void)
 	/* Voice Recognition End */
 }
 
+void KinectReader::Init(StereoKinectHeadTracking* headTracking)
+{
+	CreateFirstConnected(headTracking);
+}
+
 /// <summary>
 /// Create the first connected Kinect found.
 /// </summary>
 /// <returns>S_OK on success, otherwise failure code.</returns>
-HRESULT KinectReader::CreateFirstConnected()
+HRESULT KinectReader::CreateFirstConnected(StereoKinectHeadTracking* headTracking)
 {
     INuiSensor * pNuiSensor = NULL;
     HRESULT hr;
@@ -131,10 +136,7 @@ HRESULT KinectReader::CreateFirstConnected()
                 &m_pDepthStreamHandle);
 
 			/* Installation of skelleton traking begins here*/
-			// Create an event that will be signaled when skeleton data is available
-			// m_hNextSkeletonEvent = CreateEventW(NULL, TRUE, FALSE, NULL);
-			// Open a skeleton stream to receive skeleton data
-            // hr = m_pNuiSensor->NuiSkeletonTrackingEnable(m_hNextSkeletonEvent, 0); 
+			headTracking->Init(m_pNuiSensor);
 			/* Installation of skelleton traking ends here*/
         }
     }

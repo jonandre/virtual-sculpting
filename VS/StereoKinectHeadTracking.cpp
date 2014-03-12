@@ -1,4 +1,5 @@
 #include "StereoKinectHeadTracking.h"
+#include "NuiApi.h"
 
 void StereoKinectHeadTracking::Fail (std::string s) {
 	std::cout << "StereoKinectHeadTracking: " << s << std::endl;
@@ -8,12 +9,12 @@ void StereoKinectHeadTracking::Fail (std::string s) {
 StereoKinectHeadTracking::StereoKinectHeadTracking() :
 	m_ready(false)
 {
-	
+	m_headPosition = new Vector4;
 }
 
 StereoKinectHeadTracking::~StereoKinectHeadTracking()
 {
-
+	delete m_headPosition;
 }
 
 void StereoKinectHeadTracking::Init(INuiSensor* sensor)
@@ -33,7 +34,7 @@ void StereoKinectHeadTracking::Init(INuiSensor* sensor)
 		Fail("Failed to initialize skeleton tracking on Sensor");
 	}
 
-	m_ready = true:
+	m_ready = true;
 }
 
 void StereoKinectHeadTracking::Update()
@@ -63,9 +64,14 @@ void StereoKinectHeadTracking::Update()
 
 			if (headState == NUI_SKELETON_POSITION_NOT_TRACKED) continue; // We don't have the head of this skeleton
 
-			skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD];
+			(*m_headPosition) = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD];
 
 			break; // we just want a skeleton
         }
     }
+}
+
+const Vector4* StereoKinectHeadTracking::GetHeadPosition() {
+	std::cout << m_headPosition->x << ", " << m_headPosition->y << ", " << m_headPosition->z << ", " << m_headPosition->w << std::endl;
+	return m_headPosition;
 }
