@@ -186,6 +186,11 @@ void SDLContext::doMessage()
 }
 
 
+void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
+	this->headTracking = headTracking;
+}
+
+
 bool SDLContext::alive()
 {
 	return running;
@@ -202,29 +207,37 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 
 	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
 	float radians = DEG_TO_RAD * render->FOV / 2.0;
+	
+	float viewportHeight = float(side)*3.0f;
+	headTracking->SetViewportSize(viewportHeight*ratio, viewportHeight);
+
+	glm::vec3 head = headTracking->GetHeadPosition();
+
 	float wd2     = render->ZNEAR * glm::tan(radians);
-	float focus = -1.0f*inp->GetZoom();
+	float focus = -1.0f*inp->GetZoom() + head.z;
 	float ndfl = render->ZNEAR / focus;
-	float eyeDistance3D = float(side)/8.0f;
+	float eyeDistance3D = 0.065f*headTracking->GetWorldRatio();
 
 	float left, right, top, bottom;
 
 
 	//Left eye
-	left = -ratio * wd2 + 0.5 * eyeDistance3D * ndfl;
-	right = ratio * wd2 + 0.5 * eyeDistance3D * ndfl;
-	top = wd2;
-	bottom = -wd2;
+	left = -ratio * wd2 + (0.5 * eyeDistance3D - head.x) * ndfl;
+	right = ratio * wd2 + (0.5 * eyeDistance3D - head.x) * ndfl;
+	top = wd2 - head.y * ndfl;
+	bottom = -wd2 - head.y * ndfl;
 	glm::mat4 leftProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
-	glm::mat4 leftEye = glm::translate(glm::mat4(1.0f), glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
+	glm::mat4 leftEye = glm::translate(glm::mat4(1.0f), -head);
+	leftEye = glm::translate(leftEye, glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
 
 	//Right eye
-	left = -ratio * wd2 - 0.5 * eyeDistance3D * ndfl;
-	right = ratio * wd2 - 0.5 * eyeDistance3D * ndfl;
-	top = wd2;
-	bottom = -wd2;
+	left = -ratio * wd2 + (-0.5 * eyeDistance3D - head.x) * ndfl;
+	right = ratio * wd2 + (-0.5 * eyeDistance3D - head.x) * ndfl;
+	top = wd2 - head.y * ndfl;
+	bottom = -wd2 - head.y * ndfl;
 	glm::mat4 rightProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
-	glm::mat4 rightEye = glm::translate(glm::mat4(1.0f), -glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
+	glm::mat4 rightEye = glm::translate(glm::mat4(1.0f), -head);
+	rightEye = glm::translate(rightEye, -glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
 
 	render->SetProjections(leftProj, rightProj);
 

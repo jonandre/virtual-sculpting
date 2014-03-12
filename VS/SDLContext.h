@@ -14,6 +14,7 @@
 	#include "Render.h"
 #endif
 
+#include "StereoKinectHeadTracking.h"
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "GraphicsLib.h"
@@ -28,6 +29,7 @@ public:
 					  glm::mat4& obj, TextureMappedFont*, TextureMappedFont*, TextureMappedFont* );
 	void doMessage();
 	void SetInput( Input* );
+	void SetHeadTracking(StereoKinectHeadTracking* headTracking);
 	bool alive();
 
 private:	
@@ -44,6 +46,8 @@ private:
 #else
 	Render* render;
 #endif
+
+	StereoKinectHeadTracking* headTracking;
 
 	Input* inp;
 

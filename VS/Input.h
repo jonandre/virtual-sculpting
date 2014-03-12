@@ -1,3 +1,6 @@
+#ifndef _INPUT_HPP_
+#define _INPUT_HPP_
+
 #include "main.h"
 #include <vector>
 
@@ -91,4 +94,6 @@ private:
 	int rz;
 
 };
+
+#endif
 

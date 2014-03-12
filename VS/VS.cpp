@@ -151,6 +151,8 @@ int main( int argc, char** argv)
 	/* Initializes head tracking */
 	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
 	tool->_reader->Init(headTracking);
+
+	cntx->SetHeadTracking(headTracking);
 	
 	/* Initilizes the the font and text */
 	int fontSize = 20;
