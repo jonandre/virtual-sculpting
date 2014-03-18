@@ -188,6 +188,11 @@ void SDLContext::doMessage()
 
 void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	this->headTracking = headTracking;
+
+	headTracking->SetDisplaySize(4.0055f,  2.430f);
+	headTracking->SetEyeDistance(0.065f);
+	headTracking->SetSensorPosition(0.0f, -(2.430f/2.0f - 0.40f), 0.2f);
+	headTracking->SetScreemFacing(true);
 }
 
 
@@ -206,49 +211,28 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	unsigned int side = model->GetDimm();
 
 	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
-	float radians = DEG_TO_RAD * render->FOV / 2.0;
 	
 	float viewportHeight = float(side)*3.0f;
-	headTracking->SetViewportSize(viewportHeight*ratio, viewportHeight);
+	float viewportWidth = viewportHeight*ratio;
 
-	glm::vec3 head = headTracking->GetHeadPosition();
+	headTracking->SetViewportSize(viewportWidth, viewportHeight);
+	headTracking->SetZPlanes(render->ZNEAR, render->ZFAR);	
 
-	float wd2     = render->ZNEAR * glm::tan(radians);
-	float focus = -1.0f*inp->GetZoom() + head.z;
-	float ndfl = render->ZNEAR / focus;
-	float eyeDistance3D = 0.065f*headTracking->GetWorldRatio();
+	headTracking->RetrieveMatrices(leftProj, leftEye, rightProj, rightEye);
 
-	float left, right, top, bottom;
-
-
-	//Left eye
-	left = -ratio * wd2 + (0.5 * eyeDistance3D - head.x) * ndfl;
-	right = ratio * wd2 + (0.5 * eyeDistance3D - head.x) * ndfl;
-	top = wd2 - head.y * ndfl;
-	bottom = -wd2 - head.y * ndfl;
-	glm::mat4 leftProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
-	glm::mat4 leftEye = glm::translate(glm::mat4(1.0f), -head);
-	leftEye = glm::translate(leftEye, glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
-
-	//Right eye
-	left = -ratio * wd2 + (-0.5 * eyeDistance3D - head.x) * ndfl;
-	right = ratio * wd2 + (-0.5 * eyeDistance3D - head.x) * ndfl;
-	top = wd2 - head.y * ndfl;
-	bottom = -wd2 - head.y * ndfl;
-	glm::mat4 rightProj = glm::frustum(left, right, bottom, top, render->ZNEAR, render->ZFAR);
-	glm::mat4 rightEye = glm::translate(glm::mat4(1.0f), -head);
-	rightEye = glm::translate(rightEye, -glm::vec3(1,0,0)*(eyeDistance3D/2.0f));
+	glm::vec3 immersionTranslation(0.0, 0.0, float(side)*0.5f);
+	glm::mat4 immersiveView = glm::translate(glm::mat4(1.0f), immersionTranslation);
 
 	render->SetProjections(leftProj, rightProj);
 
 
-	render->Draw(model, _tool_mesh, leftEye*view, obj, font1, font2, font3, true);
+	render->Draw(model, _tool_mesh, leftEye*immersiveView, obj, font1, font2, font3, true);
 
 	SDL_GL_SwapWindow(window);
 
 	SDL_GL_MakeCurrent(windowRight, context);
 
-	render->Draw( model, _tool_mesh, rightEye*view, obj, font1, font2 , font3, false);
+	render->Draw( model, _tool_mesh, rightEye*immersiveView, obj, font1, font2 , font3, false);
 
 	SDL_GL_SwapWindow(windowRight);
 

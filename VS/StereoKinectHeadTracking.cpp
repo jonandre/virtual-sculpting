@@ -9,22 +9,16 @@ void StereoKinectHeadTracking::Fail (std::string s) {
 }
 
 StereoKinectHeadTracking::StereoKinectHeadTracking() :
-	m_ready(false)
+	m_ready(false), FACE_SCREEN(false)
 {
 	EYE_DISTANCE = 0.065f;
 	DISPLAY_RW_WIDTH = 4.0055f;
 	DISPLAY_RW_HEIGHT = 2.430f;
 	VIEWPORT_WIDTH = 1.0f;
 	VIEWPORT_HEIGHT = 1.0f;
-	// Relative to the horizontal plane (the floor)
-	SENSOR_ANGLE = 20.0f;
-	// Relative to the center of the screen, in meters
-	SENSOR_RW_POS_X = 0.0f;
-	SENSOR_RW_POS_Y = DISPLAY_RW_HEIGHT/2.0f - 0.40f;
-	SENSOR_RW_POS_Z = 0.2f;
 }
 
-StereoKinectHeadTracking::~StereoKinectHeadTracking()
+StereoKinectHeadTracking::~StereoKinectHeadTracking ()
 {
 	if (m_hNextSkeletonEvent && (m_hNextSkeletonEvent != INVALID_HANDLE_VALUE))
     {
@@ -32,7 +26,7 @@ StereoKinectHeadTracking::~StereoKinectHeadTracking()
     }
 }
 
-void StereoKinectHeadTracking::Init(INuiSensor* sensor)
+void StereoKinectHeadTracking::Init (INuiSensor* sensor)
 {
 	m_pNuiSensor = sensor;
 
@@ -49,10 +43,14 @@ void StereoKinectHeadTracking::Init(INuiSensor* sensor)
 		Fail("Failed to initialize skeleton tracking on Sensor");
 	}
 
+	long angle;
+	sensor->NuiCameraElevationGetAngle(&angle);
+	SENSOR_ANGLE = float(angle);
+
 	m_ready = true;
 }
 
-void StereoKinectHeadTracking::Update()
+void StereoKinectHeadTracking::Update ()
 {
 	if (!m_ready) return;
 
@@ -80,36 +78,135 @@ void StereoKinectHeadTracking::Update()
             // We're tracking the skeleton, draw it
 			NUI_SKELETON_POSITION_TRACKING_STATE headState = skel.eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_HEAD];
 
-			if (headState == NUI_SKELETON_POSITION_NOT_TRACKED) continue; // We don't have the head of this skeleton
+			if (headState == NUI_SKELETON_POSITION_NOT_TRACKED
+				//|| headState == NUI_SKELETON_POSITION_INFERRED
+				) continue; // We don't have the head of this skeleton
 
 			NuiTransformSkeletonToDepthImage(skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD], &m_headPosition.x, &m_headPosition.y, &m_headPosition.z);
 
-			m_headPosition.rwPos.x = float(int(m_headPosition.x) - 150)/300.0f;
-			m_headPosition.rwPos.y = float(int(m_headPosition.y) - 100)*(-1.0f)/200.0f;
-			m_headPosition.rwPos.z = float(m_headPosition.z >> 3)  / 1000.0f - 2.1f; // the position where is the 0.0
+			// Real world coordinates transform (in meters)
+			m_headPosition.rwPos.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].x;
+			m_headPosition.rwPos.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
+			m_headPosition.rwPos.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
+			// Virtual world
 			m_headPosition.vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x) * RW_TO_VW_RATIO;
-			m_headPosition.vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y/glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z/glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
-			m_headPosition.vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y/glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z/glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+			m_headPosition.vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+			m_headPosition.vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
 
 			break; // we just want a skeleton
         }
     }
 }
 
-glm::vec3 StereoKinectHeadTracking::GetHeadPosition() {
-	if (false)
-		std::cout << m_headPosition.vwPos.x << ", " << m_headPosition.vwPos.y << ", " << m_headPosition.rwPos.z << std::endl;
-	return m_headPosition.vwPos;
+glm::vec3 StereoKinectHeadTracking::GetHeadPosition()
+{
+	if (!m_ready) return glm::vec3(0.0f);
+	else return m_headPosition.vwPos;
 }
 
-void StereoKinectHeadTracking::SetViewportSize(float w, float h) {
+void StereoKinectHeadTracking::SetViewportSize (float w, float h) {
 	VIEWPORT_WIDTH = w;
 	VIEWPORT_HEIGHT = h;
 
 	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
 }
 
-float StereoKinectHeadTracking::GetWorldRatio() {
+void StereoKinectHeadTracking::SetDisplaySize (float w, float h)
+{
+	DISPLAY_RW_WIDTH = w;
+	DISPLAY_RW_HEIGHT = h;
+	
+	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
+}
+
+void StereoKinectHeadTracking::SetZPlanes (float znear, float zfar)
+{
+	ZNEAR = znear;
+	ZFAR = zfar;
+}
+
+void StereoKinectHeadTracking::SetEyeDistance(float eyeDistance)
+{
+	EYE_DISTANCE = eyeDistance;
+}
+
+void StereoKinectHeadTracking::SetSensorPosition(float x, float y, float z)
+{
+	SENSOR_RW_POS_X = x;
+	SENSOR_RW_POS_Y = y;
+	SENSOR_RW_POS_Z = z;
+}
+
+float StereoKinectHeadTracking::GetRealToVirtualWorldRatio()
+{
 	return RW_TO_VW_RATIO;
+}
+
+void StereoKinectHeadTracking::SetScreemFacing (bool on)
+{
+	FACE_SCREEN = on;
+}
+
+void StereoKinectHeadTracking::SetHeatTracking (bool on)
+{
+	m_ready = on;
+}
+
+void StereoKinectHeadTracking::RetrieveMatrices(glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye)
+{
+	glm::vec3 head = GetHeadPosition();
+	
+	float focus, ndfl;
+	float tf = (VIEWPORT_HEIGHT/2.0 - head.y) / VIEWPORT_HEIGHT;
+	float bf = (head.y - (-VIEWPORT_HEIGHT/2.0)) / VIEWPORT_HEIGHT;
+	float rf, lf;
+
+	float left, right, top, bottom;
+
+	float headRightFactorX = 1.0f;
+	float headRightFactorZ = 0.0f;
+	// If we are facing the screen we should evaluate the angle to the middle of the screen
+	if (FACE_SCREEN) {
+		glm::vec2 aux (head.z, -head.x);
+		aux = glm::normalize(aux);
+		headRightFactorZ = aux.y;
+		headRightFactorX = aux.x;
+
+		std::cout << headRightFactorX << ", " << headRightFactorZ << std::endl;
+	}
+
+	//Left eye
+	focus = head.z - 0.5 * EYE_DISTANCE * headRightFactorZ;
+	ndfl = ZNEAR / focus;
+	
+	top = VIEWPORT_HEIGHT * ndfl * tf;
+	bottom = -VIEWPORT_HEIGHT * ndfl * bf;
+
+	rf = (VIEWPORT_WIDTH/2.0 - (head.x - 0.5 * EYE_DISTANCE * headRightFactorX)) / VIEWPORT_WIDTH;
+	lf = ((head.x - 0.5 * EYE_DISTANCE * headRightFactorX) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
+
+	left = -VIEWPORT_WIDTH * ndfl * lf;
+	right = VIEWPORT_WIDTH * ndfl * rf;
+
+	leftProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
+	leftEye = glm::translate(glm::mat4(1.0f), -head);
+	leftEye = glm::translate(leftEye, glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f));
+
+	//Right eye
+	focus = head.z + 0.5 * EYE_DISTANCE * headRightFactorZ;
+	ndfl = ZNEAR / focus;
+	
+	top = VIEWPORT_HEIGHT * ndfl * tf;
+	bottom = -VIEWPORT_HEIGHT * ndfl * bf;
+
+	rf = (VIEWPORT_WIDTH/2.0 - (head.x + 0.5 * EYE_DISTANCE * headRightFactorX)) / VIEWPORT_WIDTH;
+	lf = ((head.x + 0.5 * EYE_DISTANCE * headRightFactorX) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
+
+	left = -VIEWPORT_WIDTH * ndfl * lf;
+	right = VIEWPORT_WIDTH * ndfl * rf;
+
+	rightProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
+	rightEye = glm::translate(glm::mat4(1.0f), -head);
+	rightEye = glm::translate(rightEye, -glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f));
 }

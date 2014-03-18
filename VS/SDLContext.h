@@ -43,6 +43,8 @@ private:
 
 #if (STEREO > 0)
 	StereoRender* render;
+
+	glm::mat4 leftProj, rightProj, leftEye, rightEye;
 #else
 	Render* render;
 #endif
