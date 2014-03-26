@@ -28,9 +28,6 @@
 #pragma comment(lib, "ws2_32.lib")
 
 
-extern float fps_procentage;
-
-
 void SoundAndHaptics(void)
 {
 	if (space_pressed)
@@ -109,14 +106,6 @@ void SoundAndHaptics(void)
 	}
 }
 
-inline double diffclock( clock_t clock1, clock_t clock2 ) 
-{
-	double diffticks = clock1 - clock2;
-    double diffms    = diffticks / ( CLOCKS_PER_SEC / 1000 );
-
-    return diffms;
-}
-
 int main( int argc, char** argv) 
 {
 	/* Intilising the stage */
@@ -150,6 +139,7 @@ int main( int argc, char** argv)
 
 	/* Initializes head tracking */
 	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
+	headTracking->SetPredictionFactor(glm::vec3(1.0f, 0.0f, 0.0f));
 	tool->_reader->Init(headTracking);
 
 	cntx->SetHeadTracking(headTracking);
@@ -180,11 +170,14 @@ int main( int argc, char** argv)
 	clock_t start = clock();
 	while (cntx->alive())
 	{
+		clock_t end = clock();
+		float deltaTime = (float)(end - start) / CLOCKS_PER_SEC;
+
 		inp->UpdateFrame();		//Reset frame variables.
 		cntx->doMessage();		//Win message loop
 
 		tool->DoToolUpdate();	//update tool state - like depthmap
-		headTracking->Update();
+		headTracking->Update(deltaTime);
 
 		//
 		headTracking->GetHeadPosition();
@@ -201,11 +194,6 @@ int main( int argc, char** argv)
 		model->UpdateGrid();			// update visual representation of model
 		
 		SoundAndHaptics();
-		
-		clock_t end = clock();
-		float fps = CLOCKS_PER_SEC / (float)(end - start);
-		start = end;
-		fps_procentage = 30.f / fps;
 	}
 	
 	RemoveSound();
