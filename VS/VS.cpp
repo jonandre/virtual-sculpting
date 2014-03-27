@@ -139,8 +139,8 @@ int main( int argc, char** argv)
 
 	/* Initializes head tracking */
 	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
-	headTracking->SetPredictionFactor(glm::vec3(1.0f, 0.0f, 0.0f));
 	tool->_reader->Init(headTracking);
+	//headTracking->SetPredictionFactor(glm::vec3(1.0f, 1.0f, 1.0f));
 
 	cntx->SetHeadTracking(headTracking);
 	
@@ -167,7 +167,7 @@ int main( int argc, char** argv)
 	
 	std::cout << "Starting main loop" << std::endl;
 
-	clock_t start = clock();
+	clock_t start = clock() - 1;
 	while (cntx->alive())
 	{
 		clock_t end = clock();
@@ -194,6 +194,8 @@ int main( int argc, char** argv)
 		model->UpdateGrid();			// update visual representation of model
 		
 		SoundAndHaptics();
+
+		start = end;
 	}
 	
 	RemoveSound();

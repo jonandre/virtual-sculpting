@@ -3,6 +3,22 @@
 
 #define DEG_TO_RAD ((2.0*3.14159265358979323846264338327950288) / 360.0)
 
+glm::vec3 StereoKinectHeadTracking::SensorRelPoint::Predict (float deltaTime)
+{
+	glm::vec3 ret;
+	float deltaTime2 = deltaTime*deltaTime;
+	float deltaTime3 = deltaTime2*deltaTime;
+
+	float accC = 1.0f/2.0f;
+	float jerkC = 1.0f/6.0f*2.0f;
+
+	ret.x = vel.x*deltaTime + accC*acc.x*deltaTime2 + jerkC*jerk.x*deltaTime3;
+	ret.y = vel.y*deltaTime + accC*acc.y*deltaTime2 + jerkC*jerk.y*deltaTime3;
+	ret.z = vel.z*deltaTime + accC*acc.z*deltaTime2 + jerkC*jerk.z*deltaTime3;
+
+	return ret;
+}
+
 void StereoKinectHeadTracking::Fail (std::string s) {
 	std::cout << "StereoKinectHeadTracking: " << s << std::endl;
 	m_ready = false;
@@ -65,8 +81,11 @@ void StereoKinectHeadTracking::Update (float deltaTime)
         return;
     }
 
+	const NUI_TRANSFORM_SMOOTH_PARAMETERS SMOOTHING_PARAMS = 
+		{0.1f, 0.7f, 1.0f, 0.025f, 0.02f};
+
     // smooth out the skeleton data
-    m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, NULL);
+    m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, &SMOOTHING_PARAMS);
 	
     for (int i = 0 ; i < NUI_SKELETON_COUNT; ++i)
     {
@@ -91,20 +110,23 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			m_headPosition.rwPos.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
 			m_headPosition.rwPos.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
-			glm::vec3 vel, acc;
+			glm::vec3 vel, acc, jerk;
 			vel = (m_headPosition.rwPos - m_headPosition.lastRwPos) / deltaTime;
 			acc = (vel - m_headPosition.vel) / deltaTime;
+			jerk = (acc - m_headPosition.acc) / deltaTime;
 
 			// Smoothing factor
-			float sf = 0.7f;
+			float sf = 0.6f;
 			m_headPosition.vel = m_headPosition.vel*sf + vel*(1.0f - sf);
-			m_headPosition.acc = m_headPosition.acc*sf + vel*(1.0f - sf);
+			m_headPosition.acc = m_headPosition.acc*sf + acc*(1.0f - sf);
+			m_headPosition.jerk = m_headPosition.jerk*sf + jerk*(1.0f - sf);
 
-			glm::vec3 pred = m_headPosition.Predict(deltaTime);
+			glm::vec3 pred = m_headPosition.Predict(deltaTime*2.0f);
+
 			// Virtual world
-			m_headPosition.vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x + pred.x) * RW_TO_VW_RATIO;
-			m_headPosition.vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + pred.y) * RW_TO_VW_RATIO;
-			m_headPosition.vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + pred.z) * RW_TO_VW_RATIO;
+			m_headPosition.vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x + pred.x*m_headPosition.predictionFactor.x) * RW_TO_VW_RATIO;
+			m_headPosition.vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + pred.y*m_headPosition.predictionFactor.y) * RW_TO_VW_RATIO;
+			m_headPosition.vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + pred.z*m_headPosition.predictionFactor.z) * RW_TO_VW_RATIO;
 
 			break; // we just want a skeleton
         }
@@ -184,8 +206,6 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::mat4& leftProj, glm::mat4& 
 		aux = glm::normalize(aux);
 		headRightFactorZ = aux.y;
 		headRightFactorX = aux.x;
-
-		std::cout << headRightFactorX << ", " << headRightFactorZ << std::endl;
 	}
 
 	//Left eye

@@ -66,16 +66,9 @@ private:
 		glm::vec3 lastRwPos;
 		glm::vec3 vel;
 		glm::vec3 acc;
+		glm::vec3 jerk;
 
-		glm::vec3 Predict (float deltaTime)
-		{
-			glm::vec3 ret;
-			ret.x = predictionFactor.x*(vel.x*deltaTime + 0.5*acc.x*deltaTime*deltaTime);
-			ret.y = predictionFactor.y*(vel.y*deltaTime + 0.5*acc.y*deltaTime*deltaTime);
-			ret.z = predictionFactor.z*(vel.z*deltaTime + 0.5*acc.z*deltaTime*deltaTime);
-
-			return ret;
-		}
+		glm::vec3 Predict (float deltaTime);
 	};
 
 	bool m_ready;
@@ -86,9 +79,5 @@ private:
 
 	HANDLE m_hNextSkeletonEvent;
 
-	void Fail (std::string s);
-
-	
-	
-	
+	void Fail (std::string s);	
 };
