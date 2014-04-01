@@ -43,6 +43,8 @@ public:
 
 	void SetPredictionFactor(glm::vec3 factor);
 
+	glm::vec3 GetSensorOriginOnVirtualWorld();
+
 private:
 	float EYE_DISTANCE;
 	float DISPLAY_RW_WIDTH, DISPLAY_RW_HEIGHT;
@@ -52,6 +54,8 @@ private:
 	float ZNEAR, ZFAR;
 	float RW_TO_VW_RATIO;
 	bool FACE_SCREEN;
+
+	bool firstTick;
 
 	class SensorRelPoint {
 	public:
@@ -80,4 +84,8 @@ private:
 	HANDLE m_hNextSkeletonEvent;
 
 	void Fail (std::string s);	
+
+	glm::vec3 vwSensorOrigin;
+
+	glm::vec3 SensorToVirtualWorldCoordinates(glm::vec3 sPos);
 };

@@ -135,7 +135,7 @@ int main( int argc, char** argv)
 	std::cout << "Grid updated" << std::endl;
 
 	/* Initilizes the tool */
-	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*.75f+ 100, -(side*.75f));
+	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*0.75f + 100, -(side*.75f));
 
 	/* Initializes head tracking */
 	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
@@ -206,6 +206,7 @@ int main( int argc, char** argv)
 	delete inp;
 	delete tool;
 	delete cntx;
+	delete headTracking;
 	return 0;
 }
 

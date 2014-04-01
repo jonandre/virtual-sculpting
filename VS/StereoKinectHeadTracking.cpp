@@ -32,6 +32,8 @@ StereoKinectHeadTracking::StereoKinectHeadTracking() :
 	DISPLAY_RW_HEIGHT = 2.430f;
 	VIEWPORT_WIDTH = 1.0f;
 	VIEWPORT_HEIGHT = 1.0f;
+
+	firstTick = true;
 }
 
 StereoKinectHeadTracking::~StereoKinectHeadTracking ()
@@ -68,7 +70,15 @@ void StereoKinectHeadTracking::Init (INuiSensor* sensor)
 
 void StereoKinectHeadTracking::Update (float deltaTime)
 {
-	if (!m_ready) return;
+	if (firstTick) {
+		vwSensorOrigin = SensorToVirtualWorldCoordinates(glm::vec3(0.0f));
+		m_headPosition.vwPos = vwSensorOrigin;
+		firstTick = false;
+	}
+
+	if (!m_ready) {
+		return;
+	}
 
 	 // Wait for 0ms, just quickly test if it is time to process a skeleton
     if ( WAIT_OBJECT_0 != WaitForSingleObject(m_hNextSkeletonEvent, 0) ) return;
@@ -110,7 +120,7 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			m_headPosition.rwPos.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
 			m_headPosition.rwPos.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
-			glm::vec3 vel, acc, jerk;
+			/*glm::vec3 vel, acc, jerk;
 			vel = (m_headPosition.rwPos - m_headPosition.lastRwPos) / deltaTime;
 			acc = (vel - m_headPosition.vel) / deltaTime;
 			jerk = (acc - m_headPosition.acc) / deltaTime;
@@ -121,22 +131,34 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			m_headPosition.acc = m_headPosition.acc*sf + acc*(1.0f - sf);
 			m_headPosition.jerk = m_headPosition.jerk*sf + jerk*(1.0f - sf);
 
-			glm::vec3 pred = m_headPosition.Predict(deltaTime*2.0f);
+			glm::vec3 pred = m_headPosition.Predict(deltaTime*2.0f);*/
 
 			// Virtual world
-			m_headPosition.vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x + pred.x*m_headPosition.predictionFactor.x) * RW_TO_VW_RATIO;
+			/*m_headPosition.vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x + pred.x*m_headPosition.predictionFactor.x) * RW_TO_VW_RATIO;
 			m_headPosition.vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + pred.y*m_headPosition.predictionFactor.y) * RW_TO_VW_RATIO;
 			m_headPosition.vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + pred.z*m_headPosition.predictionFactor.z) * RW_TO_VW_RATIO;
+			*/
+
+			m_headPosition.vwPos = SensorToVirtualWorldCoordinates(m_headPosition.rwPos);
 
 			break; // we just want a skeleton
         }
     }
 }
 
+glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sPos) {
+	glm::vec3 vwPos;
+
+	vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x) * RW_TO_VW_RATIO;
+	vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+	vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+
+	return vwPos;
+}
+
 glm::vec3 StereoKinectHeadTracking::GetHeadPosition()
 {
-	if (!m_ready) return glm::vec3(0.0f);
-	else return m_headPosition.vwPos;
+	return m_headPosition.vwPos;
 }
 
 void StereoKinectHeadTracking::SetViewportSize (float w, float h) {
@@ -152,6 +174,8 @@ void StereoKinectHeadTracking::SetDisplaySize (float w, float h)
 	DISPLAY_RW_HEIGHT = h;
 	
 	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
+
+
 }
 
 void StereoKinectHeadTracking::SetZPlanes (float znear, float zfar)
@@ -246,4 +270,9 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::mat4& leftProj, glm::mat4& 
 void StereoKinectHeadTracking::SetPredictionFactor(glm::vec3 factor)
 {
 	m_headPosition.predictionFactor = factor;
+}
+
+glm::vec3 StereoKinectHeadTracking::GetSensorOriginOnVirtualWorld()
+{
+	return vwSensorOrigin;
 }

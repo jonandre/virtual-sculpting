@@ -128,6 +128,9 @@ SDLContext::SDLContext()
 	lastTick = SDL_GetTicks();
 	lastFPSTick = lastTick;
 
+	speed = 1.0f;
+	depth = wantedDepth = 0.0f;
+
 	std::cout << "SDLContext initialized" << std::endl;
 }
 
@@ -156,30 +159,39 @@ void SDLContext::doMessage()
 			{
 				running = false;
 			}
-			else 
-			{
-				if ( e.type == SDL_KEYDOWN )
-				{			
-					std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
-					inp->OnKeyPressed(e.key.keysym.sym);
+		else 
+		{
+			if ( e.type == SDL_KEYDOWN )
+			{			
+				//std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
+				//inp->OnKeyPressed(e.key.keysym.sym);
+
+				if (e.key.keysym.sym == SDLK_UP){
+					wantedDepth += 0.5f;
+					//std::cout << "Up pressed" << std::endl;
 				}
-				/*else if ( msg.message == WM_LBUTTONDOWN )
-				{
-					inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
+				else if (e.key.keysym.sym == SDLK_DOWN){
+					wantedDepth -= 0.5f;
+					//std::cout << "Down pressed" << std::endl;
 				}
-				else if ( msg.message == WM_LBUTTONUP)
-				{
-					inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
-				}
-				else if ( msg.message == WM_MOUSEMOVE )
-				{
-					inp->OnMouseMove(msg.pt.x, msg.pt.y);
-				}
-				else if ( msg.message == WM_MOUSEWHEEL )
-				{
-					inp->OnSroll( GET_WHEEL_DELTA_WPARAM(msg.wParam) );
-				}*/
 			}
+			/*else if ( msg.message == WM_LBUTTONDOWN )
+			{
+				inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
+			}
+			else if ( msg.message == WM_LBUTTONUP)
+			{
+				inp->OnMouseLBUp(msg.pt.x, msg.pt.y);
+			}
+			else if ( msg.message == WM_MOUSEMOVE )
+			{
+				inp->OnMouseMove(msg.pt.x, msg.pt.y);
+			}
+			else if ( msg.message == WM_MOUSEWHEEL )
+			{
+				inp->OnSroll( GET_WHEEL_DELTA_WPARAM(msg.wParam) );
+			}*/
+		}
 //			TranslateMessage(&msg);
 //			DispatchMessage(&msg);
 		}
@@ -191,7 +203,7 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 
 	headTracking->SetDisplaySize(4.0055f,  2.430f);
 	headTracking->SetEyeDistance(0.065f);
-	headTracking->SetSensorPosition(0.0f, -(2.430f/2.0f - 0.40f), 0.2f);
+	headTracking->SetSensorPosition(0.0f, -(2.430f/2.0f - 0.40f), 0.3f);
 	headTracking->SetScreemFacing(true);
 }
 
@@ -220,7 +232,8 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 
 	headTracking->RetrieveMatrices(leftProj, leftEye, rightProj, rightEye);
 
-	glm::vec3 immersionTranslation(0.0, 0.0, float(side)*0.5f);
+	glm::vec3 immersionTranslation (0.0f, 0.0f, depth*side);
+	
 	glm::mat4 immersiveView = glm::translate(glm::mat4(1.0f), immersionTranslation);
 
 	render->SetProjections(leftProj, rightProj);
@@ -252,8 +265,9 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 
 	if (tick - lastFPSTick > FPSPeriod) {
 		std::cout << "FPS: " << FPS << std::endl;
-
 		lastFPSTick = tick;
 	}
+
+	depth = depth*(speed - frameTime)/speed + wantedDepth*frameTime/speed;
 }
 

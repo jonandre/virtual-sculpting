@@ -60,6 +60,13 @@ private:
 	int lastFPSTick;
 	static const int FPSPeriod = 1000;
 	float FPS;
+
+	// PROVISIONAL
+
+	float depth;
+	float speed;
+	float wantedDepth;
+
 protected:
 	bool running;
 };
