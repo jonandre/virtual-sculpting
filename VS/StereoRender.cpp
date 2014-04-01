@@ -90,7 +90,6 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 
 	glm::mat4 projectionMatrix = (left)? projectionMatrixLeft : projectionMatrixRight;
 
-	///////////////////////////////   START OF MESH DRAWTING   ///////////////////////////////////
 	// Specifies whether the depth buffer is enabled for writing.
 	glDepthMask(GL_TRUE);
 
@@ -105,6 +104,13 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	// save the gpu from using unneccesary alpha calculations
 	glDisable(GL_BLEND);
 
+	///////////////////////////   START OF ROOM DRAWTING   ///////////////////////////////////
+
+
+
+	///////////////////////////   END OF ROOM DRAWTING   ///////////////////////////////////
+
+	///////////////////////////////   START OF MESH DRAWTING   ///////////////////////////////////
 	/* Use mesh shader */
 	shader->bind();
 
