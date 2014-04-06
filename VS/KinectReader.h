@@ -22,6 +22,8 @@ struct Point;
 
 #include "StereoKinectHeadTracking.h"
 
+#include <vector>
+
 /// <summary>
 /// Application class for using kinect.
 /// </summary>
@@ -34,8 +36,12 @@ public:
 	~KinectReader();
 
 	void Init(StereoKinectHeadTracking* headTracking);
+	
+	StereoKinectHeadTracking* GetHeadTracking();
 
 	float* GetDepth();
+	vector<DepthImagePoint>& GetDepthVector();
+	DepthImageFormat GetDepthImageFormat();
 	void ProcessDepth();
 
 	/* Voice Recognition Start */
@@ -79,6 +85,8 @@ private:
 	unsigned int _min_depth;
 	unsigned int _max_depth;
 	float        _active_depth;
+	
+	StereoKinectHeadTracking* m_headTracking;
 
 	// Current Kinect
     INuiSensor*      m_pNuiSensor;
@@ -87,6 +95,8 @@ private:
     static const int cBytesPerPixel = 1;
 
 	float*					m_depth;
+	vector<DepthImagePoint> m_depthVector;
+	DepthImageFormat		m_depthImageFormat;
 	
     /// Create the first connected Kinect found.
 	HRESULT                 CreateFirstConnected(StereoKinectHeadTracking* headTracking);

@@ -21,8 +21,6 @@ SDLContext::SDLContext()
 
 	std::cout << "Number of displays detected: " << SDL_GetNumVideoDisplays() << std::endl;
 
-	int hackPixels = 0;
-
 	// Main Window
 #ifdef VIC4K
 	SCREEN_WIDTH = 4096;
@@ -32,7 +30,7 @@ SDLContext::SDLContext()
 	SCREEN_WIDTH = 1920;
 	SCREEN_HEIGHT = 1080;
 #endif
-	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH-hackPixels, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
+	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
 #ifndef VIC4K
 #if (STEREO == 0)
 		| SDL_WINDOW_FULLSCREEN_DESKTOP
@@ -58,7 +56,7 @@ SDLContext::SDLContext()
 #if (STEREO > 0)
 	{
 		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
-		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH-hackPixels, 0, SCREEN_WIDTH+hackPixels, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
+		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
 		rendererRight = SDL_CreateRenderer(windowRight, -1, SDL_RENDERER_ACCELERATED);
 		SDL_GetWindowSize(windowRight, &w, &h);
 		std::cout << "Right Window created, size: " << w << " x " << h << std::endl;
@@ -204,7 +202,7 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	headTracking->SetDisplaySize(4.0055f,  2.430f);
 	headTracking->SetEyeDistance(0.065f);
 	headTracking->SetSensorPosition(0.0f, -(2.430f/2.0f - 0.40f), 0.3f);
-	headTracking->SetScreemFacing(true);
+	headTracking->SetScreenFacing(true);
 }
 
 

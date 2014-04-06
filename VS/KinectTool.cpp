@@ -140,7 +140,9 @@ void KinectTool::DoToolUpdate()
 	//memfence again
 	
 	/* Uppdates the trinegel mesh */
-	_msh->UpdateDepth( depth_ptr );
+	//_msh->UpdateDepth( depth_ptr );
+	_msh->UpdateDepth( _reader->GetHeadTracking(), _reader->GetDepthImageFormat(), _reader->GetDepthVector() );
+	
 	//memfence again
 	//or you can combine both calls into one ( basically same happens there ), BUT with blur I see no way to do it.
 	//So the best way to parralelize it - SIMD-like paralelization inside of each function.

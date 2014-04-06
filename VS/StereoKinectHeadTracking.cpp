@@ -3,27 +3,12 @@
 
 #define DEG_TO_RAD ((2.0*3.14159265358979323846264338327950288) / 360.0)
 
-glm::vec3 StereoKinectHeadTracking::SensorRelPoint::Predict (float deltaTime)
-{
-	glm::vec3 ret;
-	float deltaTime2 = deltaTime*deltaTime;
-	float deltaTime3 = deltaTime2*deltaTime;
-
-	float accC = 1.0f/2.0f;
-	float jerkC = 1.0f/6.0f*2.0f;
-
-	ret.x = vel.x*deltaTime + accC*acc.x*deltaTime2 + jerkC*jerk.x*deltaTime3;
-	ret.y = vel.y*deltaTime + accC*acc.y*deltaTime2 + jerkC*jerk.y*deltaTime3;
-	ret.z = vel.z*deltaTime + accC*acc.z*deltaTime2 + jerkC*jerk.z*deltaTime3;
-
-	return ret;
-}
-
 void StereoKinectHeadTracking::Fail (std::string s) {
 	std::cout << "StereoKinectHeadTracking: " << s << std::endl;
 	m_ready = false;
 }
 
+// Creator
 StereoKinectHeadTracking::StereoKinectHeadTracking() :
 	m_ready(false), FACE_SCREEN(false)
 {
@@ -111,33 +96,10 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 				//|| headState == NUI_SKELETON_POSITION_INFERRED
 				) continue; // We don't have the head of this skeleton
 
-			//NuiTransformSkeletonToDepthImage(skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD], &m_headPosition.x, &m_headPosition.y, &m_headPosition.z);
-
 			// Real world coordinates transform (in meters)
-			m_headPosition.lastRwPos = m_headPosition.rwPos;
-
 			m_headPosition.rwPos.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].x;
 			m_headPosition.rwPos.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
 			m_headPosition.rwPos.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
-
-			/*glm::vec3 vel, acc, jerk;
-			vel = (m_headPosition.rwPos - m_headPosition.lastRwPos) / deltaTime;
-			acc = (vel - m_headPosition.vel) / deltaTime;
-			jerk = (acc - m_headPosition.acc) / deltaTime;
-
-			// Smoothing factor
-			float sf = 0.6f;
-			m_headPosition.vel = m_headPosition.vel*sf + vel*(1.0f - sf);
-			m_headPosition.acc = m_headPosition.acc*sf + acc*(1.0f - sf);
-			m_headPosition.jerk = m_headPosition.jerk*sf + jerk*(1.0f - sf);
-
-			glm::vec3 pred = m_headPosition.Predict(deltaTime*2.0f);*/
-
-			// Virtual world
-			/*m_headPosition.vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x + pred.x*m_headPosition.predictionFactor.x) * RW_TO_VW_RATIO;
-			m_headPosition.vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + pred.y*m_headPosition.predictionFactor.y) * RW_TO_VW_RATIO;
-			m_headPosition.vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + pred.z*m_headPosition.predictionFactor.z) * RW_TO_VW_RATIO;
-			*/
 
 			m_headPosition.vwPos = SensorToVirtualWorldCoordinates(m_headPosition.rwPos);
 
@@ -148,6 +110,16 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 
 glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sPos) {
 	glm::vec3 vwPos;
+
+	vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x) * RW_TO_VW_RATIO;
+	vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+	vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+
+	return vwPos;
+}
+
+glm::vec3 StereoKinectHeadTracking::RealWorldToSensorCoordinates (glm::vec3 rwPos) {
+	glm::vec3 sPos;
 
 	vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x) * RW_TO_VW_RATIO;
 	vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
@@ -178,6 +150,11 @@ void StereoKinectHeadTracking::SetDisplaySize (float w, float h)
 
 }
 
+void StereoKinectHeadTracking::SetSensorFloorAngle (float angle) 
+{
+	SENSOR_ANGLE += angle;
+}
+
 void StereoKinectHeadTracking::SetZPlanes (float znear, float zfar)
 {
 	ZNEAR = znear;
@@ -201,7 +178,7 @@ float StereoKinectHeadTracking::GetRealToVirtualWorldRatio()
 	return RW_TO_VW_RATIO;
 }
 
-void StereoKinectHeadTracking::SetScreemFacing (bool on)
+void StereoKinectHeadTracking::SetScreenFacing (bool on)
 {
 	FACE_SCREEN = on;
 }
@@ -265,11 +242,6 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::mat4& leftProj, glm::mat4& 
 	rightProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
 	rightEye = glm::translate(glm::mat4(1.0f), -head);
 	rightEye = glm::translate(rightEye, -glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f));
-}
-
-void StereoKinectHeadTracking::SetPredictionFactor(glm::vec3 factor)
-{
-	m_headPosition.predictionFactor = factor;
 }
 
 glm::vec3 StereoKinectHeadTracking::GetSensorOriginOnVirtualWorld()

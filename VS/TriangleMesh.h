@@ -9,6 +9,7 @@ public:
 	TriangleMesh( unsigned int x, unsigned int y, float _start_x, float start_y, float end_x, float end_y, float start_z );
 	~TriangleMesh();
 	void UpdateDepth( float* _depth_map );
+	void UpdateDepth( StereoKinectHeadTracking* tracking, DepthImageFormat format, vector<DepthImagePoint>& points );
 	VAO* GetVAO();
 	Point* GetPoints();
 private:

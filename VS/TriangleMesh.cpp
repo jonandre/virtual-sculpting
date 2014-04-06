@@ -2,6 +2,7 @@
 #include "main.h"
 #include "VBO.h"
 #include "VAO.h"
+#include "StereoKinectHeadTracking.h"
 
 TriangleMesh::TriangleMesh()
 {
@@ -73,6 +74,22 @@ void TriangleMesh::UpdateDepth( float* _depth_map )
 		for ( unsigned int j = 0; j < _y; j++ )
 		{
 			_mesh[ i*_y + j ].coord[2] = _start_z + _depth_map[ (_y-j-1)*_x + i ];
+		}
+	}
+	UpdateVBO();
+}
+
+void TriangleMesh::UpdateDepth( StereoKinectHeadTracking* tracking, DepthImageFormat format, vector<DepthImagePoint>& points )
+{
+	for ( unsigned int i = 0; i < _x; i++ )
+	{
+		for ( unsigned int j = 0; j < _y; j++ )
+		{
+			SkeletonPoint p = MapDepthPointToSkeleton(format, points[(_y-j-1)*_x + i]);
+			glm::vec3 vwPoint = tracking->SensorToVirtualWorldCoordinates(glm::vec3(p.X, p.Y, p.Z));
+			_mesh[ i*_y + j ].coord[0] = vwPoint.x;
+			_mesh[ i*_y + j ].coord[1] = vwPoint.y;
+			_mesh[ i*_y + j ].coord[2] = vwPoint.z;
 		}
 	}
 	UpdateVBO();
