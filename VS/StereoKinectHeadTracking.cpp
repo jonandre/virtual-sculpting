@@ -97,6 +97,7 @@ void StereoKinectHeadTracking::Update (float deltaTime)
     // smooth out the skeleton data
     m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, &SMOOTHING_PARAMS);
 	
+	float minDistance = 999999.0f;
     for (int i = 0 ; i < NUI_SKELETON_COUNT; ++i)
     {
 		const NUI_SKELETON_DATA& skel = skeletonFrame.SkeletonData[i];
@@ -120,6 +121,9 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			m_headPosition.rwPos.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
 			m_headPosition.rwPos.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
+			if (m_headPosition.rwPos.z > minDistance) continue;
+			minDistance = m_headPosition.rwPos.z;
+
 			/*glm::vec3 vel, acc, jerk;
 			vel = (m_headPosition.rwPos - m_headPosition.lastRwPos) / deltaTime;
 			acc = (vel - m_headPosition.vel) / deltaTime;
@@ -140,8 +144,6 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			*/
 
 			m_headPosition.vwPos = SensorToVirtualWorldCoordinates(m_headPosition.rwPos);
-
-			break; // we just want a skeleton
         }
     }
 }
@@ -149,9 +151,9 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sPos) {
 	glm::vec3 vwPos;
 
-	vwPos.x = (SENSOR_RW_POS_X + m_headPosition.rwPos.x) * RW_TO_VW_RATIO;
-	vwPos.y = (SENSOR_RW_POS_Y + m_headPosition.rwPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
-	vwPos.z = (SENSOR_RW_POS_Z - m_headPosition.rwPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + m_headPosition.rwPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+	vwPos.x = (SENSOR_RW_POS_X + sPos.x) * RW_TO_VW_RATIO;
+	vwPos.y = (SENSOR_RW_POS_Y + sPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+	vwPos.z = (SENSOR_RW_POS_Z - sPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
 
 	return vwPos;
 }

@@ -157,63 +157,63 @@ void Input::Quit()
 
 
 
-void Input::OnKeyPressed( char c )
+void Input::OnKeyPressed( SDL_Keycode c )
 {
 	switch (c)
 	{
 		// Clear rotation...
-		case 'R':
+		case SDLK_r:
 			clearRotationGridModel();
-		case 'F':
+		case SDLK_f:
 			freezGridModel();	//Freeze
 			break;
 
-		case 'I':   newGridModel(false);		break;
-		case 'C':   newGridModel(true);			break;
+		case SDLK_i:   newGridModel(false);		break;
+		case SDLK_c:   newGridModel(true);			break;
 			
 		/// X Vertical rotation
-		case 'W':  rotateXGridModel(+1);		break;
-		case 'S':  rotateXGridModel(-1);		break;
+		case SDLK_w:  rotateXGridModel(+1);		break;
+		case SDLK_s:  rotateXGridModel(-1);		break;
 
 		/// Y Horizontal rotation
-		case 'D':  rotateYGridModel(+1);		break;
-		case 'A':  rotateYGridModel(-1);		break;
+		case SDLK_d:  rotateYGridModel(+1);		break;
+		case SDLK_a:  rotateYGridModel(-1);		break;
 
 		/// Z Clockwise rotation
-		case 'Q':  rotateZGridModel(-1);		break;
-		case 'E':  rotateZGridModel(+1);		break;
+		case SDLK_q:  rotateZGridModel(-1);		break;
+		case SDLK_e:  rotateZGridModel(+1);		break;
 			
 		// Rotation increase/decrease
-		case 'G':  rotateFaster();				break;
-		case 'V':  rotateSlower();				break;
+		case SDLK_g:  rotateFaster();				break;
+		case SDLK_v:  rotateSlower();				break;
 
 		/// Haptics
-		case 'H':  SetHapticsStage(true);		break;
-		case 'J':  SetHapticsStage(false);		break;
+		case SDLK_h:  SetHapticsStage(true);		break;
+		case SDLK_j:  SetHapticsStage(false);		break;
 
 		/// Haptics
-		case 'K':  SetSoundStage(true);			break;
-		case 'L':  SetSoundStage(false);		break;
+		case SDLK_k:  SetSoundStage(true);			break;
+		case SDLK_l:  SetSoundStage(false);		break;
 
 		/// Camera
-		case '4':  cameraRotationViewLeft();    break;
-		case '6':  cameraRotationViewRight();   break;
-		case '2':  cameraRotationViewBottom();  break;
-		case '8':  cameraRotationViewTop();		break;
-		case '5':  cameraRotationViewFront();	break;
+		case SDLK_4:  cameraRotationViewLeft();    break;
+		case SDLK_6:  cameraRotationViewRight();   break;
+		case SDLK_2:  cameraRotationViewBottom();  break;
+		case SDLK_8:  cameraRotationViewTop();		break;
+		case SDLK_5:  cameraRotationViewFront();	break;
 
-		case '\t':  viewDrawStage ^= true;		break;
+		case SDLK_TAB:  viewDrawStage ^= true;		break;
 
 		/// ESC
-		case '\033':  Quit();					break;
-		case 'P': speechON ^= true;				break;
-		case 'O': hapticsConnected ^= true;			break;
+		case SDLK_ESCAPE:  Quit();					break;
+		case SDLK_p: speechON ^= true;				break;
+		case SDLK_o: hapticsConnected ^= true;			break;
 			
 		/// ON OFF sculpting
-		case ' ':
+		case SDLK_SPACE:
 			SetPressedStage(GetPressedStage() ^ true);
 			break;
-		case 'X':
+		case SDLK_x:
 			fps_regulation ^= true;
 			break;
 		

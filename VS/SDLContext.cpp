@@ -129,7 +129,8 @@ SDLContext::SDLContext()
 	lastFPSTick = lastTick;
 
 	speed = 1.0f;
-	depth = wantedDepth = 0.0f;
+	depth = 0.0f;
+	wantedDepth = 0.5f;
 
 	std::cout << "SDLContext initialized" << std::endl;
 }
@@ -164,8 +165,8 @@ void SDLContext::doMessage()
 			if ( e.type == SDL_KEYDOWN )
 			{			
 				//std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
-				//inp->OnKeyPressed(e.key.keysym.sym); //TODO
-				/*
+				inp->OnKeyPressed(e.key.keysym.sym); //TODO
+				
 				if (e.key.keysym.sym == SDLK_UP){
 					wantedDepth += 0.5f;
 					//std::cout << "Up pressed" << std::endl;
@@ -173,7 +174,7 @@ void SDLContext::doMessage()
 				else if (e.key.keysym.sym == SDLK_DOWN){
 					wantedDepth -= 0.5f;
 					//std::cout << "Down pressed" << std::endl;
-				}*/
+				}
 			}
 			/*else if ( msg.message == WM_LBUTTONDOWN )
 			{

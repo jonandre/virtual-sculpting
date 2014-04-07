@@ -2,6 +2,7 @@
 #define _INPUT_HPP_
 
 #include "main.h"
+#include "SDL.h"
 #include <vector>
 
 
@@ -18,7 +19,7 @@ public:
 
 
 	
-	void OnKeyPressed( char c );
+	void OnKeyPressed( SDL_Keycode c );
 	void OnMouseLBDown( int x, int y );
 	void OnMouseMove( int dx, int dy );
 	void OnMouseLBUp( int x, int y );
