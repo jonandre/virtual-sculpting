@@ -153,14 +153,13 @@ HRESULT KinectReader::CreateFirstConnected(StereoKinectHeadTracking* headTrackin
 	
 	printf("Kinect found. \n");
 	
-	// Done properly
-	//m_depthImageFormat = DepthImageFormat.Resolution640x480Fps30;
-	
+	// Done properly	
 	m_depthVector.resize(cDepthWidth*cDepthHeight);
 	
-	for (int i = 0; i < m_depthVector.size(); ++i) {
+	for (unsigned int i = 0; i < m_depthVector.size(); ++i) {
 		m_depthVector[i].x = i%cDepthWidth;
-		m_depthVector[i].x = i/cDepthHeight;
+		m_depthVector[i].y = i/cDepthWidth;
+		m_depthVector[i].depth = 255;
 	}
 	// Done properly
 
@@ -253,7 +252,7 @@ void KinectReader::ProcessDepth()
             // discard the portion of the depth that contains only the player index
             USHORT depth = pBufferRun->depth;
 
-			m_depthVector[aux].depth = (long)depth;
+			m_depthVector[aux].depth = (depth >= minDepth)? depth : 4000;
 			
             // To convert to a byte, we're discarding the most-significant
             // rather than least-significant bits.

@@ -133,7 +133,7 @@ void StereoKinectHeadTracking::SetViewportSize (float w, float h) {
 	VIEWPORT_WIDTH = w;
 	VIEWPORT_HEIGHT = h;
 
-	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
+	ViewportChanged();
 }
 
 void StereoKinectHeadTracking::SetDisplaySize (float w, float h)
@@ -141,9 +141,7 @@ void StereoKinectHeadTracking::SetDisplaySize (float w, float h)
 	DISPLAY_RW_WIDTH = w;
 	DISPLAY_RW_HEIGHT = h;
 	
-	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
-
-
+	ViewportChanged();
 }
 
 void StereoKinectHeadTracking::SetSensorFloorAngle (float angle) 
@@ -159,6 +157,7 @@ void StereoKinectHeadTracking::SetZPlanes (float znear, float zfar)
 
 void StereoKinectHeadTracking::SetEyeDistance(float eyeDistance)
 {
+	RW_EYE_DISTANCE = eyeDistance;
 	EYE_DISTANCE = eyeDistance;
 }
 
@@ -248,4 +247,10 @@ glm::vec3 StereoKinectHeadTracking::GetSensorOriginOnVirtualWorld()
 INuiSensor* StereoKinectHeadTracking::GetSensor()
 {
 	return m_pNuiSensor;
+}
+
+void StereoKinectHeadTracking::ViewportChanged()
+{
+	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
+	EYE_DISTANCE = RW_EYE_DISTANCE * RW_TO_VW_RATIO;
 }

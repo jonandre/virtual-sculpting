@@ -46,7 +46,7 @@ void SpeechController::DoAction(SpeechAction action)
 		case SpeechActionBegin:
 			if (speechON)
 			{
-				SetPressedStage(true);
+				SetPressedStage(GetPressedStage() ^ true);
 				printf("Beginning sculpting. \n");
 				lastWord = 2;
 			}

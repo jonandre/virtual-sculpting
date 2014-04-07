@@ -50,6 +50,7 @@ public:
 	glm::vec3 SensorToVirtualWorldCoordinates(glm::vec3 sPos);
 	
 private:
+	float RW_EYE_DISTANCE;
 	float EYE_DISTANCE;
 	float DISPLAY_RW_WIDTH, DISPLAY_RW_HEIGHT;
 	float VIEWPORT_WIDTH, VIEWPORT_HEIGHT;
@@ -79,6 +80,8 @@ private:
 	void Fail (std::string s);	
 
 	glm::vec3 vwSensorOrigin;
+
+	void ViewportChanged();
 };
 
 #endif // STEREO_KINECT_HEAD_TRACKING_H
