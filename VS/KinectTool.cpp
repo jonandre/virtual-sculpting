@@ -1,10 +1,4 @@
 #include "KinectTool.h"
-#include "TriangleMesh.h"
-#include "KinectReader.h"
-#include "GridModel.h"
-#include "Shader.h"
-#include "GraphicsLib.h"
-#include "main.h"
 
 #define PAD_DEPTH 50
 #define DIR_Z_STEP 1.0f;
@@ -141,6 +135,8 @@ void KinectTool::DoToolUpdate()
 	
 	/* Uppdates the trinegel mesh */
 	_msh->UpdateDepth( depth_ptr );
+	//_msh->UpdateDepth( _reader->GetHeadTracking(), _reader->GetDepthVector() );
+	
 	//memfence again
 	//or you can combine both calls into one ( basically same happens there ), BUT with blur I see no way to do it.
 	//So the best way to parralelize it - SIMD-like paralelization inside of each function.

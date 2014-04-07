@@ -1,10 +1,18 @@
-class GridModel;
+#ifndef STEREO_RENDER_H
+#define STEREO_RENDER_H
+
 #include "Shader.h"
 #include "main.h"
 
-#include "texturemappedfont.h"
+#include "GraphicsLib.h"
+#include "GridModel.h"
+#include "VAO.h"
+#include "KinectTool.h"
+#include "TriangleMesh.h"
+#include <time.h>
 
-class KinectTool;
+#include "texturemappedfont.h"
+#include "Stage.h"
 
 class StereoRender
 {
@@ -61,3 +69,5 @@ private:
 
 	void DrawingBottomText(TextureMappedFont* font3);
 };
+
+#endif // STEREO_RENDER_H

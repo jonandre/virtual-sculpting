@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SDL_CONTEXT_H
+#define SDL_CONTEXT_H
 
 #define VIC4K
 
@@ -71,3 +72,4 @@ protected:
 	bool running;
 };
 
+#endif // SDL_CONTEXT_H

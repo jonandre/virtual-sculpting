@@ -1,8 +1,5 @@
 #include "VAO.h"
-#include "VBO.h"
-#include "GraphicsLib.h"
 
-#include "main.h"
 /**
  * Creats a new Vertex Array Output 
  * Generats a open gl Vertex array 

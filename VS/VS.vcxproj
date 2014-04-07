@@ -162,7 +162,6 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="GLContext.cpp" />
     <ClCompile Include="GLSLShader.cpp" />
     <ClCompile Include="GridModel.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -173,7 +172,6 @@
     <ClCompile Include="load_bmp.cpp" />
     <ClCompile Include="mat_matr.cpp" />
     <ClCompile Include="Mesh.cpp" />
-    <ClCompile Include="Render.cpp" />
     <ClCompile Include="Room.cpp" />
     <ClCompile Include="SDLContext.cpp" />
     <ClCompile Include="Shader.cpp" />
@@ -192,7 +190,6 @@
     <ClCompile Include="VS.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GLContext.h" />
     <ClInclude Include="GLSLShader.h" />
     <ClInclude Include="GraphicsLib.h" />
     <ClInclude Include="GridModel.h" />
@@ -205,8 +202,6 @@
     <ClInclude Include="main.h" />
     <ClInclude Include="mat_matr.h" />
     <ClInclude Include="Mesh.h" />
-    <ClInclude Include="Model.h" />
-    <ClInclude Include="Render.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Room.h" />
     <ClInclude Include="SDLContext.h" />

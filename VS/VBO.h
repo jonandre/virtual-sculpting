@@ -1,6 +1,8 @@
-struct Point;
-struct Color;
-struct Normal;
+#ifndef VBO_H
+#define VBO_H
+
+#include "GraphicsLib.h"
+#include "main.h"
 
 class VBO
 {
@@ -19,3 +21,5 @@ private:
 	unsigned int sz;
 	unsigned int vbo_cnt;
 };
+
+#endif // VBO_H

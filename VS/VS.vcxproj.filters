@@ -75,12 +75,6 @@
     <ClCompile Include="VBO.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="GLContext.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -182,20 +176,11 @@
     <ClInclude Include="load_bmp.h">
       <Filter>Header Files\Text</Filter>
     </ClInclude>
-    <ClInclude Include="Model.h">
-      <Filter>Header Files\Tool</Filter>
-    </ClInclude>
     <ClInclude Include="TriangleMesh.h">
       <Filter>Header Files\Tool</Filter>
     </ClInclude>
     <ClInclude Include="Text.h">
       <Filter>Header Files\Text</Filter>
-    </ClInclude>
-    <ClInclude Include="Render.h">
-      <Filter>Header Files\Rendering</Filter>
-    </ClInclude>
-    <ClInclude Include="GLContext.h">
-      <Filter>Header Files\Rendering</Filter>
     </ClInclude>
     <ClInclude Include="TextureMappedFont.h">
       <Filter>Header Files\Text</Filter>

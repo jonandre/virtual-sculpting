@@ -1,14 +1,15 @@
-#pragma once
+#ifndef KINECT_TOOL_H
+#define KINECT_TOOL_H
+
 //Incapsulates all necessary objects for kinect interaction + visual representation
 #include "main.h"
 #include <pthread.h>
 #include <sched.h> /* I think phreads-w32 has a built in way for getting the processor count */
-
-class TriangleMesh;
-class KinectReader;
-class GridModel;
-class VAO;
-class Shader;
+#include "TriangleMesh.h"
+#include "KinectReader.h"
+#include "GridModel.h"
+#include "Shader.h"
+#include "GraphicsLib.h"
 
 void* SpeechThreed(void*);
 
@@ -45,4 +46,6 @@ private:
 	void parallellise(long cpu, long beginning, long stop);
 
 };
+
+#endif // KINECT_TOOL_H
 

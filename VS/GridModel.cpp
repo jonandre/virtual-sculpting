@@ -1,6 +1,5 @@
 #include "GridModel.h"
-#include "VoxelChunk.h"
-#include "VoxelBlock.h"
+
 #include <pthread.h>
 
 #define USE_SPINLOCK

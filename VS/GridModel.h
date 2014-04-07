@@ -1,11 +1,13 @@
-#include "Model.h"
+#ifndef GRID_MODEL_H
+#define GRID_MODEL_H
+
 #include "main.h"
 #include <vector>
 #include <map>
-class VoxelChunk;
-class VAO;
+#include "VoxelChunk.h"
+#include "VoxelBlock.h"
 
-class GridModel: public Model
+class GridModel
 {
 public:
 	GridModel();
@@ -44,3 +46,5 @@ private:
 	unsigned int internal_chunk_size;
 	unsigned int power_for_chunk;
 };
+
+#endif // GRID_MODEL_H

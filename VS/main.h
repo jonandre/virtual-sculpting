@@ -1,4 +1,9 @@
-#pragma once
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <Winsock.h>
+#include <Windows.h>
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -62,3 +67,5 @@ static string textFileRead(const char *fileName)
 
     return fileString;
 }
+
+#endif // MAIN_H

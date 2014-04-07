@@ -1,7 +1,5 @@
 #include "VBO.h"
-#include "GraphicsLib.h"
 
-#include "main.h"
 VBO::VBO( const Point* vrt, const Color* clr, unsigned int* indices, unsigned int len, unsigned int indices_len, float* uv, const Normal* nrm )
 {
 	sz = len;

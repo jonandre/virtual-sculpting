@@ -1,11 +1,13 @@
-#define SDLCONTEXT
+#include "main.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <sys/types.h>
+#include <iostream>
+#include <MMSystem.h>
 
 #include "GridModel.h"
-#ifdef SDLCONTEXT
 #include "SDLContext.h"
-#else
-#include "GLContext.h"
-#endif
 
 #include <time.h>
 #include "KinectTool.h"
@@ -15,15 +17,6 @@
 #include "Soundify.h"
 #include "texturemappedfont.h"
 #include "Stage.h"
-
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <sys/types.h>
-#include <Winsock.h>
-#include <Windows.h>
-#include <iostream>
-#include <MMSystem.h>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -113,11 +106,7 @@ int main( int argc, char** argv)
 	new Stage();
 
 	/* Initates the screen and its context */
-	#ifdef SDLCONTEXT
-	SDLContext* cntx = new SDLContext();//Window+render.
-	#else
-	GLContext* cntx = new GLContext();//Window+render.
-	#endif
+	SDLContext* cntx = new SDLContext();//Window+render
 	
 	/* Initilaizes the input */
 	Input* inp = new Input();//Input system.

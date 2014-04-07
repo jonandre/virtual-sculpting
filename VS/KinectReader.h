@@ -1,8 +1,9 @@
-#pragma once
+#ifndef KINECT_READER_H
+#define KINECT_READER_H
+
 #include "Windows.h"
-struct INuiSensor;
-//#include "NuiImageCamera.h"
-struct Point;
+#include "NuiApi.h"
+
 /* Voice Recognition Start */
 #include "SpeechController.h"
 // For configuring DMO properties
@@ -22,6 +23,8 @@ struct Point;
 
 #include "StereoKinectHeadTracking.h"
 
+#include <vector>
+
 /// <summary>
 /// Application class for using kinect.
 /// </summary>
@@ -34,8 +37,11 @@ public:
 	~KinectReader();
 
 	void Init(StereoKinectHeadTracking* headTracking);
+	
+	StereoKinectHeadTracking* GetHeadTracking();
 
 	float* GetDepth();
+	vector<NUI_DEPTH_IMAGE_POINT>& GetDepthVector();
 	void ProcessDepth();
 
 	/* Voice Recognition Start */
@@ -79,6 +85,8 @@ private:
 	unsigned int _min_depth;
 	unsigned int _max_depth;
 	float        _active_depth;
+	
+	StereoKinectHeadTracking* m_headTracking;
 
 	// Current Kinect
     INuiSensor*      m_pNuiSensor;
@@ -87,6 +95,7 @@ private:
     static const int cBytesPerPixel = 1;
 
 	float*					m_depth;
+	vector<NUI_DEPTH_IMAGE_POINT> m_depthVector;
 	
     /// Create the first connected Kinect found.
 	HRESULT                 CreateFirstConnected(StereoKinectHeadTracking* headTracking);
@@ -100,3 +109,4 @@ private:
 	//void DrawSkeleton(NUI_SKELETON_DATA*);
 };
 
+#endif // KINECT_READER_H

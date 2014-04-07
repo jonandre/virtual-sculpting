@@ -1,13 +1,4 @@
 #include "StereoRender.h"
-#include "GraphicsLib.h"
-#include "GridModel.h"
-#include "VAO.h"
-#include "KinectTool.h"
-#include "TriangleMesh.h"
-#include <time.h>
-
-#include "texturemappedfont.h"
-#include "Stage.h"
 
 const float StereoRender::FOV = 30.0f;
 const float StereoRender::ZNEAR = 0.1f;

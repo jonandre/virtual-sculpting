@@ -5,9 +5,8 @@
 #include "SDL.h"
 #include <vector>
 
+#include "GridModel.h"
 
-
-class GridModel;
 class Input
 {
 public:

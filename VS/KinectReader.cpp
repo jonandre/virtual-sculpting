@@ -1,10 +1,10 @@
 #include "KinectReader.h"
+
 #include "main.h"
+
 // For Kinect SDK APIs
-#include "NuiApi.h"
 /* Voice Recognition Start */
 #include "stdafx.h"
-#include "resource.h"
 #include <guiddef.h>
 
 #define INITGUID
@@ -88,6 +88,8 @@ HRESULT KinectReader::CreateFirstConnected(StereoKinectHeadTracking* headTrackin
 {
     INuiSensor * pNuiSensor = NULL;
     HRESULT hr;
+	
+	m_headTracking = headTracking;
 
     int iSensorCount = 0;
     hr = NuiGetSensorCount(&iSensorCount);
@@ -150,6 +152,17 @@ HRESULT KinectReader::CreateFirstConnected(StereoKinectHeadTracking* headTrackin
     }
 	
 	printf("Kinect found. \n");
+	
+	// Done properly
+	//m_depthImageFormat = DepthImageFormat.Resolution640x480Fps30;
+	
+	m_depthVector.resize(cDepthWidth*cDepthHeight);
+	
+	for (int i = 0; i < m_depthVector.size(); ++i) {
+		m_depthVector[i].x = i%cDepthWidth;
+		m_depthVector[i].x = i/cDepthHeight;
+	}
+	// Done properly
 
 	/* Speech start */
 
@@ -234,11 +247,14 @@ void KinectReader::ProcessDepth()
 		float float_per_depth_unit = _active_depth/float(delta_depth );
 		static int t=0;
 		++t;
+		int aux = 0;
         while ( pBufferRun < pBufferEnd )
         {
             // discard the portion of the depth that contains only the player index
             USHORT depth = pBufferRun->depth;
 
+			m_depthVector[aux].depth = (long)depth;
+			
             // To convert to a byte, we're discarding the most-significant
             // rather than least-significant bits.
             // We're preserving detail, although the intensity will "wrap."
@@ -256,6 +272,7 @@ void KinectReader::ProcessDepth()
 
             // Increment our index into the Kinect's depth buffer
             ++pBufferRun;
+			++aux;
         }
 
         // Draw the data with Direct2D
@@ -277,6 +294,16 @@ void KinectReader::ProcessDepth()
 float* KinectReader::GetDepth()
 {
 	return m_depth;
+}
+
+vector<NUI_DEPTH_IMAGE_POINT>& KinectReader::GetDepthVector()
+{
+	return m_depthVector;
+}
+
+StereoKinectHeadTracking* KinectReader::GetHeadTracking()
+{
+	return m_headTracking;
 }
 
 /// <summary>

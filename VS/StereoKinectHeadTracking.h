@@ -1,12 +1,10 @@
-#pragma once
+#ifndef STEREO_KINECT_HEAD_TRACKING_H
+#define STEREO_KINECT_HEAD_TRACKING_H
 
 #include "Windows.h"
 #include "glm\glm.hpp"
 #include "glm\gtc\matrix_transform.hpp"
-
-
-struct INuiSensor;
-
+#include "NuiApi.h"
 #include <iostream>
 #include <string>
 
@@ -20,8 +18,18 @@ public:
 	void Init(INuiSensor* sensor);
 
 	void Update(float deltaTime);
+	
+	void RetrieveMatrices(glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye);
+	
 
 	glm::vec3 GetHeadPosition();
+	
+	float GetRealToVirtualWorldRatio();
+	
+	glm::vec3 GetSensorOriginOnVirtualWorld();
+
+	INuiSensor* GetSensor();
+	
 
 	void SetViewportSize(float w, float h);
 
@@ -31,20 +39,16 @@ public:
 
 	void SetEyeDistance(float eyeDistance);
 
-	void SetScreemFacing (bool on);
+	void SetScreenFacing (bool on);
+	
+	void SetSensorFloorAngle (float angle);
 
 	void SetSensorPosition(float x, float y, float z);
 
 	void SetHeatTracking (bool on);
 
-	float GetRealToVirtualWorldRatio();
-
-	void RetrieveMatrices(glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye);
-
-	void SetPredictionFactor(glm::vec3 factor);
-
-	glm::vec3 GetSensorOriginOnVirtualWorld();
-
+	glm::vec3 SensorToVirtualWorldCoordinates(glm::vec3 sPos);
+	
 private:
 	float EYE_DISTANCE;
 	float DISPLAY_RW_WIDTH, DISPLAY_RW_HEIGHT;
@@ -59,20 +63,9 @@ private:
 
 	class SensorRelPoint {
 	public:
-		//LONG x;
-		//LONG y;
-		//USHORT z;
 		glm::vec3 rwPos; // Real world coordinate
 		glm::vec3 vwPos; // Virtual world coordinate
-
-		// Prediction
-		glm::vec3 predictionFactor;
-		glm::vec3 lastRwPos;
-		glm::vec3 vel;
-		glm::vec3 acc;
-		glm::vec3 jerk;
-
-		glm::vec3 Predict (float deltaTime);
+		float zDist;
 	};
 
 	bool m_ready;
@@ -86,6 +79,6 @@ private:
 	void Fail (std::string s);	
 
 	glm::vec3 vwSensorOrigin;
-
-	glm::vec3 SensorToVirtualWorldCoordinates(glm::vec3 sPos);
 };
+
+#endif // STEREO_KINECT_HEAD_TRACKING_H
