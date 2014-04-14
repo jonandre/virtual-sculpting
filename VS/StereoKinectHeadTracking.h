@@ -24,7 +24,7 @@ public:
 
 	glm::vec3 GetHeadPosition();
 	
-	float GetRealToVirtualWorldRatio();
+	glm::vec2 GetRealToVirtualWorldRatio();
 	
 	glm::vec3 GetSensorOriginOnVirtualWorld();
 
@@ -57,7 +57,7 @@ private:
 	float SENSOR_ANGLE;
 	float SENSOR_RW_POS_X, SENSOR_RW_POS_Y, SENSOR_RW_POS_Z;
 	float ZNEAR, ZFAR;
-	float RW_TO_VW_RATIO;
+	glm::vec2 RW_TO_VW_RATIO;
 	bool FACE_SCREEN;
 
 	bool firstTick;

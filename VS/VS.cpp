@@ -115,10 +115,11 @@ int main( int argc, char** argv)
 	/* Initializes the model */
 	unsigned int power = 8;
 	GridModel* model = new GridModel(power);//power of 2
-	unsigned int side = model->GetDimm();
-	std::cout << "Model side is " << side << std::endl;
-	inp->SetZoom(-(side*4.0f));
+	//inp->SetZoom(-(side*4.0f));
 	inp->SetModel( model );
+	inp->SetModelSide(1.0f);
+	float side = inp->GetModelSide();
+	std::cout << "Model side is " << side << std::endl;
 	std::cout << "Model initialized" << std::endl;
 	model->UpdateGrid();// update visual representation of model
 	std::cout << "Grid updated" << std::endl;
@@ -162,7 +163,7 @@ int main( int argc, char** argv)
 		clock_t end = clock();
 		float deltaTime = (float)(end - start) / CLOCKS_PER_SEC;
 
-		inp->UpdateFrame();		//Reset frame variables.
+		inp->UpdateFrame(deltaTime);		//Reset frame variables.
 		cntx->doMessage();		//Win message loop
 
 		tool->DoToolUpdate();	//update tool state - like depthmap
@@ -173,7 +174,7 @@ int main( int argc, char** argv)
 		//
 
 		if ( GetPressedStage() )
-			tool->StartInteractModel( model, inp->GetObjectQ());//obvious
+			tool->StartInteractModel( model, inp->GetObjectQ(), inp->GetObjectM());//obvious
 
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM(), font1, font2, font3);// do actual rendering.
 		

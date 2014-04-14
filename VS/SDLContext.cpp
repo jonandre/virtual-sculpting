@@ -164,11 +164,11 @@ void SDLContext::doMessage()
 				//std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
 				inp->OnKeyPressed(e.key.keysym.sym); //TODO
 				
-				if (e.key.keysym.sym == SDLK_UP){
+				if (e.key.keysym.sym == SDLK_PLUS){
 					wantedDepth += 0.5f;
 					//std::cout << "Up pressed" << std::endl;
 				}
-				else if (e.key.keysym.sym == SDLK_DOWN){
+				else if (e.key.keysym.sym == SDLK_MINUS){
 					wantedDepth -= 0.5f;
 					//std::cout << "Down pressed" << std::endl;
 				}
@@ -201,7 +201,8 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 
 	headTracking->SetDisplaySize(4.0055f,  2.430f);
 	headTracking->SetEyeDistance(0.065f);
-	headTracking->SetSensorPosition(0.0f, -(2.430f/2.0f - 0.40f), 0.3f);
+	headTracking->SetSensorPosition(0.0005f, (2.430f/2.0f + 0.06f), 0.7f);
+	//headTracking->SetSensorFloorAngle(-90.0f);
 	headTracking->SetScreenFacing(true);
 }
 
@@ -218,7 +219,7 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	
 
 #if (STEREO > 0)
-	unsigned int side = model->GetDimm();
+	float side = inp->GetModelSide();
 
 	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
 	
@@ -230,20 +231,20 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 
 	headTracking->RetrieveMatrices(leftProj, leftEye, rightProj, rightEye);
 
-	glm::vec3 immersionTranslation (0.0f, 0.0f, depth*side);
+	glm::vec3 cameraPosition (0.0f, 0.0f, depth*side);
 	
-	glm::mat4 immersiveView = glm::translate(glm::mat4(1.0f), immersionTranslation);
+	glm::mat4 cameraView = glm::translate(glm::mat4(1.0f), cameraPosition);
 
 	render->SetProjections(leftProj, rightProj);
 
 
-	render->Draw(model, _tool_mesh, leftEye*immersiveView, obj, font1, font2, font3, true);
+	render->Draw(model, _tool_mesh, leftEye*cameraView, obj, font1, font2, font3, true);
 
 	SDL_GL_SwapWindow(window);
 
 	SDL_GL_MakeCurrent(windowRight, context);
 
-	render->Draw( model, _tool_mesh, rightEye*immersiveView, obj, font1, font2 , font3, false);
+	render->Draw( model, _tool_mesh, rightEye*cameraView, obj, font1, font2 , font3, false);
 
 	SDL_GL_SwapWindow(windowRight);
 

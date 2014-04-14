@@ -105,7 +105,7 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			if (aux.z > m_headPosition.zDist) continue;
 			m_headPosition.zDist = aux.z;
 
-			if (headState != NUI_SKELETON_POSITION_INFERRED)// If the position is inferred we don't want to trust it
+			//if (headState != NUI_SKELETON_POSITION_INFERRED)// If the position is inferred we don't want to trust it
 				m_headPosition.rwPos = aux;
 
 
@@ -117,9 +117,9 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sPos) {
 	glm::vec3 vwPos;
 
-	vwPos.x = (SENSOR_RW_POS_X + sPos.x) * RW_TO_VW_RATIO;
-	vwPos.y = (SENSOR_RW_POS_Y + sPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
-	vwPos.z = (SENSOR_RW_POS_Z - sPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO;
+	vwPos.x = (SENSOR_RW_POS_X + sPos.x) * RW_TO_VW_RATIO.x;
+	vwPos.y = (SENSOR_RW_POS_Y + sPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO.x;
+	vwPos.z = (SENSOR_RW_POS_Z - sPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO.x;
 
 	return vwPos;
 }
@@ -168,7 +168,7 @@ void StereoKinectHeadTracking::SetSensorPosition(float x, float y, float z)
 	SENSOR_RW_POS_Z = z;
 }
 
-float StereoKinectHeadTracking::GetRealToVirtualWorldRatio()
+glm::vec2 StereoKinectHeadTracking::GetRealToVirtualWorldRatio()
 {
 	return RW_TO_VW_RATIO;
 }
@@ -251,6 +251,7 @@ INuiSensor* StereoKinectHeadTracking::GetSensor()
 
 void StereoKinectHeadTracking::ViewportChanged()
 {
-	RW_TO_VW_RATIO = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
-	EYE_DISTANCE = RW_EYE_DISTANCE * RW_TO_VW_RATIO;
+	RW_TO_VW_RATIO.y = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
+	RW_TO_VW_RATIO.x = VIEWPORT_WIDTH / DISPLAY_RW_WIDTH;
+	EYE_DISTANCE = RW_EYE_DISTANCE * RW_TO_VW_RATIO.x;
 }

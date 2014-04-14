@@ -20,6 +20,10 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 	_angleXS = 0;
 	_angleYS = 0;
 	_obj_quat = glm::quat( glm::vec3(0.0));
+	_obj_pos = 0.0;
+	_obj_scale = 1.0;
+	wantedScale = 1.0f;
+	wantedZ= 0.0f;
 	_view_mat = glm::mat4(1.0f);
 	_model = NULL;
 	_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
@@ -216,6 +220,18 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			fps_regulation ^= true;
 			break;
 		
+		case SDLK_UP:
+			wantedZ += 0.5f;
+			break;
+		case SDLK_DOWN:
+			wantedZ -= 0.5f;
+			break;
+		case SDLK_RIGHT:
+			wantedScale *=  1.2f;
+			break;
+		case SDLK_LEFT:
+			wantedScale /= 1.2f;
+			break;
 	}
 }
 void Input::OnMouseLBDown( int x, int y )
@@ -233,7 +249,19 @@ void Input::OnMouseLBDown( int x, int y )
 glm::mat4 Input::GetObjectM()
 {
 	//return transformation;
-	return glm::toMat4(_obj_quat);
+	glm::mat4 rot = glm::toMat4(_obj_quat);
+
+	glm::mat4 m = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,_obj_pos*wantedSide));
+	m = glm::scale(m, glm::vec3(_obj_scale));
+	m = m*rot;
+	return m;
+}
+
+glm::mat4 Input::GetModelM()
+{
+	glm::mat4 m = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,_obj_pos*wantedSide));
+	m = glm::scale(m, glm::vec3(_obj_scale));
+	return m;
 }
 
 /** 
@@ -251,7 +279,7 @@ glm::mat4 createRotationMatrix(glm::vec3, float);
 /** 
  * Get projection quaterion
  */
-void Input::UpdateFrame()
+void Input::UpdateFrame(float deltaTime)
 {
 	float ACCELERATION = 10.0f * DEGREES_PER_SECOND_PER_SECOND;
 	
@@ -311,6 +339,10 @@ void Input::UpdateFrame()
 		transformation = createRotationMatrix(rotation, rotation_speed);
 
 	_obj_quat = glm::quat(transformation * glm::toMat4(_obj_quat));
+
+	float speed = 1.0f;
+	_obj_pos = _obj_pos*(speed - deltaTime)/speed + wantedZ*deltaTime/speed;
+	_obj_scale = _obj_scale*(speed - deltaTime)/speed + wantedScale*deltaTime/speed;
 }
 
 
@@ -408,3 +440,13 @@ void Input::OnMouseLBUp( int x, int y )
     _angleYS = _angleY;
 }
 
+void Input::SetModelSide( float wantedSide)
+{
+	this->wantedSide = wantedSide;
+	wantedScale = wantedSide/float(_model->GetDimm());
+}
+
+float Input::GetModelSide()
+{
+	return wantedSide;
+}

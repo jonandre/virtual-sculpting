@@ -134,8 +134,8 @@ void KinectTool::DoToolUpdate()
 	//memfence again
 	
 	/* Uppdates the trinegel mesh */
-	_msh->UpdateDepth( depth_ptr );
-	//_msh->UpdateDepth( _reader->GetHeadTracking(), _reader->GetDepthVector() );
+	//_msh->UpdateDepth( depth_ptr );
+	_msh->UpdateDepth( _reader->GetHeadTracking(), _reader->GetDepthVector() );
 	
 	//memfence again
 	//or you can combine both calls into one ( basically same happens there ), BUT with blur I see no way to do it.
@@ -173,19 +173,33 @@ inline Point Rotate( const Point& v, const glm::quat& q )//looks to be fast.
 	return res;
 }
 
+inline Point Transform( const Point& v, const glm::mat4& m)
+{
+	glm::vec4 p (v.coord[0], v.coord[1], v.coord[2], 1.0f);
+	p = m*p;
+	Point res;
+	res.coord[0] = p.x;
+	res.coord[1] = p.y;
+	res.coord[2] = p.z;
+
+	return res;
+}
+
 
 static glm::quat inverse;
+static glm::mat4 modelMatrix;
 static Point* points;
 static unsigned int grid_dimm;
 static Point dir_vector;
 static GridModel* grid_model;
 static int cpu_output[480];
 
-void KinectTool::StartInteractModel( GridModel* model, glm::quat quat )
+void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM)
 {
 	//for loop for each point, rotated by inverse of quat
 	points = _msh->GetPoints();
 	inverse = glm::conjugate(quat);
+	modelMatrix = glm::inverse(modelM);
 	
 	//Can be easy paralelized. With one but - UpdateCell should be treated properly - it's nor thead safe for moment.
 	grid_dimm = model->GetDimm() - 1;
@@ -303,7 +317,8 @@ static void* run(void* args)
 		{
 			//tmp = points[ x*480 + y ];
 			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
-			action_point = Rotate( points[ x*480 + y ], inverse);
+			//action_point = Rotate( points[ x*480 + y ], inverse);
+			action_point = Transform (points[ x*480 + y ], modelMatrix);
 			for ( int delta = 0; delta < PAD_DEPTH; delta++ )
 			{
 				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0]*delta;

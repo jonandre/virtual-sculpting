@@ -21,7 +21,7 @@ public:
 	KinectTool( float half_x, float half_y, float start_z, float end_z );
 	~KinectTool();
 	void DoToolUpdate();
-	void StartInteractModel( GridModel* model, glm::quat quat );
+	void StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM );
 	int StopInteractModel( );
 	TriangleMesh* GetToolMesh();
 	Shader* GetToolShader();

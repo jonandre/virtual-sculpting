@@ -28,14 +28,17 @@ public:
 	glm::mat4 GetObjectM();
 	glm::quat GetObjectQ();
 	glm::mat4 GetViewM();
+	glm::mat4 GetModelM();
 
 	void SetViewM(const glm::mat4& mat );
 	void SetZoom( float val );
 	void SetModel( GridModel* );
+	void SetModelSide(float wantedSide);
 
 	float GetZoom ();
+	float GetModelSide();
 
-	void UpdateFrame();
+	void UpdateFrame(float deltaTime);
 
 	glm::vec3 _rotation_vector_obj;
 	
@@ -85,9 +88,14 @@ private:
 	//float _rotationSpeedValu;
 	//glm::mat4 _obj_mat;
 	glm::quat _obj_quat;
+	float _obj_pos;
+	float _obj_scale;
 	glm::mat4 _view_mat;
 	float zoom_val;
 
+	float wantedScale;
+	float wantedZ;
+	float wantedSide;
 	
 	int rx;
 	int ry;
