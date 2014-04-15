@@ -404,6 +404,11 @@ void Input::SetModel( GridModel* md )
 	_model = md;
 }
 
+void Input::SetModelPosition(glm::vec3 pos)
+{
+	wantedZ = pos.z;
+}
+
 
 void Input::OnMouseMove( int x, int y )
 {

@@ -29,7 +29,7 @@ public:
 	void Resize(int w, int h);
 	void Draw(GridModel* model, KinectTool* _tool_mesh, glm::mat4& view,
 		glm::mat4& obj, TextureMappedFont*, TextureMappedFont*,
-		TextureMappedFont*, bool left);
+		TextureMappedFont*, glm::mat4& proj, int status);
 
 	void SetProjections(glm::mat4& leftEye, glm::mat4& rightEye);
 

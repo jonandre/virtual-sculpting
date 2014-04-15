@@ -252,7 +252,7 @@ void KinectReader::ProcessDepth()
             // discard the portion of the depth that contains only the player index
             USHORT depth = pBufferRun->depth;
 
-			m_depthVector[aux].depth = (depth >= minDepth)? depth : 4000;
+			m_depthVector[aux].depth = (depth >= minDepth)? depth : 10000;
 			
             // To convert to a byte, we're discarding the most-significant
             // rather than least-significant bits.

@@ -34,6 +34,7 @@ public:
 	void SetZoom( float val );
 	void SetModel( GridModel* );
 	void SetModelSide(float wantedSide);
+	void SetModelPosition(glm::vec3 pos);
 
 	float GetZoom ();
 	float GetModelSide();

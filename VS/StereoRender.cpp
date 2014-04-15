@@ -75,17 +75,18 @@ inline double diffclock(clock_t clock1, clock_t clock2)
 
 void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	glm::mat4& obj, TextureMappedFont* font1, TextureMappedFont* font2,
-	TextureMappedFont* font3, bool left)
+	TextureMappedFont* font3, glm::mat4& proj, int status)
 {
 	clock_t start = clock();
 
-	glm::mat4 projectionMatrix = (left)? projectionMatrixLeft : projectionMatrixRight;
+	glm::mat4 projectionMatrix = proj;
 
 	// Specifies whether the depth buffer is enabled for writing.
 	glDepthMask(GL_TRUE);
 
 	// glClear sets the bitplane area of the window to values previously selected 
 	// by glClearColor, glClearDepth, and glClearStencil.
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// GL_CULL_FACE is to be enabled for performance reasons, 
@@ -170,7 +171,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 
-
+	if (status < 0) {
 	///////////////////////////   START OF KINECT TOOL DRAWTING   ///////////////////////////////////
 
 	// Gets tringelMesh Vertex Array Output
@@ -200,27 +201,29 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	/* Do not use tool shader */
 
 	///////////////////////////   END OF KINECT TOOL DRAWTING   ///////////////////////////////////
+	}
+
 
 	//////////////////////////////   START OF HEAD DRAWING   ////////////////////////////////////////////
 	
 	//////////////////////////////   END OF HEAD DRAWING   //////////////////////////////////////////////
 	
-	//////////////////////////////   START OF TEXT DRAWTING   ////////////////////////////////////////////
-	DrawingStages(font1, font2, font3);
-	//////////////////////////////   END OF TEXT DRAWTING   //////////////////////////////////////////////
+	if (status > 0) {
+		//////////////////////////////   START OF TEXT DRAWTING   ////////////////////////////////////////////
+		DrawingStages(font1, font2, font3);
+		//////////////////////////////   END OF TEXT DRAWTING   //////////////////////////////////////////////
 
-	//////////////////////////   START OF LAST TEXT DRAWTING   ////////////////////////////////////////////
-	DrawingBottomText(font3);
-	///////////////////////////   END OF LAST TEXT DRAWTING   //////////////////////////////////////////////
+		//////////////////////////   START OF LAST TEXT DRAWTING   ////////////////////////////////////////////
+		DrawingBottomText(font3);
+		///////////////////////////   END OF LAST TEXT DRAWTING   //////////////////////////////////////////////
 	
-	/////////////////////////////   START OF LINE DRAWTING   ////////////////////////////////////////////
+		/////////////////////////////   START OF LINE DRAWTING   ////////////////////////////////////////////
 
-	//////////////////////////////   END OF LINE DRAWTING   ////////////////////////////////////////////
-
+		//////////////////////////////   END OF LINE DRAWTING   ////////////////////////////////////////////
+	}
 
 
 	clock_t end = clock();
-	//std::cout<<"For ticks = "<<i<<", tick time = " << diffclock( end, start )<< " ms" << std::endl;
 }
 
 void StereoRender::Resize(int w, int h)

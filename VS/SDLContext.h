@@ -42,6 +42,10 @@ private:
 	SDL_Renderer* rendererRight;
 	SDL_GLContext contextRight;
 
+	SDL_Window* windowShadow;
+	SDL_Renderer* rendererShadow;
+	SDL_GLContext contextShadow;
+
 #if (STEREO > 0)
 	StereoRender* render;
 
@@ -67,6 +71,8 @@ private:
 	float depth;
 	float speed;
 	float wantedDepth;
+
+	bool shadowRendering;
 
 protected:
 	bool running;

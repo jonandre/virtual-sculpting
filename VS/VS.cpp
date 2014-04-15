@@ -117,7 +117,8 @@ int main( int argc, char** argv)
 	GridModel* model = new GridModel(power);//power of 2
 	//inp->SetZoom(-(side*4.0f));
 	inp->SetModel( model );
-	inp->SetModelSide(1.0f);
+	inp->SetModelSide(0.5f);
+	inp->SetModelPosition(glm::vec3(0.0f, 0.0f, 1.25f));
 	float side = inp->GetModelSide();
 	std::cout << "Model side is " << side << std::endl;
 	std::cout << "Model initialized" << std::endl;
