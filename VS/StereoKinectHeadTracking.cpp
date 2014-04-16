@@ -9,7 +9,7 @@ void StereoKinectHeadTracking::Fail (std::string s) {
 
 // Creator
 StereoKinectHeadTracking::StereoKinectHeadTracking() :
-	m_ready(false), FACE_SCREEN(false)
+	m_ready(false), FACE_INTEREST(false)
 {
 	EYE_DISTANCE = 0.065f;
 	DISPLAY_RW_WIDTH = 4.0055f;
@@ -75,8 +75,10 @@ void StereoKinectHeadTracking::Update (float deltaTime)
         return;
     }
 
+//	const NUI_TRANSFORM_SMOOTH_PARAMETERS SMOOTHING_PARAMS = 
+//		{0.1f, 0.7f, 1.0f, 0.025f, 0.02f};
 	const NUI_TRANSFORM_SMOOTH_PARAMETERS SMOOTHING_PARAMS = 
-		{0.1f, 0.7f, 1.0f, 0.025f, 0.02f};
+		{0.5f, 0.7f, 0.5f, 0.05f, 0.04f};
 
     // smooth out the skeleton data
     m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, &SMOOTHING_PARAMS);
@@ -161,6 +163,12 @@ void StereoKinectHeadTracking::SetEyeDistance(float eyeDistance)
 	EYE_DISTANCE = eyeDistance;
 }
 
+void StereoKinectHeadTracking::SetHeadRadius(float headRadius)
+{
+	RW_HEAD_RADIUS = headRadius;
+	HEAD_RADIUS = headRadius;
+}
+
 void StereoKinectHeadTracking::SetSensorPosition(float x, float y, float z)
 {
 	SENSOR_RW_POS_X = x;
@@ -173,9 +181,9 @@ glm::vec2 StereoKinectHeadTracking::GetRealToVirtualWorldRatio()
 	return RW_TO_VW_RATIO;
 }
 
-void StereoKinectHeadTracking::SetScreenFacing (bool on)
+void StereoKinectHeadTracking::SetInterestFacing (bool on)
 {
-	FACE_SCREEN = on;
+	FACE_INTEREST = on;
 }
 
 void StereoKinectHeadTracking::SetHeatTracking (bool on)
@@ -183,8 +191,30 @@ void StereoKinectHeadTracking::SetHeatTracking (bool on)
 	m_ready = on;
 }
 
-void StereoKinectHeadTracking::RetrieveMatrices(glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye)
+glm::vec3 StereoKinectHeadTracking::GetEyePosition(bool left)
 {
+	glm::vec3 head = GetHeadPosition();
+
+	float headRightFactorX = 1.0f;
+	float headRightFactorZ = 0.0f;
+	// If we are facing the screen we should evaluate the angle to the middle of the screen
+	if (FACE_INTEREST) {
+		glm::vec3 interestDir = head - interestPoint; 
+		glm::vec2 aux (interestDir.z, -interestDir.x);
+		aux = glm::normalize(aux);
+		headRightFactorZ = aux.y;
+		headRightFactorX = aux.x;
+	}
+
+	glm::vec3 eye = ((left)? -1.0f : 1.0f)* glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f)
+					- glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS + head;
+	return eye;
+}
+
+void StereoKinectHeadTracking::RetrieveMatrices(glm::vec3 interestPoint, glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye)
+{
+	this->interestPoint = interestPoint;
+
 	glm::vec3 head = GetHeadPosition();
 	
 	float focus, ndfl;
@@ -197,46 +227,47 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::mat4& leftProj, glm::mat4& 
 	float headRightFactorX = 1.0f;
 	float headRightFactorZ = 0.0f;
 	// If we are facing the screen we should evaluate the angle to the middle of the screen
-	if (FACE_SCREEN) {
-		glm::vec2 aux (head.z, -head.x);
+	if (FACE_INTEREST) {
+		glm::vec3 interestDir = head - interestPoint; 
+		glm::vec2 aux (interestDir.z, -interestDir.x);
 		aux = glm::normalize(aux);
 		headRightFactorZ = aux.y;
 		headRightFactorX = aux.x;
 	}
 
 	//Left eye
-	focus = head.z - 0.5 * EYE_DISTANCE * headRightFactorZ;
+	focus = head.z - 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * headRightFactorX;
 	ndfl = ZNEAR / focus;
 	
 	top = VIEWPORT_HEIGHT * ndfl * tf;
 	bottom = -VIEWPORT_HEIGHT * ndfl * bf;
 
-	rf = (VIEWPORT_WIDTH/2.0 - (head.x - 0.5 * EYE_DISTANCE * headRightFactorX)) / VIEWPORT_WIDTH;
-	lf = ((head.x - 0.5 * EYE_DISTANCE * headRightFactorX) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
+	rf = (VIEWPORT_WIDTH/2.0 - (head.x - 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ)) / VIEWPORT_WIDTH;
+	lf = ((head.x - 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
 
 	left = -VIEWPORT_WIDTH * ndfl * lf;
 	right = VIEWPORT_WIDTH * ndfl * rf;
 
 	leftProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
 	leftEye = glm::translate(glm::mat4(1.0f), -head);
-	leftEye = glm::translate(leftEye, glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f));
+	leftEye = glm::translate(leftEye, glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f) - glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS);
 
 	//Right eye
-	focus = head.z + 0.5 * EYE_DISTANCE * headRightFactorZ;
+	focus = head.z + 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * headRightFactorX;
 	ndfl = ZNEAR / focus;
 	
 	top = VIEWPORT_HEIGHT * ndfl * tf;
 	bottom = -VIEWPORT_HEIGHT * ndfl * bf;
 
-	rf = (VIEWPORT_WIDTH/2.0 - (head.x + 0.5 * EYE_DISTANCE * headRightFactorX)) / VIEWPORT_WIDTH;
-	lf = ((head.x + 0.5 * EYE_DISTANCE * headRightFactorX) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
+	rf = (VIEWPORT_WIDTH/2.0 - (head.x + 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ)) / VIEWPORT_WIDTH;
+	lf = ((head.x + 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
 
 	left = -VIEWPORT_WIDTH * ndfl * lf;
 	right = VIEWPORT_WIDTH * ndfl * rf;
 
 	rightProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
 	rightEye = glm::translate(glm::mat4(1.0f), -head);
-	rightEye = glm::translate(rightEye, -glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f));
+	rightEye = glm::translate(rightEye, -glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f) - glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS);
 }
 
 glm::vec3 StereoKinectHeadTracking::GetSensorOriginOnVirtualWorld()
@@ -254,4 +285,5 @@ void StereoKinectHeadTracking::ViewportChanged()
 	RW_TO_VW_RATIO.y = VIEWPORT_HEIGHT / DISPLAY_RW_HEIGHT;
 	RW_TO_VW_RATIO.x = VIEWPORT_WIDTH / DISPLAY_RW_WIDTH;
 	EYE_DISTANCE = RW_EYE_DISTANCE * RW_TO_VW_RATIO.x;
+	HEAD_RADIUS = RW_HEAD_RADIUS * RW_TO_VW_RATIO.x;
 }

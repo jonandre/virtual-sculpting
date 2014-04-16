@@ -121,7 +121,7 @@ HRESULT KinectReader::CreateFirstConnected(StereoKinectHeadTracking* headTrackin
     {
 		// Initialize the Kinect and specify that we'll be using audio signal
         // Initialize the Kinect and specify that we'll be using depth
-        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH | NUI_INITIALIZE_FLAG_USES_AUDIO | NUI_INITIALIZE_FLAG_USES_SKELETON); 
+        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH | NUI_INITIALIZE_FLAG_USES_AUDIO | NUI_INITIALIZE_FLAG_USES_SKELETON | NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT); 
 		
         if (SUCCEEDED(hr))
         {

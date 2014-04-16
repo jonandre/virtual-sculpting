@@ -50,6 +50,10 @@ private:
 	StereoRender* render;
 
 	glm::mat4 leftProj, rightProj, leftEye, rightEye;
+
+	glm::mat4 shadowProj, shadowView;
+
+	glm::mat4 sceneProj, sceneView;
 #else
 	Render* render;
 #endif
@@ -73,7 +77,11 @@ private:
 	float wantedDepth;
 
 	bool shadowRendering;
+	bool showScene;
+	int SCENE_PREVIW_SIZE;
 
+	float sceneRotSpeed;
+	float sceneRot;
 protected:
 	bool running;
 };

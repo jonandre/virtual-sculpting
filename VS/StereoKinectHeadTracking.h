@@ -19,10 +19,12 @@ public:
 
 	void Update(float deltaTime);
 	
-	void RetrieveMatrices(glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye);
+	void RetrieveMatrices(glm::vec3 interestPoint, glm::mat4& leftProj, glm::mat4& leftEye, glm::mat4& rightProj, glm::mat4& rightEye);
 	
 
 	glm::vec3 GetHeadPosition();
+
+	glm::vec3 GetEyePosition(bool left);
 	
 	glm::vec2 GetRealToVirtualWorldRatio();
 	
@@ -39,7 +41,9 @@ public:
 
 	void SetEyeDistance(float eyeDistance);
 
-	void SetScreenFacing (bool on);
+	void SetHeadRadius(float headRadius);
+
+	void SetInterestFacing (bool on);
 	
 	void SetSensorFloorAngle (float angle);
 
@@ -50,17 +54,19 @@ public:
 	glm::vec3 SensorToVirtualWorldCoordinates(glm::vec3 sPos);
 	
 private:
-	float RW_EYE_DISTANCE;
-	float EYE_DISTANCE;
+	float RW_EYE_DISTANCE, EYE_DISTANCE;
+	float RW_HEAD_RADIUS, HEAD_RADIUS;
 	float DISPLAY_RW_WIDTH, DISPLAY_RW_HEIGHT;
 	float VIEWPORT_WIDTH, VIEWPORT_HEIGHT;
 	float SENSOR_ANGLE;
 	float SENSOR_RW_POS_X, SENSOR_RW_POS_Y, SENSOR_RW_POS_Z;
 	float ZNEAR, ZFAR;
 	glm::vec2 RW_TO_VW_RATIO;
-	bool FACE_SCREEN;
+	bool FACE_INTEREST;
 
 	bool firstTick;
+
+	glm::vec3 interestPoint;
 
 	class SensorRelPoint {
 	public:

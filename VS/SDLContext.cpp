@@ -167,6 +167,20 @@ SDLContext::SDLContext()
 	depth = 0.0f;
 	wantedDepth = 0.0f;
 
+	// SCENE VIEW
+	showScene= true;
+	sceneRotSpeed = 4.0f;
+	SCENE_PREVIW_SIZE = SCREEN_HEIGHT/4;
+
+	sceneProj = glm::perspective(90.0f, 1.0f, 0.1f, 100.0f);
+
+	// PROJECTOR SHADOW 0.92, 1.42
+	float projW = 1.42f;
+	float projH = 0.92f;
+	shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, 5.0f);
+	shadowView = glm::lookAt(glm::vec3(0.0f, 3.0f, 0.88 + projW/2.0f), glm::vec3(0.0f, 0.0f, 0.88 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+
 	std::cout << "SDLContext initialized" << std::endl;
 }
 
@@ -212,6 +226,9 @@ void SDLContext::doMessage()
 					wantedDepth -= 0.5f;
 					//std::cout << "Down pressed" << std::endl;
 				}
+				else if (e.key.keysym.sym == SDLK_PERIOD) {
+					showScene ^= true;
+				}
 			}
 			/*else if ( msg.message == WM_LBUTTONDOWN )
 			{
@@ -241,8 +258,9 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 
 	headTracking->SetDisplaySize(4.0055f,  2.430f);
 	headTracking->SetEyeDistance(0.065f);
-	headTracking->SetSensorPosition(0.0005f, (2.430f/2.0f + 0.06f), 0.07f);
-	headTracking->SetScreenFacing(true);
+	headTracking->SetHeadRadius(0.1f);
+	headTracking->SetSensorPosition(0.1205f, (2.430f/2.0f + 0.06f), 0.06f);
+	headTracking->SetInterestFacing(true);
 	
 	headTracking->SetViewportSize(4.0055f, 2.430f);
 	headTracking->SetZPlanes(render->ZNEAR, render->ZFAR);	
@@ -267,20 +285,54 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	
 	//float viewportHeight = float(side)*3.0f;
 	//float viewportWidth = viewportHeight*ratio;
+	sceneView = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.2f));
+	sceneView = glm::rotate(sceneView, sceneRot, glm::vec3(0.0f, 1.0f, 0.0f));
+	sceneView = glm::translate(sceneView, -headTracking->GetHeadPosition());
 
-	headTracking->RetrieveMatrices(leftProj, leftEye, rightProj, rightEye);
+	headTracking->RetrieveMatrices(inp->GetObjectPosition(), leftProj, leftEye, rightProj, rightEye);
 
 	glm::vec3 cameraPosition (0.0f, 0.0f, depth*side);
 	
 	glm::mat4 cameraView = glm::translate(glm::mat4(1.0f), cameraPosition);
 
 	render->Draw(model, _tool_mesh, leftEye*cameraView, obj, font1, font2, font3, leftProj, 0);
+	
+	if (showScene) {
+		glm::mat4 leftSceneView = glm::translate(glm::mat4(1.0f), glm::vec3(-0.065f/2.0f, 0.0f, 0.0f));
+
+		glViewport(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
+		
+		glEnable(GL_SCISSOR_TEST); 
+		glScissor(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
+
+		render->Draw(model, _tool_mesh, leftSceneView*sceneView, obj, font1, font2, font3, sceneProj, 3);
+
+		glDisable(GL_SCISSOR_TEST); 
+
+		glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+	}
 
 	SDL_GL_SwapWindow(window);
 
 	SDL_GL_MakeCurrent(windowRight, context);
 
 	render->Draw( model, _tool_mesh, rightEye*cameraView, obj, font1, font2 , font3, rightProj, 1);
+
+	if (showScene) {
+		glm::mat4 rightSceneView = glm::translate(glm::mat4(1.0f), glm::vec3(0.065f/2.0f, 0.0f, 0.0f));
+
+		glViewport(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
+
+		glEnable(GL_SCISSOR_TEST); 
+		glScissor(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
+
+		render->Draw(model, _tool_mesh, rightSceneView*sceneView, obj, font1, font2, font3, sceneProj, 3);
+
+		
+		glDisable(GL_SCISSOR_TEST); 
+
+		glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+	}
 
 	SDL_GL_SwapWindow(windowRight);
 #else
@@ -294,14 +346,6 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 
 		glViewport(0,0,800,600);
 
-		// 0.92, 1.42
-		float projW = 1.42f;
-		float projH = 0.92f;
-		glm::mat4 shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, 5.0f);
-		glm::mat4 shadowView = glm::lookAt(glm::vec3(0.0f, 3.0f, 0.88 + projW/2.0f), glm::vec3(0.0f, 0.0f, 0.88 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-		//glm::mat4 shadowView = glm::lookAt(glm::vec3(0.0f, 0.0f, 3.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-
-		//render->Draw( model, _tool_mesh, rightEye*cameraView, obj, font1, font2 , font3, rightProj, 1);
 		render->Draw( model, _tool_mesh, shadowView, obj, font1, font2 , font3, shadowProj, -1);
 
 		SDL_GL_SwapWindow(windowShadow);
@@ -322,6 +366,8 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 		std::cout << "FPS: " << FPS << std::endl;
 		lastFPSTick = tick;
 	}
+
+	sceneRot += sceneRotSpeed*frameTime;
 
 	depth = depth*(speed - frameTime)/speed + wantedDepth*frameTime/speed;
 }

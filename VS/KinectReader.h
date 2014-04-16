@@ -80,13 +80,13 @@ public:
 	HANDLE                  m_hNextSkeletonEvent;	
 	/* Skelleton Recognition End */
 
+	StereoKinectHeadTracking* m_headTracking;
+
 private:
 	KinectReader();
 	unsigned int _min_depth;
 	unsigned int _max_depth;
 	float        _active_depth;
-	
-	StereoKinectHeadTracking* m_headTracking;
 
 	// Current Kinect
     INuiSensor*      m_pNuiSensor;

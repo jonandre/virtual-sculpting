@@ -407,6 +407,7 @@ void Input::SetModel( GridModel* md )
 void Input::SetModelPosition(glm::vec3 pos)
 {
 	wantedZ = pos.z;
+	_obj_pos = wantedZ;
 }
 
 
@@ -449,9 +450,15 @@ void Input::SetModelSide( float wantedSide)
 {
 	this->wantedSide = wantedSide;
 	wantedScale = wantedSide/float(_model->GetDimm());
+	_obj_scale = wantedScale;
 }
 
 float Input::GetModelSide()
 {
 	return wantedSide;
+}
+
+glm::vec3 Input::GetObjectPosition()
+{
+	return glm::vec3(0.0f, 0.0f, _obj_pos*wantedSide);
 }

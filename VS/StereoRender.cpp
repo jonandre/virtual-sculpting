@@ -171,36 +171,58 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 
-	if (status < 0) {
-	///////////////////////////   START OF KINECT TOOL DRAWTING   ///////////////////////////////////
+	if (status < 0 || status > 2) {
+		///////////////////////////   START OF KINECT TOOL DRAWTING   ///////////////////////////////////
 
-	// Gets tringelMesh Vertex Array Output
-	vao_ptr = tool->GetToolMesh()->GetVAO();
+		// Gets tringelMesh Vertex Array Output
+		vao_ptr = tool->GetToolMesh()->GetVAO();
 
-	/* Use tool shader */
-	tool->GetToolShader()->bind();
+		/* Use tool shader */
+		tool->GetToolShader()->bind();
 
-	// glBindVertexArray binds the vertex array object with name array. 
-	// array is the name of a vertex array object previously returned 
-	// from a call to glGenVertexArrays, or zero to break the existing 
-	// vertex array object binding. 
+		// glBindVertexArray binds the vertex array object with name array. 
+		// array is the name of a vertex array object previously returned 
+		// from a call to glGenVertexArrays, or zero to break the existing 
+		// vertex array object binding. 
 
-	glUniformMatrix4fv(tool->GetPVMLocation(), 1, GL_FALSE, &(pvm[0][0]));
+		glUniformMatrix4fv(tool->GetPVMLocation(), 1, GL_FALSE, &(pvm[0][0]));
 
-	glBindVertexArray(vao_ptr->id());
+		glBindVertexArray(vao_ptr->id());
 
-	glDrawElements(
-		GL_TRIANGLES,		// mode
-		vao_ptr->size(),		// count
-		GL_UNSIGNED_INT,	// type
-		(void*)0			// element array buffer offset
-		);
-	glBindVertexArray(0);
+		glDrawElements(
+			GL_TRIANGLES,		// mode
+			vao_ptr->size(),		// count
+			GL_UNSIGNED_INT,	// type
+			(void*)0			// element array buffer offset
+			);
+		glBindVertexArray(0);
 
-	tool->GetToolShader()->unbind();
-	/* Do not use tool shader */
+		tool->GetToolShader()->unbind();
+		/* Do not use tool shader */
 
-	///////////////////////////   END OF KINECT TOOL DRAWTING   ///////////////////////////////////
+		///////////////////////////   END OF KINECT TOOL DRAWTING   ///////////////////////////////////
+
+		///////////////////////////   START OF HEAD DRAWTING   ///////////////////////////////////
+		
+		glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
+		glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
+		glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
+
+		glm::vec4 h = pvm*glm::vec4(head.x, head.y, head.z, 1.0f);
+		glm::vec4 l = pvm*glm::vec4(left.x, left.y, left.z, 1.0f);
+		glm::vec4 r = pvm*glm::vec4(right.x, right.y, right.z, 1.0f);
+
+		glLineWidth(5.5f);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glBegin(GL_LINES);
+		glVertex3f(h.x, h.y, h.z);
+		glVertex3f(l.x, l.y, l.z);
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(h.x, h.y, h.z);;
+		glVertex3f(r.x, r.y, r.z);;
+		glEnd();
+
+		///////////////////////////   END OF HEAD DRAWTING   ///////////////////////////////////
 	}
 
 
@@ -208,7 +230,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	
 	//////////////////////////////   END OF HEAD DRAWING   //////////////////////////////////////////////
 	
-	if (status > 0) {
+	if (status >= 0 && status < 3) {
 		//////////////////////////////   START OF TEXT DRAWTING   ////////////////////////////////////////////
 		DrawingStages(font1, font2, font3);
 		//////////////////////////////   END OF TEXT DRAWTING   //////////////////////////////////////////////
