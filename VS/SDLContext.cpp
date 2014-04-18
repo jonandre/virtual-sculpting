@@ -178,7 +178,7 @@ SDLContext::SDLContext()
 	float projW = 1.42f;
 	float projH = 0.92f;
 	shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, 5.0f);
-	shadowView = glm::lookAt(glm::vec3(0.0f, 3.0f, 0.88 + projW/2.0f), glm::vec3(0.0f, 0.0f, 0.88 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	shadowView = glm::lookAt(glm::vec3(0.0f, 3.0f, 0.88 + projW/2.0f), glm::vec3(0.0f, 0.0f, 0.83 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
 	std::cout << "SDLContext initialized" << std::endl;
@@ -259,7 +259,7 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	headTracking->SetDisplaySize(4.0055f,  2.430f);
 	headTracking->SetEyeDistance(0.065f);
 	headTracking->SetHeadRadius(0.1f);
-	headTracking->SetSensorPosition(0.1205f, (2.430f/2.0f + 0.06f), 0.06f);
+	headTracking->SetSensorPosition(0.1205f, (2.430f/2.0f + 0.06f), 0.08f);
 	headTracking->SetInterestFacing(true);
 	
 	headTracking->SetViewportSize(4.0055f, 2.430f);

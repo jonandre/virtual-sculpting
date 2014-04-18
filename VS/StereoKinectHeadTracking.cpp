@@ -236,7 +236,7 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::vec3 interestPoint, glm::ma
 	}
 
 	//Left eye
-	focus = head.z - 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * headRightFactorX;
+	focus = head.z - 0.5 * EYE_DISTANCE * headRightFactorZ - HEAD_RADIUS * headRightFactorX;
 	ndfl = ZNEAR / focus;
 	
 	top = VIEWPORT_HEIGHT * ndfl * tf;
@@ -249,11 +249,11 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::vec3 interestPoint, glm::ma
 	right = VIEWPORT_WIDTH * ndfl * rf;
 
 	leftProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
-	leftEye = glm::translate(glm::mat4(1.0f), -head);
+	leftEye = glm::translate(glm::mat4(1.0f), -head + glm::vec3(0.0f, 0.0f, 0.23f)); // debug
 	leftEye = glm::translate(leftEye, glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f) - glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS);
 
 	//Right eye
-	focus = head.z + 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * headRightFactorX;
+	focus = head.z + 0.5 * EYE_DISTANCE * headRightFactorZ - HEAD_RADIUS * headRightFactorX;
 	ndfl = ZNEAR / focus;
 	
 	top = VIEWPORT_HEIGHT * ndfl * tf;
@@ -266,7 +266,7 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::vec3 interestPoint, glm::ma
 	right = VIEWPORT_WIDTH * ndfl * rf;
 
 	rightProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
-	rightEye = glm::translate(glm::mat4(1.0f), -head);
+	rightEye = glm::translate(glm::mat4(1.0f), -head + glm::vec3(0.0f, 0.0f, 0.23f)); // debug);
 	rightEye = glm::translate(rightEye, -glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f) - glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS);
 }
 

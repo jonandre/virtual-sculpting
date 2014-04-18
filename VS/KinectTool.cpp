@@ -1,11 +1,12 @@
 #include "KinectTool.h"
 
-#define PAD_DEPTH 50
 #define DIR_Z_STEP 1.0f;
 #define FALLBACK_CPU_COUNT 4
 
 KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 {
+	PAD_DEPTH = 50;
+
 	/* Creats a vertex grid mesh out of triengels */
 	_msh = new TriangleMesh(640, 480, -half_x, -half_y, half_x, half_y, start_z);
 	printf("Kinect grid created. \n");
@@ -209,6 +210,8 @@ void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4
 	dir_vector.coord[2] = DIR_Z_STEP;
 	dir_vector = Rotate(dir_vector, inverse );
 	grid_model = model;
+
+	PAD_DEPTH = ((float)model->GetDimm())/256.0f * 50.0f;
 	
 	pthread_barrier_wait(&(this->barrier)); /* Start threads */
 }
@@ -319,7 +322,7 @@ static void* run(void* args)
 			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
 			//action_point = Rotate( points[ x*480 + y ], inverse);
 			action_point = Transform (points[ x*480 + y ], modelMatrix);
-			for ( int delta = 0; delta < PAD_DEPTH; delta++ )
+			for ( int delta = 0; delta < tool->PAD_DEPTH; delta++ )
 			{
 				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0]*delta;
 				tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1]*delta;

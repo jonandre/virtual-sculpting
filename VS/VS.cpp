@@ -113,7 +113,7 @@ int main( int argc, char** argv)
 	cntx->SetInput( inp );//Context redirects mouse+keyb to Input
 
 	/* Initializes the model */
-	unsigned int power = 8;
+	unsigned int power = 7;
 	GridModel* model = new GridModel(power);//power of 2
 	//inp->SetZoom(-(side*4.0f));
 	inp->SetModel( model );

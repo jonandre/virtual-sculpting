@@ -20,10 +20,10 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 	_angleXS = 0;
 	_angleYS = 0;
 	_obj_quat = glm::quat( glm::vec3(0.0));
-	_obj_pos = 0.0;
+	_obj_pos = 1.0f;
 	_obj_scale = 1.0;
 	wantedScale = 1.0f;
-	wantedZ= 0.0f;
+	wantedZ= 1.0f;
 	_view_mat = glm::mat4(1.0f);
 	_model = NULL;
 	_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);

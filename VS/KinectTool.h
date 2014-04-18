@@ -30,6 +30,8 @@ public:
 	pthread_barrier_t barrier;
 	KinectReader* _reader;
 
+	int PAD_DEPTH;
+
 private:
 	KinectTool();
 
