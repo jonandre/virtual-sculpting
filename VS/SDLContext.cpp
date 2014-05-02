@@ -164,11 +164,11 @@ SDLContext::SDLContext()
 	lastFPSTick = lastTick;
 
 	speed = 1.0f;
-	depth = 0.0f;
+	depth = 0.0f; 
 	wantedDepth = 0.0f;
 
 	// SCENE VIEW
-	showScene= true;
+	showScene= false;
 	sceneRotSpeed = 5.0f;
 	SCENE_PREVIW_SIZE = SCREEN_HEIGHT/4;
 

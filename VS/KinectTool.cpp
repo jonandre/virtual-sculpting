@@ -3,9 +3,14 @@
 #define DIR_Z_STEP 1.0f;
 #define FALLBACK_CPU_COUNT 4
 
+
+static Point* lastPoints;
+
 KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 {
 	PAD_DEPTH = 50;
+
+	lastPoints = new Point[640*480];
 
 	/* Creats a vertex grid mesh out of triengels */
 	_msh = new TriangleMesh(640, 480, -half_x, -half_y, half_x, half_y, start_z);
@@ -198,6 +203,9 @@ static int cpu_output[480];
 void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM)
 {
 	//for loop for each point, rotated by inverse of quat
+	if (points) {
+		memcpy(lastPoints, points, 640*480*sizeof(Point));
+	}
 	points = _msh->GetPoints();
 	inverse = glm::conjugate(quat);
 	modelMatrix = glm::inverse(modelM);
@@ -241,6 +249,7 @@ KinectTool::~KinectTool()
 	delete _reader;
 	delete [] _tmp_blured_image;
 	delete _tool_shader;
+	delete [] lastPoints;
 	
 	pthread_barrier_destroy(&(this->barrier));
 	free(threads);
@@ -292,6 +301,29 @@ void KinectTool::parallellise(long cpu, long beginning, long stop)
 }
 
 
+inline int direction(int from, int dir) {
+	int aux;
+
+	switch (dir) {
+	case 0:
+		return from;
+	case 1: // up
+		aux = from - 1;
+		return (aux < 0)? -1 : aux;
+	case 2: // down
+		aux = from + 1;
+		return (aux/480 != from/480)? -1 : aux;
+	case 3: // left
+		aux = from - 480;
+		return (aux < 0)? -1 : aux;
+	case 4: // right
+		aux = from + 480;
+		return (aux >= 480*640)? -1 : aux;
+	}
+
+	return dir;
+}
+
 static void* run(void* args)
 {
 	KinectTool* tool = (KinectTool*)(((long*)args)[1]);
@@ -304,9 +336,9 @@ static void* run(void* args)
 	long count, x, y;
 	int accum = 0;
   
-	Point action_point;
+	Point action_point, action_base;
 	unsigned int tmp1, tmp2, tmp3;
-	Point tmp;
+	Point tmp, last_action_dir;
 	UINT8 val = 128;
   
 	for (;;)
@@ -322,18 +354,50 @@ static void* run(void* args)
 			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
 			//action_point = Rotate( points[ x*480 + y ], inverse);
 			action_point = Transform (points[ x*480 + y ], modelMatrix);
-			for ( int delta = 0; delta < tool->PAD_DEPTH; delta++ )
+			/*for ( int delta = 0; delta < tool->PAD_DEPTH; delta++ )
 			{
 				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0]*delta;
 				tmp.coord[1] = action_point.coord[1] + local_dir_vector.coord[1]*delta;
 				tmp.coord[2] = action_point.coord[2] + local_dir_vector.coord[2]*delta;
-				/*index =*/ grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+				grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
 		
 				if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
 					accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
 				else
 					break;
-			}
+			}*/
+			
+			float divisions = 7.0f;
+			last_action_dir = Transform (lastPoints[x*480 + y], modelMatrix);
+			last_action_dir.coord[0] = (last_action_dir.coord[0] - action_point.coord[0])/divisions;
+			last_action_dir.coord[1] = (last_action_dir.coord[1] - action_point.coord[1])/divisions;
+			last_action_dir.coord[2] = (last_action_dir.coord[2] - action_point.coord[2])/divisions;
+
+			
+
+			for (int i = 0; i < 5; ++i) {
+				int current = direction(x*480 + y, i);
+
+				if (current < 0) continue;
+
+				action_base = Transform (points[current], modelMatrix);
+				action_base.coord[0] = (action_base.coord[0] - action_point.coord[0])/3.0f + action_point.coord[0];
+				action_base.coord[1] = (action_base.coord[1] - action_point.coord[1])/3.0f + action_point.coord[1];
+				action_base.coord[2] = (action_base.coord[2] - action_point.coord[2])/3.0f + action_point.coord[2];
+
+				for (float j = 0.0f; j < divisions; j += 1.0f) {
+					tmp.coord[0] = action_base.coord[0] + last_action_dir.coord[0]*j;
+					tmp.coord[1] = action_base.coord[1] + last_action_dir.coord[1]*j;
+					tmp.coord[2] = action_base.coord[2] + last_action_dir.coord[2]*j;
+
+					grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+		
+					if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
+						accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
+					else
+						break;
+				}
+			} 
 		}
       
 		  cpu_output[cpu] = accum;
