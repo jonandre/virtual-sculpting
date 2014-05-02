@@ -169,16 +169,16 @@ SDLContext::SDLContext()
 
 	// SCENE VIEW
 	showScene= true;
-	sceneRotSpeed = 4.0f;
+	sceneRotSpeed = 5.0f;
 	SCENE_PREVIW_SIZE = SCREEN_HEIGHT/4;
 
-	sceneProj = glm::perspective(90.0f, 1.0f, 0.1f, 100.0f);
+	sceneProj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
 
 	// PROJECTOR SHADOW 0.92, 1.42
-	float projW = 1.42f;
-	float projH = 0.92f;
+	float projW = 1.39f;
+	float projH = 0.925f;
 	shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, 5.0f);
-	shadowView = glm::lookAt(glm::vec3(0.0f, 3.0f, 0.88 + projW/2.0f), glm::vec3(0.0f, 0.0f, 0.83 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	shadowView = glm::lookAt(glm::vec3(0.1225f, 3.0f, 0.855 + projW/2.0f), glm::vec3(0.1225f, 0.0f, 0.855 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
 	std::cout << "SDLContext initialized" << std::endl;
@@ -256,13 +256,13 @@ void SDLContext::doMessage()
 void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	this->headTracking = headTracking;
 
-	headTracking->SetDisplaySize(4.0055f,  2.430f);
-	headTracking->SetEyeDistance(0.065f);
+	headTracking->SetDisplaySize(4.0055f - 0.075f*2.0f,  2.430f - 0.075f*2.0f);
+	headTracking->SetEyeDistance(0.075f);
 	headTracking->SetHeadRadius(0.1f);
-	headTracking->SetSensorPosition(0.1205f, (2.430f/2.0f + 0.06f), 0.08f);
+	headTracking->SetSensorPosition(0.15f, ((2.430f - 0.075f*2.0f)/2.0f + 0.0375f), 0.13f);
 	headTracking->SetInterestFacing(true);
 	
-	headTracking->SetViewportSize(4.0055f, 2.430f);
+	headTracking->SetViewportSize(4.0055f - 0.075f*2.0f, 2.430f - 0.075f*2.0f);
 	headTracking->SetZPlanes(render->ZNEAR, render->ZFAR);	
 }
 
@@ -285,7 +285,7 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	
 	//float viewportHeight = float(side)*3.0f;
 	//float viewportWidth = viewportHeight*ratio;
-	sceneView = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -1.2f));
+	sceneView = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.2f, -2.0f));
 	sceneView = glm::rotate(sceneView, sceneRot, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneView = glm::translate(sceneView, -headTracking->GetHeadPosition());
 

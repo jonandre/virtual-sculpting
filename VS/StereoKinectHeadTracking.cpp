@@ -119,6 +119,10 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sPos) {
 	glm::vec3 vwPos;
 
+	/*sPos.y *= 0.85f;
+	sPos.x *= 0.77f;
+	sPos.z *= 1.1f;*/
+
 	vwPos.x = (SENSOR_RW_POS_X + sPos.x) * RW_TO_VW_RATIO.x;
 	vwPos.y = (SENSOR_RW_POS_Y + sPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO.x;
 	vwPos.z = (SENSOR_RW_POS_Z - sPos.y*glm::sin(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::cos(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO.x;
@@ -224,50 +228,43 @@ void StereoKinectHeadTracking::RetrieveMatrices(glm::vec3 interestPoint, glm::ma
 
 	float left, right, top, bottom;
 
-	float headRightFactorX = 1.0f;
-	float headRightFactorZ = 0.0f;
-	// If we are facing the screen we should evaluate the angle to the middle of the screen
-	if (FACE_INTEREST) {
-		glm::vec3 interestDir = head - interestPoint; 
-		glm::vec2 aux (interestDir.z, -interestDir.x);
-		aux = glm::normalize(aux);
-		headRightFactorZ = aux.y;
-		headRightFactorX = aux.x;
-	}
-
+	glm::vec3 eyePos;
+	
 	//Left eye
-	focus = head.z - 0.5 * EYE_DISTANCE * headRightFactorZ - HEAD_RADIUS * headRightFactorX;
+	eyePos = GetEyePosition(true);
+
+	focus = eyePos.z;
 	ndfl = ZNEAR / focus;
 	
 	top = VIEWPORT_HEIGHT * ndfl * tf;
 	bottom = -VIEWPORT_HEIGHT * ndfl * bf;
 
-	rf = (VIEWPORT_WIDTH/2.0 - (head.x - 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ)) / VIEWPORT_WIDTH;
-	lf = ((head.x - 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
+	rf = (VIEWPORT_WIDTH/2.0 - eyePos.x) / VIEWPORT_WIDTH;
+	lf = 1.0f - rf;
 
 	left = -VIEWPORT_WIDTH * ndfl * lf;
 	right = VIEWPORT_WIDTH * ndfl * rf;
 
 	leftProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
-	leftEye = glm::translate(glm::mat4(1.0f), -head + glm::vec3(0.0f, 0.0f, 0.23f)); // debug
-	leftEye = glm::translate(leftEye, glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f) - glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS);
+	leftEye = glm::translate(glm::mat4(1.0f), -eyePos + glm::vec3(0.0f, 0.0f, 0.0f)); // debug
 
 	//Right eye
-	focus = head.z + 0.5 * EYE_DISTANCE * headRightFactorZ - HEAD_RADIUS * headRightFactorX;
+	eyePos = GetEyePosition(false);
+
+	focus = eyePos.z;
 	ndfl = ZNEAR / focus;
 	
 	top = VIEWPORT_HEIGHT * ndfl * tf;
 	bottom = -VIEWPORT_HEIGHT * ndfl * bf;
 
-	rf = (VIEWPORT_WIDTH/2.0 - (head.x + 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ)) / VIEWPORT_WIDTH;
-	lf = ((head.x + 0.5 * EYE_DISTANCE * headRightFactorX - HEAD_RADIUS * -headRightFactorZ) - (-VIEWPORT_WIDTH/2.0)) / VIEWPORT_WIDTH;
+	rf = (VIEWPORT_WIDTH/2.0 - eyePos.x) / VIEWPORT_WIDTH;
+	lf = 1.0f - rf;
 
 	left = -VIEWPORT_WIDTH * ndfl * lf;
 	right = VIEWPORT_WIDTH * ndfl * rf;
 
 	rightProj = glm::frustum(left, right, bottom, top, ZNEAR, ZFAR);
-	rightEye = glm::translate(glm::mat4(1.0f), -head + glm::vec3(0.0f, 0.0f, 0.23f)); // debug);
-	rightEye = glm::translate(rightEye, -glm::vec3(headRightFactorX,0,headRightFactorZ)*(EYE_DISTANCE/2.0f) - glm::vec3(-headRightFactorZ,0,headRightFactorX)*HEAD_RADIUS);
+	rightEye = glm::translate(glm::mat4(1.0f), -eyePos + glm::vec3(0.0f, 0.0f, 0.0f)); // debug);
 }
 
 glm::vec3 StereoKinectHeadTracking::GetSensorOriginOnVirtualWorld()
@@ -286,4 +283,6 @@ void StereoKinectHeadTracking::ViewportChanged()
 	RW_TO_VW_RATIO.x = VIEWPORT_WIDTH / DISPLAY_RW_WIDTH;
 	EYE_DISTANCE = RW_EYE_DISTANCE * RW_TO_VW_RATIO.x;
 	HEAD_RADIUS = RW_HEAD_RADIUS * RW_TO_VW_RATIO.x;
+
+	std::cout << "RW_TO_VW_RATIO is: " << RW_TO_VW_RATIO.x << ", " << RW_TO_VW_RATIO.y << std::endl;
 }

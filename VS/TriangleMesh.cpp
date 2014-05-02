@@ -90,7 +90,9 @@ void TriangleMesh::UpdateDepth( StereoKinectHeadTracking* tracking, vector<NUI_D
 			coordMapper->MapDepthPointToSkeletonPoint(NUI_IMAGE_RESOLUTION_640x480, &points[(_y-j-1)*_x + i], &p);
 			//p = NuiTransformDepthImageToSkeleton(o.x, o.y, o.depth, NUI_IMAGE_RESOLUTION_640x480);
 			
-			glm::vec3 vwPoint = tracking->SensorToVirtualWorldCoordinates(glm::vec3(p.x, p.y, p.z));
+			glm::vec3 rwPoint = glm::vec3(p.x, p.y, p.z);
+			glm::vec3 vwPoint = tracking->SensorToVirtualWorldCoordinates(rwPoint);
+			vwPoint += glm::vec3(-0.027f, 0.03f, 0.013f); // Seen error
 
 			if (false/*i == _x/2 && j == 0*/) {
 				std::cout << "Depth conversion " << i <<","<<j<<":" << std::endl;

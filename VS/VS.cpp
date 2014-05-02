@@ -131,7 +131,6 @@ int main( int argc, char** argv)
 	/* Initializes head tracking */
 	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
 	tool->_reader->Init(headTracking);
-	//headTracking->SetPredictionFactor(glm::vec3(1.0f, 1.0f, 1.0f));
 
 	cntx->SetHeadTracking(headTracking);
 	

@@ -204,25 +204,31 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 
 		///////////////////////////   START OF HEAD DRAWTING   ///////////////////////////////////
 		
-		glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
-		glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
-		glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
+		if (status < 0 || status > 2) {
+			glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
+			glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
+			glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
 
-		glm::vec4 h = pvm*glm::vec4(head.x, head.y, head.z, 1.0f);
-		glm::vec4 l = pvm*glm::vec4(left.x, left.y, left.z, 1.0f);
-		glm::vec4 r = pvm*glm::vec4(right.x, right.y, right.z, 1.0f);
+			glm::vec4 h = pvm*glm::vec4(head.x, head.y, head.z, 1.0f);
+			glm::vec4 l = pvm*glm::vec4(left.x, left.y, left.z, 1.0f);
+			glm::vec4 r = pvm*glm::vec4(right.x, right.y, right.z, 1.0f);
 
-		glLineWidth(5.5f);
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glBegin(GL_LINES);
-		glVertex3f(h.x, h.y, h.z);
-		glVertex3f(l.x, l.y, l.z);
-		glColor3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(h.x, h.y, h.z);;
-		glVertex3f(r.x, r.y, r.z);;
-		glEnd();
+			//glDisable(GL_CULL_FACE);
 
-		///////////////////////////   END OF HEAD DRAWTING   ///////////////////////////////////
+			//glLineWidth(5.5f);
+			glBegin(GL_TRIANGLES);
+			glColor3f(0.2f, 0.2f, 0.2f);
+			glVertex3f(h.x, h.y, h.z);
+			glColor3f(1.0f, 0.0f, 0.0f);
+			glVertex3f(l.x, l.y, l.z);
+			glColor3f(0.0f, 0.0f, 1.0f);
+			glVertex3f(r.x, r.y, r.z);
+			glEnd();
+
+			//glEnable(GL_CULL_FACE);
+
+			///////////////////////////   END OF HEAD DRAWTING   ///////////////////////////////////
+		}
 	}
 
 
