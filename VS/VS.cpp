@@ -174,7 +174,7 @@ int main( int argc, char** argv)
 		//
 
 		if ( GetPressedStage() )
-			tool->StartInteractModel( model, inp->GetObjectQ(), inp->GetObjectM());//obvious
+			tool->StartInteractModel( model, inp->GetObjectQ(), inp->GetObjectM(), inp->GetModelSide());//obvious
 
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM(), font1, font2, font3);// do actual rendering.
 		

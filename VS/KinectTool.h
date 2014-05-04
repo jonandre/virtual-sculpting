@@ -21,7 +21,7 @@ public:
 	KinectTool( float half_x, float half_y, float start_z, float end_z );
 	~KinectTool();
 	void DoToolUpdate();
-	void StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM );
+	void StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM, float modelSide);
 	int StopInteractModel( );
 	TriangleMesh* GetToolMesh();
 	Shader* GetToolShader();
@@ -30,7 +30,7 @@ public:
 	pthread_barrier_t barrier;
 	KinectReader* _reader;
 
-	int PAD_DEPTH;
+	float PAD_DEPTH;
 
 private:
 	KinectTool();

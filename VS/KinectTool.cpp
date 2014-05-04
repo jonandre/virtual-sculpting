@@ -8,7 +8,7 @@ static Point* lastPoints;
 
 KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 {
-	PAD_DEPTH = 50;
+	PAD_DEPTH = 0.05; // CentiMeters
 
 	lastPoints = new Point[640*480];
 
@@ -199,8 +199,9 @@ static unsigned int grid_dimm;
 static Point dir_vector;
 static GridModel* grid_model;
 static int cpu_output[480];
+static float voxel_distance;
 
-void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM)
+void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM, float modelSide)
 {
 	//for loop for each point, rotated by inverse of quat
 	if (points) {
@@ -209,6 +210,8 @@ void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4
 	points = _msh->GetPoints();
 	inverse = glm::conjugate(quat);
 	modelMatrix = glm::inverse(modelM);
+	
+	voxel_distance = modelSide / float(model->GetDimm());
 	
 	//Can be easy paralelized. With one but - UpdateCell should be treated properly - it's nor thead safe for moment.
 	grid_dimm = model->GetDimm() - 1;
@@ -305,15 +308,15 @@ inline int direction(int from, int dir) {
 	int aux;
 
 	switch (dir) {
-	case 0:
+	case 2:
 		return from;
-	case 1: // up
+	case 0: // up
 		aux = from - 1;
 		return (aux < 0)? -1 : aux;
-	case 2: // down
+	case 3: // down
 		aux = from + 1;
 		return (aux/480 != from/480)? -1 : aux;
-	case 3: // left
+	case 1: // left
 		aux = from - 480;
 		return (aux < 0)? -1 : aux;
 	case 4: // right
@@ -340,13 +343,25 @@ static void* run(void* args)
 	unsigned int tmp1, tmp2, tmp3;
 	Point tmp, last_action_dir;
 	UINT8 val = 128;
+	
+	glm::vec3 action_p, towards_p, base_p, current_p;
+	glm::vec3 current_dir, tool_dir;
+	int tool_iterations;
+	int max_steps = 10;
   
 	for (;;)
 	{
 		pthread_barrier_wait(&(tool->barrier)); /* Wait for start cue */
 		accum = 0;
 		Point local_dir_vector = dir_vector;
+		tool_dir = glm::vec3(dir_vector.coord[0], dir_vector.coord[1], dir_vector.coord[2]);
+		tool_dir.normalize();
+		
 		count = 0;
+		
+		tool_iterations = int(PAD_DEPTH / voxel_distance);
+		if (tool_iterations == 0) tool_iterations = 1;
+		
 		for (y = beginning; y < stop; y++)
 		for (x = 0; x < 640; x++)
 		{
@@ -354,6 +369,7 @@ static void* run(void* args)
 			//tmp.coord[2] -= DIR_Z_STEP * PAD_DEPTH;
 			//action_point = Rotate( points[ x*480 + y ], inverse);
 			action_point = Transform (points[ x*480 + y ], modelMatrix);
+			action_p = glm::vec3(action_point.coord[0], action_point.coord[1], action_point.coord[2]);
 			/*for ( int delta = 0; delta < tool->PAD_DEPTH; delta++ )
 			{
 				tmp.coord[0] = action_point.coord[0] + local_dir_vector.coord[0]*delta;
@@ -366,36 +382,53 @@ static void* run(void* args)
 				else
 					break;
 			}*/
-			
-			float divisions = 7.0f;
-			last_action_dir = Transform (lastPoints[x*480 + y], modelMatrix);
-			last_action_dir.coord[0] = (last_action_dir.coord[0] - action_point.coord[0])/divisions;
-			last_action_dir.coord[1] = (last_action_dir.coord[1] - action_point.coord[1])/divisions;
-			last_action_dir.coord[2] = (last_action_dir.coord[2] - action_point.coord[2])/divisions;
 
-			
+			// Base point check
+			base_p = action_p;
+			for (int k = 0; k < tool_iterations; ++k) {
+				current_p = base_p + tool_dir*voxel_distance*k;
+				
+				memcpy(&tmp.coord, current_p[], 3*sizeof(float));
+				
+				grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+		
+				if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
+					accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
+				else
+					break;
+			}
 
-			for (int i = 0; i < 5; ++i) {
+			// checking up and left
+			for (int i = 0; i <= 1; ++i) { 
 				int current = direction(x*480 + y, i);
 
 				if (current < 0) continue;
 
 				action_base = Transform (points[current], modelMatrix);
-				action_base.coord[0] = (action_base.coord[0] - action_point.coord[0])/3.0f + action_point.coord[0];
-				action_base.coord[1] = (action_base.coord[1] - action_point.coord[1])/3.0f + action_point.coord[1];
-				action_base.coord[2] = (action_base.coord[2] - action_point.coord[2])/3.0f + action_point.coord[2];
-
-				for (float j = 0.0f; j < divisions; j += 1.0f) {
-					tmp.coord[0] = action_base.coord[0] + last_action_dir.coord[0]*j;
-					tmp.coord[1] = action_base.coord[1] + last_action_dir.coord[1]*j;
-					tmp.coord[2] = action_base.coord[2] + last_action_dir.coord[2]*j;
-
-					grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
-		
-					if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
-						accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
-					else
-						break;
+				towards_p = glm::vec3(action_base.coords[0], action_base.coords[1], action_base.coords[2]);
+				
+				current_dir = towards_p - action_p;
+				
+				int steps = int(glm::length(current_dir) / voxel_distance);
+				if (steps > max_steps) steps = max_steps;
+				
+				current_dir.normalize();
+				
+				for (int j = 1; j < steps; ++j) {
+					base_p = action_p + current_dir*voxel_distance*j;
+					
+					for (int k = 0; k < tool_iterations; ++k) {
+						current_p = base_p + tool_dir*voxel_distance*k;
+						
+						memcpy(&tmp.coord, current_p[], 3*sizeof(float));
+						
+						grid_model->GetCellIndex(tmp, tmp1, tmp2, tmp3);
+				
+						if (!( ( tmp1 > grid_dimm ) || ( tmp2 > grid_dimm ) || ( tmp3 > grid_dimm )))//if we are in model bounds
+							accum += grid_model->UpdateCellMelt(tmp1, tmp2, tmp3, val);
+						else
+							break;
+					}
 				}
 			} 
 		}
