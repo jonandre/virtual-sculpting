@@ -349,7 +349,7 @@ static void* run(void* args)
 	glm::vec3 action_p, towards_p, left_p, up_p, base_p, current_p;
 	glm::vec3 current_dir, left_dir, up_dir, tool_dir;
 	int tool_iterations;
-	int max_steps = 10;
+	int max_steps = 100;
   
 	for (;;)
 	{
@@ -363,7 +363,7 @@ static void* run(void* args)
 		
 		tool_iterations = int(tool->PAD_DEPTH / voxel_distance);
 		if (tool_iterations == 0) tool_iterations = 1;
-		else if (tool_iterations > 10) tool_iterations = 10;
+		max_steps = tool_iterations * 2.0f;
 		
 		for (y = beginning; y < stop; y++)
 		for (x = 0; x < 640; x++)
@@ -386,7 +386,7 @@ static void* run(void* args)
 					break;
 			}*/
 			
-			/*
+			
 			// checking up and left
 			int up = direction(x*480 + y, 0);
 			int left = direction(x*480 + y, 1);
@@ -401,10 +401,12 @@ static void* run(void* args)
 				up_steps = int(glm::length(up_dir));
 				// Max steps?
 				if (up_steps < 1) up_steps = 1;
-				else glm::normalize(up_dir);
+				else {
+					up_dir = glm::normalize(up_dir);
 
-				//if (up_steps > 10) up_steps = 10;
-				up_steps = 2;
+					if (up_steps > max_steps) up_steps = 1;
+					//up_steps = 2;
+				}
 			}
 			else up_dir = glm::vec3(0.0f);
 
@@ -416,10 +418,12 @@ static void* run(void* args)
 				left_steps = int(glm::length(left_dir));
 				// Max steps?
 				if (left_steps < 1) left_steps = 1;
-				else glm::normalize(left_dir);
+				else {
+					left_dir = glm::normalize(left_dir);
 
-				//if (left_steps > 10) left_steps = 10;
-				left_steps = 2;
+					if (left_steps > max_steps) left_steps = 1;
+					//left_steps = 2;
+				}
 			}
 			else left_dir = glm::vec3(0.0f);
 
@@ -441,9 +445,9 @@ static void* run(void* args)
 					}
 				}
 			}
-			*/
-
 			
+
+			/*
 			// Base point check
 			base_p = action_p;
 			for (int k = 0; k < tool_iterations; ++k) {
@@ -473,7 +477,7 @@ static void* run(void* args)
 				int steps = int(glm::length(current_dir));
 				if (steps > max_steps) steps = max_steps;
 
-				glm::normalize(current_dir);
+				current_dir = glm::normalize(current_dir);
 
 				for (int j = 1; j < steps; ++j) {
 					base_p = action_p + current_dir*float(j);
@@ -492,6 +496,7 @@ static void* run(void* args)
 					}
 				}
 			}
+			*/
 		}
       
 		  cpu_output[cpu] = accum;
