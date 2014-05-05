@@ -171,7 +171,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 
-	if (status < 0 || status > 2) {
+	if (	TRUE || status < 0 || status > 2) {
 		///////////////////////////   START OF KINECT TOOL DRAWTING   ///////////////////////////////////
 
 		// Gets tringelMesh Vertex Array Output
