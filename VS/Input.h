@@ -91,14 +91,14 @@ private:
 	//float _rotationSpeedValu;
 	//glm::mat4 _obj_mat;
 	glm::quat _obj_quat;
-	float _obj_pos;
+	glm::vec3 _obj_pos;
 	float _obj_scale;
 	glm::mat4 _view_mat;
 	float zoom_val;
 
 	float wantedScale;
-	float wantedZ;
-	float wantedSide;
+		float wantedSide;
+	glm::vec3 wantedPos;
 	
 	int rx;
 	int ry;

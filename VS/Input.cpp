@@ -20,10 +20,10 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 	_angleXS = 0;
 	_angleYS = 0;
 	_obj_quat = glm::quat( glm::vec3(0.0));
-	_obj_pos = 1.0f;
+	wantedPos = glm::vec3(0.0f);
+	_obj_pos = glm::vec3(0.0f);
 	_obj_scale = 1.0;
 	wantedScale = 1.0f;
-	wantedZ= 1.0f;
 	_view_mat = glm::mat4(1.0f);
 	_model = NULL;
 	_rotation_vector_obj = glm::vec3(0.0,0.0,0.0);
@@ -220,16 +220,22 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			fps_regulation ^= true;
 			break;
 		
-		case SDLK_UP:
-			wantedZ += 0.5f;
-			break;
-		case SDLK_DOWN:
-			wantedZ -= 0.5f;
-			break;
 		case SDLK_RIGHT:
-			wantedScale *=  1.2f;
+			wantedPos += glm::vec3(0.0f, 0.0f, 0.5f);
 			break;
 		case SDLK_LEFT:
+			wantedPos -= glm::vec3(0.0f, 0.0f, 0.5f);
+			break;
+		case SDLK_UP:
+			wantedPos += glm::vec3(0.0f, 0.25f, 0.0f);
+			break;
+		case SDLK_DOWN:
+			wantedPos -= glm::vec3(0.0f, 0.25f, 0.0f);
+			break;
+		case SDLK_PLUS:
+			wantedScale *=  1.2f;
+			break;
+		case SDLK_MINUS:
 			wantedScale /= 1.2f;
 			break;
 	}
@@ -251,7 +257,7 @@ glm::mat4 Input::GetObjectM()
 	//return transformation;
 	glm::mat4 rot = glm::toMat4(_obj_quat);
 
-	glm::mat4 m = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,_obj_pos*wantedSide));
+	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos*wantedSide);
 	m = glm::scale(m, glm::vec3(_obj_scale));
 	m = m*rot;
 	return m;
@@ -259,7 +265,7 @@ glm::mat4 Input::GetObjectM()
 
 glm::mat4 Input::GetModelM()
 {
-	glm::mat4 m = glm::translate(glm::mat4(1.0f), glm::vec3(0,0,_obj_pos*wantedSide));
+	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos*wantedSide);
 	m = glm::scale(m, glm::vec3(_obj_scale));
 	return m;
 }
@@ -341,7 +347,7 @@ void Input::UpdateFrame(float deltaTime)
 	_obj_quat = glm::quat(transformation * glm::toMat4(_obj_quat));
 
 	float speed = 1.0f;
-	_obj_pos = _obj_pos*(speed - deltaTime)/speed + wantedZ*deltaTime/speed;
+	_obj_pos = _obj_pos*(speed - deltaTime)/speed + wantedPos*deltaTime/speed;
 	_obj_scale = _obj_scale*(speed - deltaTime)/speed + wantedScale*deltaTime/speed;
 }
 
@@ -406,8 +412,8 @@ void Input::SetModel( GridModel* md )
 
 void Input::SetModelPosition(glm::vec3 pos)
 {
-	wantedZ = pos.z;
-	_obj_pos = wantedZ;
+	wantedPos = pos;
+	_obj_pos = pos;
 }
 
 
@@ -460,5 +466,5 @@ float Input::GetModelSide()
 
 glm::vec3 Input::GetObjectPosition()
 {
-	return glm::vec3(0.0f, 0.0f, _obj_pos*wantedSide);
+	return _obj_pos*wantedSide;
 }
