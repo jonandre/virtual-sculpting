@@ -218,15 +218,15 @@ void SDLContext::doMessage()
 				//std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
 				inp->OnKeyPressed(e.key.keysym.sym); //TODO
 				
-				if (e.key.keysym.sym == SDLK_PLUS){
+				/*if (e.key.keysym.sym == SDLK_PLUS){
 					wantedDepth += 0.5f;
 					//std::cout << "Up pressed" << std::endl;
 				}
 				else if (e.key.keysym.sym == SDLK_MINUS){
 					wantedDepth -= 0.5f;
 					//std::cout << "Down pressed" << std::endl;
-				}
-				else if (e.key.keysym.sym == SDLK_PERIOD) {
+				}*/
+				if (e.key.keysym.sym == SDLK_PERIOD) {
 					showScene ^= true;
 				}
 			}

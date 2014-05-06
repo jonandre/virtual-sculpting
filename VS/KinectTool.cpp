@@ -10,8 +10,6 @@ KinectTool::KinectTool( float half_x, float half_y, float start_z, float end_z )
 {
 	PAD_DEPTH = 0.05f; // CentiMeters
 
-	lastPoints = new Point[640*480];
-
 	/* Creats a vertex grid mesh out of triengels */
 	_msh = new TriangleMesh(640, 480, -half_x, -half_y, half_x, half_y, start_z);
 	printf("Kinect grid created. \n");
@@ -204,9 +202,6 @@ static float voxel_distance;
 void KinectTool::StartInteractModel( GridModel* model, glm::quat quat, glm::mat4 modelM, float modelSide)
 {
 	//for loop for each point, rotated by inverse of quat
-	if (points) {
-		memcpy(lastPoints, points, 640*480*sizeof(Point));
-	}
 	points = _msh->GetPoints();
 	inverse = glm::conjugate(quat);
 	modelMatrix = glm::inverse(modelM);

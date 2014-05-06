@@ -217,7 +217,9 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			SetPressedStage(GetPressedStage() ^ true);
 			break;
 		case SDLK_x:
-			fps_regulation ^= true;
+			//fps_regulation ^= true;
+			STLExporter::ExportToStl(_model->GetCells(), _model->GetDimm());
+
 			break;
 		
 		case SDLK_RIGHT:

@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "SDL.h"
+#include "STLExporter.h"
 #include <vector>
 
 #include "GridModel.h"

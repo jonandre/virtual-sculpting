@@ -180,6 +180,7 @@
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StereoKinectHeadTracking.cpp" />
     <ClCompile Include="StereoRender.cpp" />
+    <ClCompile Include="STLExporter.cpp" />
     <ClCompile Include="Text.cpp" />
     <ClCompile Include="TextureMappedFont.cpp" />
     <ClCompile Include="TriangleMesh.cpp" />
@@ -212,6 +213,7 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StereoKinectHeadTracking.h" />
     <ClInclude Include="StereoRender.h" />
+    <ClInclude Include="STLExporter.h" />
     <ClInclude Include="Text.h" />
     <ClInclude Include="TextureMappedFont.h" />
     <ClInclude Include="TriangleMesh.h" />
