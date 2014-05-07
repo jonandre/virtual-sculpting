@@ -151,16 +151,16 @@ void STLExporter::ExportToStl(unsigned char* voxels, int dimm)
 						outFile << "facet normal " << normal.x << " " << normal.y << " " << normal.z << std::endl;
 						outFile << "outer loop" << std::endl;
 						outFile << "vertex " << v0.x << " " << v0.y << " " << v0.z << std::endl;
-						outFile << "vertex " << v2.x << " " << v2.y << " " << v2.z << std::endl;
 						outFile << "vertex " << v1.x << " " << v1.y << " " << v1.z << std::endl;
+						outFile << "vertex " << v2.x << " " << v2.y << " " << v2.z << std::endl;
 						outFile << "endloop" << std::endl;
 						outFile << "endfacet" << std::endl;
 
 						outFile << "facet normal " << normal.x << " " << normal.y << " " << normal.z << std::endl;
 						outFile << "outer loop" << std::endl;
 						outFile << "vertex " << v0.x << " " << v0.y << " " << v0.z << std::endl;
-						outFile << "vertex " << v3.x << " " << v3.y << " " << v3.z << std::endl;
 						outFile << "vertex " << v2.x << " " << v2.y << " " << v2.z << std::endl;
+						outFile << "vertex " << v3.x << " " << v3.y << " " << v3.z << std::endl;
 						outFile << "endloop" << std::endl;
 						outFile << "endfacet" << std::endl;
 					}
