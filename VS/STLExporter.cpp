@@ -57,28 +57,28 @@ inline glm::vec3 STLExporter::dirVector (direction normal, direction dir) {
 		};
 	case right:
 		switch (dir) {
-		case up: return -rightv;
+		case up: return rightv;
 		case right: return -upv;
 		case forward: return forwardv;
 		default: return rightv;
 		};
 	case left:
 		switch (dir) {
-		case up: return rightv;
+		case up: return -rightv;
 		case right: return upv;
 		case forward: return forwardv;
 		default: return -rightv;
 		};
 	case forward:
 		switch (dir) {
-		case up: return -forwardv;
+		case up: return forwardv;
 		case right: return rightv;
 		case forward: return -upv;
 		default: return forwardv;
 		};
 	case backward:
 		switch (dir) {
-		case up: return forwardv;
+		case up: return -forwardv;
 		case right: return -rightv;
 		case forward: return -upv;
 		default: return -forwardv;
