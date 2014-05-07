@@ -51,7 +51,7 @@ inline glm::vec3 STLExporter::dirVector (direction normal, direction dir) {
 	case down:
 		switch (dir) {
 		case up: return -upv;
-		case right: return -rightv;
+		case right: return rightv;
 		case forward: return -forwardv;
 		default: return -upv;
 		};
@@ -99,7 +99,7 @@ glm::vec3 STLExporter::basePoint (glm::vec3 center, direction dir)
 	case up:
 		return center + upv;
 	case down:
-		return center + forwardv + rightv;
+		return center + forwardv;
 	case right:
 		return center + upv + rightv;
 	case left:
@@ -136,10 +136,6 @@ void STLExporter::ExportToStl(unsigned char* voxels, int dimm)
 						glm::vec3 normal = dirVector((direction)d, (direction)up);
 						glm::vec3 rightv = dirVector((direction)d, (direction)right);
 						glm::vec3 forwardv = dirVector((direction)d, (direction)forward);
-
-						//debug
-						if ((direction)d == down)
-							normal *= -1;
 
 						glm::vec3 center = glm::vec3(float(i), float(j), float(k));
 						center = basePoint(center, (direction)d);
