@@ -137,6 +137,10 @@ void STLExporter::ExportToStl(unsigned char* voxels, int dimm)
 						glm::vec3 rightv = dirVector((direction)d, (direction)right);
 						glm::vec3 forwardv = dirVector((direction)d, (direction)forward);
 
+						//debug
+						if ((direction)d == down)
+							normal *= -1;
+
 						glm::vec3 center = glm::vec3(float(i), float(j), float(k));
 						center = basePoint(center, (direction)d);
 						// Vertex representation
