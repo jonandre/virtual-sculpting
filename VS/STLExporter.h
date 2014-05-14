@@ -3,8 +3,6 @@
 
 #include "main.h"
 #include <iostream>
-#include <iomanip>
-#include <string>
 
 
 class STLExporter {

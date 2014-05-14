@@ -257,7 +257,7 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	this->headTracking = headTracking;
 
 	headTracking->SetDisplaySize(4.0055f - 0.075f*2.0f,  2.430f - 0.075f*2.0f);
-	headTracking->SetEyeDistance(0.075f);
+	headTracking->SetEyeDistance(0.065f);
 	headTracking->SetHeadRadius(0.1f);
 	headTracking->SetSensorPosition(0.15f, ((2.430f - 0.075f*2.0f)/2.0f + 0.0375f), 0.13f);
 	headTracking->SetInterestFacing(true);

@@ -1,4 +1,9 @@
 #include "STLExporter.h"
+#include <time.h>
+#include <iomanip>
+#include <string>
+#include <sstream>
+#include <algorithm>
 
 inline int STLExporter::ref (int dimm, int i, int j, int k) {
 	return i*dimm*dimm + j*dimm + k;
@@ -116,9 +121,28 @@ glm::vec3 STLExporter::basePoint (glm::vec3 center, direction dir)
 void STLExporter::ExportToStl(unsigned char* voxels, int dimm)
 {
 	std::ofstream outFile;
-	outFile.open("milotest.stl", std::ofstream::out | std::ofstream::trunc);
+	time_t rawTime;
+	struct tm * timeInfo;
 
-	outFile << "solid milotest" << std::endl;
+	time (&rawTime);
+	timeInfo = localtime(&rawTime);
+	string timeString(asctime(timeInfo));
+	timeString.pop_back();
+	replace(timeString.begin(), timeString.end(), ' ', '_');
+	replace(timeString.begin(), timeString.end(), ':', '-'); 
+
+	std::stringstream ss;
+	ss << "Milo_sculpture_" << timeString << ".stl";
+
+	std::cout << "Saving file " << ss.str() << std::endl;
+
+	outFile.open(ss.str(), std::ofstream::out | std::ofstream::trunc);
+
+	if (!outFile) {
+		std::cout << std::strerror(errno) << std::endl;
+	}
+
+	outFile << "solid milosculpture" << std::endl;
 	outFile << std::scientific;
 
 	for (int i = 0; i < dimm; ++i) {
@@ -169,7 +193,7 @@ void STLExporter::ExportToStl(unsigned char* voxels, int dimm)
 		}
 	}
 
-	outFile << "endsolid milotest" << std::endl;
+	outFile << "endsolid milosculpture" << std::endl;
 
 	outFile.close();
 }

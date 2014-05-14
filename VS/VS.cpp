@@ -163,7 +163,7 @@ int main( int argc, char** argv)
 		clock_t end = clock();
 		float deltaTime = (float)(end - start) / CLOCKS_PER_SEC;
 
-		inp->UpdateFrame(deltaTime);		//Reset frame variables.
+		inp->UpdateFrame(deltaTime);		//Update frame variables.
 		cntx->doMessage();		//Win message loop
 
 		tool->DoToolUpdate();	//update tool state - like depthmap
