@@ -8,6 +8,7 @@ static const float DEGREES_PER_SECOND_PER_SECOND = glm::pi<float>() * 30.f / 100
 static glm::vec3 rotation = glm::vec3(1.f, 0.f, 0.f);
 static float rotation_speed = 0.f;
 static bool rotation_freeze = false;
+static float rotation_speed_increase = 5.0f;
 
 float fps_procentage = 1.f;
 bool fps_regulation = true;
@@ -19,7 +20,9 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 {
 	_angleXS = 0;
 	_angleYS = 0;
-	_obj_quat = glm::quat( glm::vec3(0.0));
+	_obj_quat = glm::quat(glm::vec3(0.0));
+	_obj_euler = glm::quat(glm::vec3(0.0));
+	rotSpeed = glm::vec3(0.0f);
 	wantedPos = glm::vec3(0.0f);
 	_obj_pos = glm::vec3(0.0f);
 	_obj_scale = 1.0;
@@ -53,11 +56,12 @@ void Input::newGridModel(bool b)
 
 void Input::freezGridModel()
 {
-	rotation_freeze = true;
+	rotSpeed = glm::vec3(0.0f);
 }
 void Input::clearRotationGridModel()
 {
 	_obj_quat = glm::quat(glm::mat4(1.f));
+	_obj_euler = glm::quat(glm::mat4(1.f));
 }
 
 void Input::rotateYGridModel(int directionRight)
@@ -175,16 +179,16 @@ void Input::OnKeyPressed( SDL_Keycode c )
 		case SDLK_c:   newGridModel(true);			break;
 			
 		/// X Vertical rotation
-		case SDLK_w:  rotateXGridModel(+1);		break;
-		case SDLK_s:  rotateXGridModel(-1);		break;
+		case SDLK_w:  rotSpeed.x -= rotation_speed_increase;		break;
+		case SDLK_s:  rotSpeed.x += rotation_speed_increase;		break;
 
 		/// Y Horizontal rotation
-		case SDLK_d:  rotateYGridModel(+1);		break;
-		case SDLK_a:  rotateYGridModel(-1);		break;
+		case SDLK_d:  rotSpeed.y += rotation_speed_increase;		break;
+		case SDLK_a:  rotSpeed.y -= rotation_speed_increase;		break;
 
 		/// Z Clockwise rotation
-		case SDLK_q:  rotateZGridModel(-1);		break;
-		case SDLK_e:  rotateZGridModel(+1);		break;
+		case SDLK_q:  rotSpeed.z += rotation_speed_increase;		break;
+		case SDLK_e:  rotSpeed.z -= rotation_speed_increase;		break;
 			
 		// Rotation increase/decrease
 		case SDLK_g:  rotateFaster();				break;
@@ -257,11 +261,12 @@ void Input::OnMouseLBDown( int x, int y )
 glm::mat4 Input::GetObjectM()
 {
 	//return transformation;
+	glm::mat4 euler = glm::toMat4(_obj_euler);	
 	glm::mat4 rot = glm::toMat4(_obj_quat);
 
 	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos*wantedSide);
 	m = glm::scale(m, glm::vec3(_obj_scale));
-	m = m*rot;
+	m = m*euler*rot;
 	return m;
 }
 
@@ -291,62 +296,12 @@ void Input::UpdateFrame(float deltaTime)
 {
 	float ACCELERATION = 10.0f * DEGREES_PER_SECOND_PER_SECOND;
 	
-	if (rotation_freeze)
-	{
-		rotation_speed = 0;
-		rotation_freeze = false;
-	}
-	
-	if (rx != 0)
-	{
-		glm::vec3 v = this->rx * ACCELERATION * glm::vec3(1.f, 0.f, 0.f);
-		v += rotation_speed * rotation;
-		rotation_speed = glm::length(v);
-		if (rotation_speed * rotation_speed > 0.000001f)
-			rotation = glm::normalize(v);
-		else
-		{
-			rotation = glm::vec3(1, 0, 0);
-			rotation_speed = 0;
-		}
-	}
-	if (ry != 0)
-	{
-		glm::vec3 v = this->ry * ACCELERATION * glm::vec3(0.f, -1.f, 0.f);
-		v += rotation_speed * rotation;
-		rotation_speed = glm::length(v);
-		if (rotation_speed * rotation_speed > 0.000001f)
-			rotation = glm::normalize(v);
-		else
-		{
-			rotation = glm::vec3(1, 0, 0);
-			rotation_speed = 0;
-		}
-	}
-	if (rz != 0)
-	{
-		glm::vec3 v = this->rz * ACCELERATION * glm::vec3(0.f, 0.f, 1.f);
-		v += rotation_speed * rotation;
-		rotation_speed = glm::length(v);
-		if (rotation_speed * rotation_speed > 0.000001f)
-			rotation = glm::normalize(v);
-		else
-		{
-			rotation = glm::vec3(1, 0, 0);
-			rotation_speed = 0;
-		}
-	}
-	rx = ry = rz = 0;
+	glm::quat aux (glm::vec3(0.0f));
+	aux = glm::rotate(aux, rotSpeed.x*deltaTime, glm::vec3(1.0f,0.0f,0.0f));
+	aux = glm::rotate(aux, rotSpeed.y*deltaTime, glm::vec3(0.0f,1.0f,0.0f));
+	aux = glm::rotate(aux, rotSpeed.z*deltaTime, glm::vec3(0.0f,0.0f,1.0f));
 
-	if (rotation_speed > 360.f * DEGREES_PER_SECOND)
-		rotation_speed = 360.f * DEGREES_PER_SECOND;
-
-	if (fps_regulation)
-		transformation = createRotationMatrix(rotation, rotation_speed * fps_procentage);
-	else
-		transformation = createRotationMatrix(rotation, rotation_speed);
-
-	_obj_quat = glm::quat(transformation * glm::toMat4(_obj_quat));
+	_obj_euler = aux*_obj_euler;
 
 	float speed = 1.0f;
 	_obj_pos = _obj_pos*(speed - deltaTime)/speed + wantedPos*deltaTime/speed;

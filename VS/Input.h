@@ -92,6 +92,8 @@ private:
 	//float _rotationSpeedValu;
 	//glm::mat4 _obj_mat;
 	glm::quat _obj_quat;
+	glm::quat _obj_euler;
+	glm::vec3 rotSpeed;
 	glm::vec3 _obj_pos;
 	float _obj_scale;
 	glm::mat4 _view_mat;
