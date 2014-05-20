@@ -152,6 +152,22 @@ void Input::cameraRotationViewRight()
 	_view_mat = glm::rotate( glm::mat4(1.0), -90.0f, glm::vec3(0.0, 1.0, 0.0) );
 }
 
+void Input::translateGridModel(glm::vec3& translation)
+{
+	wantedPos += translation;
+}
+
+void Input::rotateGridModel(glm::vec3& from, glm::vec3& to)
+{
+	glm::vec2 rot;
+	
+	glm::quat aux (glm::vec3(0.0f));
+	aux = glm::rotate(aux, rot.x, glm::vec3(1.0f,0.0f,0.0f));
+	aux = glm::rotate(aux, rot.y, glm::vec3(0.0f,1.0f,0.0f));
+
+	_obj_euler = aux*_obj_euler;
+}
+
 /** Quit program **/
 void Input::Quit()
 {

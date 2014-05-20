@@ -75,6 +75,9 @@ public:
 	void cameraRotationViewBottom();
 	void cameraRotationViewLeft();
 	void cameraRotationViewRight();
+	
+	void translateGridModel(glm::vec3& translation);
+	void rotateGridModel(glm::vec3& from, glm::vec3& to);
 
 	void Quit();
 	

@@ -270,18 +270,27 @@ GridModel::GridModel( int power )
 }
 
 
-void GridModel::ReInitModel( bool clear )
+void GridModel::ReInitModel( bool sphere )
 {
 	unsigned int iter;
+	float radius;
+	Point center;
 	for (  int i = 0; i < dimm; i++ )
 	{
+		center.coord[0] = float(i - half_dimm);
 		for (  int j = 0; j < dimm; j++ )
 		{
+			center.coord[1] = float(j - half_dimm);
 			for (  int k = 0; k < dimm; k++ )
 			{
+				center.coord[2] = float(k - half_dimm);
 				iter = i*dimm*dimm+ j*dimm+ k;
-
-				_cells[iter] = clear ? 0 : 255;
+				
+				radius = sqrtf(  center.coord[0]*center.coord[0] + center.coord[1]*center.coord[1] + center.coord[2]*center.coord[2]);
+				
+				if (!sphere || radius < dimm/2 - 1)
+					_cells[iter] = 255;
+				else _cells[iter] = 0;
 				//_interacted[iter] = false;
 				//floating_rock(i, j, k, _cells, dimm);				
 			}
