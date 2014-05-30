@@ -21,7 +21,6 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 	_angleXS = 0;
 	_angleYS = 0;
 	_obj_quat = glm::quat(glm::vec3(0.0));
-	_obj_euler = glm::quat(glm::vec3(0.0));
 	rotSpeed = glm::vec3(0.0f);
 	wantedPos = glm::vec3(0.0f);
 	_obj_pos = glm::vec3(0.0f);
@@ -33,6 +32,11 @@ Input::Input():_lbtn_pressed(false), zoom_val(0.0)
 	this->rx = 0;
 	this->ry = 0;
 	this->rz = 0;
+	handPosition = glm::vec3(0.0f);
+	handVelocity = glm::vec3(0.0f);
+
+
+	rotateOn = false;
 	
 	std::cout << "Input Initialized" << std::endl;
 }
@@ -61,7 +65,6 @@ void Input::freezGridModel()
 void Input::clearRotationGridModel()
 {
 	_obj_quat = glm::quat(glm::mat4(1.f));
-	_obj_euler = glm::quat(glm::mat4(1.f));
 }
 
 void Input::rotateYGridModel(int directionRight)
@@ -152,20 +155,21 @@ void Input::cameraRotationViewRight()
 	_view_mat = glm::rotate( glm::mat4(1.0), -90.0f, glm::vec3(0.0, 1.0, 0.0) );
 }
 
-void Input::translateGridModel(glm::vec3& translation)
+void Input::TranslateGridModel(glm::vec3& translation)
 {
 	wantedPos += translation;
 }
 
-void Input::rotateGridModel(glm::vec3& from, glm::vec3& to)
+glm::vec3 Input::GetRotationFromTo(glm::vec3& from, glm::vec3& to)
 {
-	glm::vec2 rot;
-	
-	glm::quat aux (glm::vec3(0.0f));
-	aux = glm::rotate(aux, rot.x, glm::vec3(1.0f,0.0f,0.0f));
-	aux = glm::rotate(aux, rot.y, glm::vec3(0.0f,1.0f,0.0f));
+	glm::vec3 f = from - _obj_pos;
+	glm::vec3 t = to - _obj_pos;
 
-	_obj_euler = aux*_obj_euler;
+	glm::vec3 rot;
+	rot.x = -glm::degrees( glm::atan(t.y/t.z) - glm::atan(f.y/f.z));
+	rot.y = glm::degrees( glm::atan(t.x/t.z) - glm::atan(f.x/f.z));
+
+	return rot;
 }
 
 /** Quit program **/
@@ -233,8 +237,14 @@ void Input::OnKeyPressed( SDL_Keycode c )
 		case SDLK_o: hapticsConnected ^= true;			break;
 			
 		/// ON OFF sculpting
-		case SDLK_SPACE:
+		case SDLK_RETURN:
 			SetPressedStage(GetPressedStage() ^ true);
+			break;
+		case SDLK_SPACE:
+			rotSpeed = glm::vec3(0.0f);
+			lastHandPosition = handPosition;
+
+			rotateOn = true;
 			break;
 		case SDLK_x:
 			//fps_regulation ^= true;
@@ -262,6 +272,22 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			break;
 	}
 }
+
+void Input::OnKeyReleased( SDL_Keycode c )
+{
+	switch (c)
+	{
+		case SDLK_SPACE:
+			if (glm::length(handVelocity) > 0.05f) // m/s
+				rotSpeed = GetRotationFromTo(lastHandPosition, lastHandPosition + handVelocity);
+			else
+				rotSpeed = glm::vec3(0.0f);
+
+			rotateOn = false;
+			break;
+	}
+}
+
 void Input::OnMouseLBDown( int x, int y )
 {
 	_mouseStartX = x;
@@ -277,18 +303,17 @@ void Input::OnMouseLBDown( int x, int y )
 glm::mat4 Input::GetObjectM()
 {
 	//return transformation;
-	glm::mat4 euler = glm::toMat4(_obj_euler);	
 	glm::mat4 rot = glm::toMat4(_obj_quat);
 
-	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos*wantedSide);
+	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos);
 	m = glm::scale(m, glm::vec3(_obj_scale));
-	m = m*euler*rot;
+	m = m*rot;
 	return m;
 }
 
 glm::mat4 Input::GetModelM()
 {
-	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos*wantedSide);
+	glm::mat4 m = glm::translate(glm::mat4(1.0f), _obj_pos);
 	m = glm::scale(m, glm::vec3(_obj_scale));
 	return m;
 }
@@ -298,26 +323,32 @@ glm::mat4 Input::GetModelM()
  */
 glm::quat Input::GetObjectQ()
 {
-	//return glm::normalize(_obj_quat);
-	//return glm::quat(transformation);
 	return _obj_quat;
 }
 
 glm::mat4 createRotationMatrix(glm::vec3, float);
 
-/** 
- * Get projection quaterion
- */
 void Input::UpdateFrame(float deltaTime)
-{
-	float ACCELERATION = 10.0f * DEGREES_PER_SECOND_PER_SECOND;
-	
+{	
 	glm::quat aux (glm::vec3(0.0f));
-	aux = glm::rotate(aux, rotSpeed.x*deltaTime, glm::vec3(1.0f,0.0f,0.0f));
-	aux = glm::rotate(aux, rotSpeed.y*deltaTime, glm::vec3(0.0f,1.0f,0.0f));
-	aux = glm::rotate(aux, rotSpeed.z*deltaTime, glm::vec3(0.0f,0.0f,1.0f));
+	if (rotateOn) {
+		glm::vec3 vel = (handPosition - lastHandPosition)/deltaTime;
+		handVelocity = 0.9f*handVelocity + 0.1f*vel;
 
-	_obj_euler = aux*_obj_euler;
+		glm::vec3 r = GetRotationFromTo(lastHandPosition, handPosition);
+		aux = glm::rotate(aux, r.x, glm::vec3(1.0f,0.0f,0.0f));
+		aux = glm::rotate(aux, r.y, glm::vec3(0.0f,1.0f,0.0f));
+		aux = glm::rotate(aux, r.z, glm::vec3(0.0f,0.0f,1.0f));
+
+		lastHandPosition = handPosition;
+	}
+	else {
+		aux = glm::rotate(aux, rotSpeed.x*deltaTime, glm::vec3(1.0f,0.0f,0.0f));
+		aux = glm::rotate(aux, rotSpeed.y*deltaTime, glm::vec3(0.0f,1.0f,0.0f));
+		aux = glm::rotate(aux, rotSpeed.z*deltaTime, glm::vec3(0.0f,0.0f,1.0f));
+	}
+
+	_obj_quat = aux*_obj_quat;
 
 	float speed = 1.0f;
 	_obj_pos = _obj_pos*(speed - deltaTime)/speed + wantedPos*deltaTime/speed;
@@ -439,5 +470,10 @@ float Input::GetModelSide()
 
 glm::vec3 Input::GetObjectPosition()
 {
-	return _obj_pos*wantedSide;
+	return _obj_pos;
+}
+
+void Input::UpdateHandPosition(glm::vec3& lHand, glm::vec3& rHand)
+{
+	handPosition = lHand.y > rHand.y? lHand : rHand;
 }

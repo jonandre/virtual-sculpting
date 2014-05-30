@@ -20,6 +20,7 @@ public:
 
 	
 	void OnKeyPressed( SDL_Keycode c );
+	void OnKeyReleased( SDL_Keycode c );
 	void OnMouseLBDown( int x, int y );
 	void OnMouseMove( int dx, int dy );
 	void OnMouseLBUp( int x, int y );
@@ -76,10 +77,12 @@ public:
 	void cameraRotationViewLeft();
 	void cameraRotationViewRight();
 	
-	void translateGridModel(glm::vec3& translation);
-	void rotateGridModel(glm::vec3& from, glm::vec3& to);
+	void TranslateGridModel(glm::vec3& translation);
+	glm::vec3 GetRotationFromTo(glm::vec3& from, glm::vec3& to);
 
 	void Quit();
+
+	void UpdateHandPosition(glm::vec3& lHand, glm::vec3& rHand);
 	
 
 private:
@@ -95,7 +98,6 @@ private:
 	//float _rotationSpeedValu;
 	//glm::mat4 _obj_mat;
 	glm::quat _obj_quat;
-	glm::quat _obj_euler;
 	glm::vec3 rotSpeed;
 	glm::vec3 _obj_pos;
 	float _obj_scale;
@@ -105,6 +107,11 @@ private:
 	float wantedScale;
 		float wantedSide;
 	glm::vec3 wantedPos;
+
+	bool rotateOn;
+	glm::vec3 handPosition;
+	glm::vec3 lastHandPosition;
+	glm::vec3 handVelocity;
 	
 	int rx;
 	int ry;

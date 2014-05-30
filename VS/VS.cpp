@@ -118,7 +118,7 @@ int main( int argc, char** argv)
 	//inp->SetZoom(-(side*4.0f));
 	inp->SetModel( model );
 	inp->SetModelSide(0.5f);
-	inp->SetModelPosition(glm::vec3(0.0f, 0.0f, 2.0f));
+	inp->SetModelPosition(glm::vec3(0.0f, 0.0f, 1.0f));
 	float side = inp->GetModelSide();
 	std::cout << "Model side is " << side << std::endl;
 	std::cout << "Model initialized" << std::endl;
@@ -162,15 +162,16 @@ int main( int argc, char** argv)
 	{
 		clock_t end = clock();
 		float deltaTime = (float)(end - start) / CLOCKS_PER_SEC;
-
-		inp->UpdateFrame(deltaTime);		//Update frame variables.
+		
 		cntx->doMessage();		//Win message loop
-
 		tool->DoToolUpdate();	//update tool state - like depthmap
 		headTracking->Update(deltaTime);
+		inp->UpdateHandPosition(headTracking->GetHandPosition(true), headTracking->GetHandPosition(false));
+		inp->UpdateFrame(deltaTime);		//Update frame variables.
+		
 
 		if ( GetPressedStage() )
-			tool->StartInteractModel( model, inp->GetObjectQ(), inp->GetObjectM(), inp->GetModelSide());//obvious
+			tool->StartInteractModel( model, inp->GetObjectQ(), inp->GetObjectM(), inp->GetModelSide());
 
 		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM(), font1, font2, font3);// do actual rendering.
 		

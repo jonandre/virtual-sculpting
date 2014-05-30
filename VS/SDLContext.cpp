@@ -177,8 +177,14 @@ SDLContext::SDLContext()
 	// PROJECTOR SHADOW 0.92, 1.42
 	float projW = 1.39f;
 	float projH = 0.925f;
-	shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, 5.0f);
-	shadowView = glm::lookAt(glm::vec3(0.1225f, 3.0f, 0.855 + projW/2.0f), glm::vec3(0.1225f, 0.0f, 0.855 + projW/2.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+	float projDepth = 5.0f;
+	//Relative to the center of the screen, in meters
+	float projPosX = 0.1225f;
+	float projPosY = 3.0f;
+	float projPosZ =  0.855 + projW/2.0f;
+
+	shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, projDepth);
+	shadowView = glm::lookAt(glm::vec3(projPosX, projPosY,projPosZ), glm::vec3(projPosX, projPosY-projDepth, projPosZ), glm::vec3(1.0f, 0.0f, 0.0f));
 
 
 	std::cout << "SDLContext initialized" << std::endl;
@@ -215,21 +221,19 @@ void SDLContext::doMessage()
 		{
 			if ( e.type == SDL_KEYDOWN )
 			{			
-				//std::cout << "Key " << (char)e.key.keysym.sym << " pressed" << std::endl;
-				inp->OnKeyPressed(e.key.keysym.sym); //TODO
-				
-				/*if (e.key.keysym.sym == SDLK_PLUS){
-					wantedDepth += 0.5f;
-					//std::cout << "Up pressed" << std::endl;
-				}
-				else if (e.key.keysym.sym == SDLK_MINUS){
-					wantedDepth -= 0.5f;
-					//std::cout << "Down pressed" << std::endl;
-				}*/
+				inp->OnKeyPressed(e.key.keysym.sym);
+
 				if (e.key.keysym.sym == SDLK_PERIOD) {
 					showScene ^= true;
 				}
 			}
+			else if ( e.type == SDL_KEYUP )
+			{
+				inp->OnKeyReleased(e.key.keysym.sym);
+			}
+
+			// TODO: These need to be changed to SDL2 events
+
 			/*else if ( msg.message == WM_LBUTTONDOWN )
 			{
 				inp->OnMouseLBDown(msg.pt.x, msg.pt.y);
@@ -247,22 +251,29 @@ void SDLContext::doMessage()
 				inp->OnSroll( GET_WHEEL_DELTA_WPARAM(msg.wParam) );
 			}*/
 		}
-//			TranslateMessage(&msg);
-//			DispatchMessage(&msg);
-		}
+	}
 }
 
 
 void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	this->headTracking = headTracking;
 
-	headTracking->SetDisplaySize(4.0055f - 0.075f*2.0f,  2.430f - 0.075f*2.0f);
-	headTracking->SetEyeDistance(0.065f);
-	headTracking->SetHeadRadius(0.1f);
-	headTracking->SetSensorPosition(0.15f, ((2.430f - 0.075f*2.0f)/2.0f + 0.0375f), 0.13f);
+	// All in Meters
+	float VIC_SCREEN_WIDTH = 4.0055f;
+	float VIC_SCREEN_HEIGHT = 2.430f;
+	float VIC_SCREEN_BORDER = 0.075f;
+	float EYE_DISTANCE = 0.065f;
+	float HEAD_DEPTH_RADIUS = 0.1f;
+
+	headTracking->SetDisplaySize(VIC_SCREEN_WIDTH - VIC_SCREEN_BORDER*2.0f,  VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f);
+	headTracking->SetEyeDistance(EYE_DISTANCE);
+	headTracking->SetHeadRadius(HEAD_DEPTH_RADIUS);
+
+	// Relative to the center of the screen
+	headTracking->SetSensorPosition(0.15f, ((VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f)/2.0f + 0.0375f), 0.13f);
 	headTracking->SetInterestFacing(true);
 	
-	headTracking->SetViewportSize(4.0055f - 0.075f*2.0f, 2.430f - 0.075f*2.0f);
+	headTracking->SetViewportSize(VIC_SCREEN_WIDTH - VIC_SCREEN_BORDER*2.0f, VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f);
 	headTracking->SetZPlanes(render->ZNEAR, render->ZFAR);	
 }
 

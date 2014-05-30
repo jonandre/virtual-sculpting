@@ -91,12 +91,10 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 
         if (trackingState == NUI_SKELETON_TRACKED)
         {
-            // We're tracking the skeleton, draw it
 			NUI_SKELETON_POSITION_TRACKING_STATE headState = skel.eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_HEAD];
 
-			if (headState == NUI_SKELETON_POSITION_NOT_TRACKED
-				//|| headState == NUI_SKELETON_POSITION_INFERRED
-				) continue; // We don't have the head of this skeleton
+			if (headState == NUI_SKELETON_POSITION_NOT_TRACKED)
+				continue;
 
 			// Real world coordinates transform (in meters)
 			glm::vec3 aux;
@@ -110,8 +108,27 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			//if (headState != NUI_SKELETON_POSITION_INFERRED)// If the position is inferred we don't want to trust it
 				m_headPosition.rwPos = aux;
 
-
 			m_headPosition.vwPos = SensorToVirtualWorldCoordinates(m_headPosition.rwPos);
+
+
+			// HANDS
+			glm::vec3 lHand;
+			lHand.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].x;
+			lHand.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].y;
+			lHand.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].z;
+
+			m_leftHandPosition.rwPos = lHand;
+
+			m_leftHandPosition.vwPos = SensorToVirtualWorldCoordinates(m_leftHandPosition.rwPos);
+
+			glm::vec3 rHand;
+			rHand.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x;
+			rHand.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y;
+			rHand.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].z;
+
+			m_rightHandPosition.rwPos = rHand;
+
+			m_rightHandPosition.vwPos = SensorToVirtualWorldCoordinates(m_rightHandPosition.rwPos);
         }
     }
 }
@@ -133,6 +150,11 @@ glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sP
 glm::vec3 StereoKinectHeadTracking::GetHeadPosition()
 {
 	return m_headPosition.vwPos;
+}
+
+glm::vec3 StereoKinectHeadTracking::GetHandPosition(bool left)
+{
+	return left? m_leftHandPosition.vwPos : m_rightHandPosition.vwPos;
 }
 
 void StereoKinectHeadTracking::SetViewportSize (float w, float h) {

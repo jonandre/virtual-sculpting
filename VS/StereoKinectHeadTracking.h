@@ -24,6 +24,8 @@ public:
 
 	glm::vec3 GetHeadPosition();
 
+	glm::vec3 GetHandPosition(bool left);
+
 	glm::vec3 GetEyePosition(bool left);
 	
 	glm::vec2 GetRealToVirtualWorldRatio();
@@ -78,6 +80,8 @@ private:
 	bool m_ready;
 
 	SensorRelPoint m_headPosition;
+	SensorRelPoint m_leftHandPosition;
+	SensorRelPoint m_rightHandPosition;
 
 	INuiSensor* m_pNuiSensor;
 
