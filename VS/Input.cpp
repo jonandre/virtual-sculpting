@@ -258,6 +258,13 @@ void Input::OnKeyPressed( SDL_Keycode c )
 		case SDLK_LEFT:
 			wantedPos -= glm::vec3(0.0f, 0.0f, 0.5f);
 			break;
+		case SDLK_PAGEDOWN:
+		case SDLK_PAGEUP:
+			rotSpeed = glm::vec3(0.0f);
+			lastHandPosition = handPosition;
+
+			rotateOn = true;
+			break;
 		case SDLK_UP:
 			wantedPos += glm::vec3(0.0f, 0.25f, 0.0f);
 			break;
@@ -278,12 +285,16 @@ void Input::OnKeyReleased( SDL_Keycode c )
 	switch (c)
 	{
 		case SDLK_SPACE:
+		case SDLK_PAGEDOWN:
+		case SDLK_PAGEUP:
 			if (glm::length(handVelocity) > 0.05f) // m/s
 				rotSpeed = GetRotationFromTo(lastHandPosition, lastHandPosition + handVelocity);
 			else
 				rotSpeed = glm::vec3(0.0f);
 
 			rotateOn = false;
+			break;
+		default:
 			break;
 	}
 }

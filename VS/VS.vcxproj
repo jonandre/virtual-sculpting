@@ -177,6 +177,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Soundify.cpp" />
     <ClCompile Include="SpeechController.cpp" />
+    <ClCompile Include="Sphere.cpp" />
     <ClCompile Include="Stage.cpp" />
     <ClCompile Include="StereoKinectHeadTracking.cpp" />
     <ClCompile Include="StereoRender.cpp" />
@@ -209,6 +210,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Soundify.h" />
     <ClInclude Include="SpeechController.h" />
+    <ClInclude Include="Sphere.h" />
     <ClInclude Include="Stage.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StereoKinectHeadTracking.h" />

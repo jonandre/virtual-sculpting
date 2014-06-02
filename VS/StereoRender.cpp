@@ -4,6 +4,50 @@ const float StereoRender::FOV = 30.0f;
 const float StereoRender::ZNEAR = 0.1f;
 const float StereoRender::ZFAR = 4048.f;
 
+void DrawCube (float side, glm::vec4 pos, glm::vec3 color)
+{
+	float s = side/2.0f;
+	float x = pos.x;
+	float y = pos.y;
+	float z = pos.z;
+
+	
+	
+	glColor3f(color.x, color.y, color.z);
+	glBegin(GL_QUADS); 
+    glVertex3f(-s+x, -s+y, -s+z);
+    glVertex3f(s+x, -s+y, -s+z);
+    glVertex3f(s+x, s+y, -s+z);
+    glVertex3f(-s+x, s+y, -s+z);
+
+    glVertex3f(-s+x, -s+y, -s+z);
+    glVertex3f(-s+x, -s+y, s+z);
+    glVertex3f(-s+x, s+y, -s+z);
+    glVertex3f(-s+x, s+y, s+z);
+
+    glVertex3f(-s+x, -s+y, -s+z);
+    glVertex3f(-s+x, -s+y, s+z);
+    glVertex3f(s+x, -s+y, s+z);
+    glVertex3f(s+x, -s+y, -s+z);
+
+    glVertex3f(-s+x, -s+y, s+z);
+    glVertex3f(s+x, -s+y, s+z);
+    glVertex3f(s+x, s+y, s+z);
+    glVertex3f(-s+x, s+y, s+z);
+
+    glVertex3f(-s+x, -s+y, s+z);
+    glVertex3f(s+x, -s+y, s+z);
+    glVertex3f(s+x, s+y, s+z);
+    glVertex3f(-s+x, s+y, s+z);
+
+    glVertex3f(-s+x, s+y, -s+z);
+    glVertex3f(-s+x, s+y, s+z);
+    glVertex3f(s+x, s+y, s+z);
+    glVertex3f(s+x, s+y, -s+z);
+
+    glEnd();
+}
+
 StereoRender::StereoRender() : shader(NULL)
 {
 	windowWidth = 512;
@@ -22,6 +66,8 @@ StereoRender::StereoRender() : shader(NULL)
 
 	for (int i = 0; i < 26; i++)
 		actedIndex[i] = 1.0f;
+
+	new (&sphere) Sphere(0.075, 12, 24);
 }
 
 StereoRender::~StereoRender()
@@ -205,7 +251,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 
 	///////////////////////////   START OF HEAD DRAWTING   ///////////////////////////////////
 		
-	if (status < 0 || status > 2) {
+	if (true || status < 0 || status > 2) {
 		glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
 		glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
 		glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
@@ -225,6 +271,8 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 		glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex3f(r.x, r.y, r.z);
 		glEnd();
+
+		DrawCube(0.075f, h, glm::vec3(0.0f, 1.0f, 0.0f));
 
 		//glEnable(GL_CULL_FACE);
 

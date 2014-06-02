@@ -13,6 +13,7 @@
 
 #include "texturemappedfont.h"
 #include "Stage.h"
+#include "Sphere.h"
 
 class StereoRender
 {
@@ -43,6 +44,8 @@ private:
 	int pMatrixLocation;
 	int vMatrixLocation;
 	int mMatrixLocation;
+
+	Sphere sphere;
 
 	void DrawingStages(TextureMappedFont*, TextureMappedFont*,
 		TextureMappedFont*);
