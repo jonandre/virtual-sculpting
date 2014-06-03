@@ -270,7 +270,7 @@ void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	headTracking->SetHeadRadius(HEAD_DEPTH_RADIUS);
 
 	// Relative to the center of the screen
-	headTracking->SetSensorPosition(0.15f, ((VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f)/2.0f + 0.0375f), 0.13f);
+	headTracking->SetSensorPosition(0.13f, ((VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f)/2.0f + 0.0375f), 0.13f);
 	headTracking->SetInterestFacing(true);
 	
 	headTracking->SetViewportSize(VIC_SCREEN_WIDTH - VIC_SCREEN_BORDER*2.0f, VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f);
@@ -293,12 +293,13 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	float side = inp->GetModelSide();
 
 	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
-	
-	//float viewportHeight = float(side)*3.0f;
-	//float viewportWidth = viewportHeight*ratio;
-	sceneView = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.2f, -2.0f));
+
+	sceneView = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.5f, -4.0f));
 	sceneView = glm::rotate(sceneView, sceneRot, glm::vec3(0.0f, 1.0f, 0.0f));
 	sceneView = glm::translate(sceneView, -headTracking->GetHeadPosition());
+
+	//sceneView = glm::lookAt(headTracking->GetHeadPosition() + glm::vec3(0.0f, 0.2f, 4.0f), headTracking->GetHeadPosition(), glm::vec3(0.0f, 1.0f, 0.0f)); 
+	//sceneView = glm::rotate(sceneView, sceneRot, glm::vec3(0.0f, 1.0f, 0.0f));
 
 	headTracking->RetrieveMatrices(inp->GetObjectPosition(), leftProj, leftEye, rightProj, rightEye);
 
@@ -338,7 +339,6 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 		glScissor(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
 
 		render->Draw(model, _tool_mesh, rightSceneView*sceneView, obj, font1, font2, font3, sceneProj, 3);
-
 		
 		glDisable(GL_SCISSOR_TEST); 
 

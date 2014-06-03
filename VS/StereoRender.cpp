@@ -4,46 +4,80 @@ const float StereoRender::FOV = 30.0f;
 const float StereoRender::ZNEAR = 0.1f;
 const float StereoRender::ZFAR = 4048.f;
 
-void DrawCube (float side, glm::vec4 pos, glm::vec3 color)
+void DrawCube (float side, glm::vec4& pos, glm::vec3& color, glm::mat4& pvm)
 {
-	float s = side/2.0f;
-	float x = pos.x;
-	float y = pos.y;
-	float z = pos.z;
+	glm::vec4 sx = pvm*glm::vec4(side/2.0f, 0.0f, 0.0f, 1.0f) - pvm*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 sy = pvm*glm::vec4(0.0f, side/2.0f, 0.0f, 1.0f) - pvm*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	glm::vec4 sz = pvm*glm::vec4(0.0f, 0.0f, side/2.0f, 1.0f) - pvm*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+
+//	float x = pos.x;
+//	float y = pos.y;
+//	float z = pos.z;
 
 	
 	
 	glColor3f(color.x, color.y, color.z);
-	glBegin(GL_QUADS); 
-    glVertex3f(-s+x, -s+y, -s+z);
-    glVertex3f(s+x, -s+y, -s+z);
-    glVertex3f(s+x, s+y, -s+z);
-    glVertex3f(-s+x, s+y, -s+z);
+	glBegin(GL_QUADS);
 
-    glVertex3f(-s+x, -s+y, -s+z);
-    glVertex3f(-s+x, -s+y, s+z);
-    glVertex3f(-s+x, s+y, -s+z);
-    glVertex3f(-s+x, s+y, s+z);
+	glVertex4fv(&((pos - sx - sy - sz)[0]));
+    glVertex4fv(&((pos + sx - sy - sz)[0]));
+    glVertex4fv(&((pos + sx + sy - sz)[0]));
+    glVertex4fv(&((pos - sx + sy - sz)[0]));
 
-    glVertex3f(-s+x, -s+y, -s+z);
-    glVertex3f(-s+x, -s+y, s+z);
-    glVertex3f(s+x, -s+y, s+z);
-    glVertex3f(s+x, -s+y, -s+z);
+	glVertex4fv(&((pos - sx - sy - sz)[0]));
+	glVertex4fv(&((pos - sx + sy - sz)[0]));
+	glVertex4fv(&((pos - sx + sy + sz)[0]));
+	glVertex4fv(&((pos - sx - sy + sz)[0]));
 
-    glVertex3f(-s+x, -s+y, s+z);
-    glVertex3f(s+x, -s+y, s+z);
-    glVertex3f(s+x, s+y, s+z);
-    glVertex3f(-s+x, s+y, s+z);
+	glVertex4fv(&((pos - sx - sy - sz)[0]));
+	glVertex4fv(&((pos - sx - sy + sz)[0]));
+	glVertex4fv(&((pos + sx - sy + sz)[0]));
+	glVertex4fv(&((pos + sx - sy - sz)[0]));
 
-    glVertex3f(-s+x, -s+y, s+z);
-    glVertex3f(s+x, -s+y, s+z);
-    glVertex3f(s+x, s+y, s+z);
-    glVertex3f(-s+x, s+y, s+z);
+	glVertex4fv(&((pos - sx - sy + sz)[0]));
+	glVertex4fv(&((pos - sx + sy + sz)[0]));
+	glVertex4fv(&((pos + sx + sy + sz)[0]));
+	glVertex4fv(&((pos + sx - sy + sz)[0]));
 
-    glVertex3f(-s+x, s+y, -s+z);
-    glVertex3f(-s+x, s+y, s+z);
-    glVertex3f(s+x, s+y, s+z);
-    glVertex3f(s+x, s+y, -s+z);
+	glVertex4fv(&((pos + sx - sy - sz)[0]));
+	glVertex4fv(&((pos + sx - sy + sz)[0]));
+	glVertex4fv(&((pos + sx + sy + sz)[0]));
+	glVertex4fv(&((pos + sx + sy - sz)[0]));
+
+	glVertex4fv(&((pos - sx + sy - sz)[0]));
+	glVertex4fv(&((pos + sx + sy - sz)[0]));
+	glVertex4fv(&((pos + sx + sy + sz)[0]));
+	glVertex4fv(&((pos - sx + sy + sz)[0]));
+
+	/*glVertex3f(-s.x+x, -s.y+y, -s.z+z);
+    glVertex3f(s.x+x, -s.y+y, -s.z+z);
+    glVertex3f(s.x+x, s.y+y, -s.z+z);
+    glVertex3f(-s.x+x, s.y+y, -s.z+z);
+
+    glVertex3f(-s.x+x, -s.y+y, -s.z+z);
+    glVertex3f(-s.x+x, s.y+y, -s.z+z);
+    glVertex3f(-s.x+x, s.y+y, s.z+z);
+    glVertex3f(-s.x+x, -s.y+y, s.z+z);
+
+    glVertex3f(-s.x+x, -s.y+y, -s.z+z);
+    glVertex3f(-s.x+x, -s.y+y, s.z+z);
+    glVertex3f(s.x+x, -s.y+y, s.z+z);
+    glVertex3f(s.x+x, -s.y+y, -s.z+z);
+
+    glVertex3f(-s.x+x, -s.y+y, s.z+z);
+    glVertex3f(-s.x+x, s.y+y, s.z+z);
+    glVertex3f(s.x+x, s.y+y, s.z+z);
+    glVertex3f(s.x+x, -s.y+y, s.z+z);
+
+    glVertex3f(s.x+x, -s.y+y, -s.z+z);
+    glVertex3f(s.x+x, -s.y+y, s.z+z);
+    glVertex3f(s.x+x, s.y+y, s.z+z);
+    glVertex3f(s.x+x, s.y+y, -s.z+z);
+
+    glVertex3f(-s.x+x, s.y+y, -s.z+z);
+    glVertex3f(s.x+x, s.y+y, -s.z+z);
+    glVertex3f(s.x+x, s.y+y, s.z+z);
+    glVertex3f(-s.x+x, s.y+y, s.z+z);*/
 
     glEnd();
 }
@@ -125,8 +159,6 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 {
 	clock_t start = clock();
 
-	glm::mat4 projectionMatrix = proj;
-
 	// Specifies whether the depth buffer is enabled for writing.
 	glDepthMask(GL_TRUE);
 
@@ -164,7 +196,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	// value	 -	Specifies a pointer to an array of count values that will be 
 	//				used to update the specified uniform variable.
 
-	glUniformMatrix4fv(pMatrixLocation, 1, GL_FALSE, &(projectionMatrix[0][0]));
+	glUniformMatrix4fv(pMatrixLocation, 1, GL_FALSE, &(proj[0][0]));
 	glUniformMatrix4fv(mMatrixLocation, 1, GL_FALSE, &(obj[0][0]));
 	glUniformMatrix4fv(vMatrixLocation, 1, GL_FALSE, &(view[0][0]));
 
@@ -209,7 +241,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	shader->unbind();
 	/* Do not use mesh shader */
 
-	glm::mat4 pvm = projectionMatrix*view;
+	glm::mat4 pvm = proj*view;
 
 	////////////////////////////////   END OF MESH DRAWTING   ///////////////////////////////////
 
@@ -217,7 +249,32 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 	glEnable(GL_BLEND);
 	glDepthMask(GL_FALSE);
 
-	if (true ||  status > 0) {
+		///////////////////////////   START OF HEAD & SKELETON DRAWTING   ///////////////////////////////////
+		
+	if (status < 0 || status > 2) {
+		glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
+		glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
+		glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
+
+		glm::vec4 h = pvm*glm::vec4(head.x, head.y, head.z, 1.0f);
+		glm::vec4 l = pvm*glm::vec4(left.x, left.y, left.z, 1.0f);
+		glm::vec4 r = pvm*glm::vec4(right.x, right.y, right.z, 1.0f);
+
+		glBegin(GL_TRIANGLES);
+		glColor3f(0.2f, 0.2f, 0.2f);
+		glVertex3f(h.x, h.y, h.z);
+		glColor3f(1.0f, 0.0f, 0.0f);
+		glVertex3f(l.x, l.y, l.z);
+		glColor3f(0.0f, 0.0f, 1.0f);
+		glVertex3f(r.x, r.y, r.z);
+		glEnd();
+
+		DrawCube(0.05f, h, glm::vec3(0.0f, 1.0f, 0.0f), pvm);
+
+		///////////////////////////   END OF HEAD DRAWTING   ///////////////////////////////////
+	}
+
+	if (true) {
 		///////////////////////////   START OF KINECT TOOL DRAWTING   ///////////////////////////////////
 
 		// Gets tringelMesh Vertex Array Output
@@ -247,36 +304,6 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 		/* Do not use tool shader */
 
 		///////////////////////////   END OF KINECT TOOL DRAWTING   ///////////////////////////////////
-	}
-
-	///////////////////////////   START OF HEAD DRAWTING   ///////////////////////////////////
-		
-	if (true || status < 0 || status > 2) {
-		glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
-		glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
-		glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
-
-		glm::vec4 h = pvm*glm::vec4(head.x, head.y, head.z, 1.0f);
-		glm::vec4 l = pvm*glm::vec4(left.x, left.y, left.z, 1.0f);
-		glm::vec4 r = pvm*glm::vec4(right.x, right.y, right.z, 1.0f);
-
-		//glDisable(GL_CULL_FACE);
-
-		//glLineWidth(5.5f);
-		glBegin(GL_TRIANGLES);
-		glColor3f(0.2f, 0.2f, 0.2f);
-		glVertex3f(h.x, h.y, h.z);
-		glColor3f(1.0f, 0.0f, 0.0f);
-		glVertex3f(l.x, l.y, l.z);
-		glColor3f(0.0f, 0.0f, 1.0f);
-		glVertex3f(r.x, r.y, r.z);
-		glEnd();
-
-		DrawCube(0.075f, h, glm::vec3(0.0f, 1.0f, 0.0f));
-
-		//glEnable(GL_CULL_FACE);
-
-		///////////////////////////   END OF HEAD DRAWTING   ///////////////////////////////////
 	}
 	
 	if (status >= 0 && status < 3) {
