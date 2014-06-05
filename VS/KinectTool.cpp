@@ -278,7 +278,8 @@ void* SpeechThreed(void* args)
 		// Check if this is an event we're waiting on and not a timeout or message
 		if (WAIT_OBJECT_0 == dwEvent)
 		{
-			self->_reader->ProcessSpeech(input);
+			// DEMO
+			// self->_reader->ProcessSpeech(input);
 		}
 	/* Speech end */
 	}

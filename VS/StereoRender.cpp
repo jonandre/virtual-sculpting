@@ -251,7 +251,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 
 		///////////////////////////   START OF HEAD & SKELETON DRAWTING   ///////////////////////////////////
 		
-	if (status < 0 || status > 2) {
+	if (status > 2) {
 		glm::vec3 head = tool->_reader->m_headTracking->GetHeadPosition();
 		glm::vec3 left = tool->_reader->m_headTracking->GetEyePosition(true);
 		glm::vec3 right = tool->_reader->m_headTracking->GetEyePosition(false);
@@ -306,7 +306,7 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 		///////////////////////////   END OF KINECT TOOL DRAWTING   ///////////////////////////////////
 	}
 	
-	if (status >= 0 && status < 3) {
+	if (false && status >= 0 && status < 3) {
 		//////////////////////////////   START OF TEXT DRAWTING   ////////////////////////////////////////////
 		DrawingStages(font1, font2, font3);
 		//////////////////////////////   END OF TEXT DRAWTING   //////////////////////////////////////////////

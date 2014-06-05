@@ -486,5 +486,5 @@ glm::vec3 Input::GetObjectPosition()
 
 void Input::UpdateHandPosition(glm::vec3& lHand, glm::vec3& rHand)
 {
-	handPosition = lHand.y > rHand.y? lHand : rHand;
+	handPosition = lHand;
 }
