@@ -242,12 +242,12 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			break;
 		case SDLK_SPACE:
 			rotSpeed = glm::vec3(0.0f);
+			handVelocity = glm::vec3(0.0f);
 			lastHandPosition = handPosition;
 
 			rotateOn = true;
 			break;
 		case SDLK_x:
-			//fps_regulation ^= true;
 			STLExporter::ExportToStl(_model->GetCells(), _model->GetDimm());
 
 			break;
@@ -266,10 +266,10 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			rotateOn = true;
 			break;
 		case SDLK_UP:
-			wantedPos += glm::vec3(0.0f, 0.25f, 0.0f);
+			wantedPos += glm::vec3(0.0f, 0.05f, 0.0f);
 			break;
 		case SDLK_DOWN:
-			wantedPos -= glm::vec3(0.0f, 0.25f, 0.0f);
+			wantedPos -= glm::vec3(0.0f, 0.05f, 0.0f);
 			break;
 		case SDLK_PLUS:
 			wantedScale *=  1.2f;

@@ -102,8 +102,8 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			aux.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
 			aux.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
-			if (aux.z > m_headPosition.zDist) continue;
-			m_headPosition.zDist = aux.z;
+			if (glm::length(aux) > m_headPosition.zDist) continue;
+			m_headPosition.zDist = glm::length(aux);
 
 			//if (headState != NUI_SKELETON_POSITION_INFERRED)// If the position is inferred we don't want to trust it
 				m_headPosition.rwPos = aux;
