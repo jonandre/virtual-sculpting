@@ -74,10 +74,11 @@ private:
 	public:
 		glm::vec3 rwPos; // Real world coordinate
 		glm::vec3 vwPos; // Virtual world coordinate
-		float zDist;
+		NUI_SKELETON_POSITION_TRACKING_STATE state;
 	};
 
 	bool m_ready;
+	float headDist;
 
 	SensorRelPoint m_headPosition;
 	SensorRelPoint m_leftHandPosition;

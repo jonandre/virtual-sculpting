@@ -83,7 +83,7 @@ void StereoKinectHeadTracking::Update (float deltaTime)
     // smooth out the skeleton data
     m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, &SMOOTHING_PARAMS);
 	
-	m_headPosition.zDist = 999999.0f;
+	headDist = 999999.0f;
     for (int i = 0 ; i < NUI_SKELETON_COUNT; ++i)
     {
 		const NUI_SKELETON_DATA& skel = skeletonFrame.SkeletonData[i];
@@ -102,8 +102,8 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 			aux.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
 			aux.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
-			if (glm::length(aux) > m_headPosition.zDist) continue;
-			m_headPosition.zDist = glm::length(aux);
+			if (glm::length(aux) > headDist) continue;
+			headDist = glm::length(aux);
 
 			//if (headState != NUI_SKELETON_POSITION_INFERRED)// If the position is inferred we don't want to trust it
 				m_headPosition.rwPos = aux;

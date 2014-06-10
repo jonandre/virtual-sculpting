@@ -241,11 +241,16 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			SetPressedStage(GetPressedStage() ^ true);
 			break;
 		case SDLK_SPACE:
-			rotSpeed = glm::vec3(0.0f);
-			handVelocity = glm::vec3(0.0f);
-			lastHandPosition = handPosition;
+		case SDLK_PAGEDOWN:
+		case SDLK_PAGEUP:
+			if (!rotateOn)
+			{
+				rotSpeed = glm::vec3(0.0f);
+				handVelocity = glm::vec3(0.0f);
+				lastHandPosition = handPosition;
 
-			rotateOn = true;
+				rotateOn = true;
+			}
 			break;
 		case SDLK_x:
 			STLExporter::ExportToStl(_model->GetCells(), _model->GetDimm());
@@ -257,13 +262,6 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			break;
 		case SDLK_LEFT:
 			wantedPos -= glm::vec3(0.0f, 0.0f, 0.5f);
-			break;
-		case SDLK_PAGEDOWN:
-		case SDLK_PAGEUP:
-			rotSpeed = glm::vec3(0.0f);
-			lastHandPosition = handPosition;
-
-			rotateOn = true;
 			break;
 		case SDLK_UP:
 			wantedPos += glm::vec3(0.0f, 0.05f, 0.0f);
@@ -407,6 +405,7 @@ glm::mat4 Input::GetViewM()
 void Input::SetViewM(const glm::mat4& mat )
 {
 	_view_mat = mat;
+
 }
 
 void Input::SetZoom( float val )
