@@ -18,6 +18,13 @@ StereoKinectHeadTracking::StereoKinectHeadTracking() :
 	VIEWPORT_HEIGHT = 1.0f;
 
 	firstTick = true;
+
+	m_skeleton_positions.resize(NUI_SKELETON_POSITION_COUNT);
+
+	for (int i = 0; i < m_skeleton_positions.size(); ++i) {
+		m_skeleton_positions[i].state = NUI_SKELETON_POSITION_NOT_TRACKED;
+		m_skeleton_positions[i].vwPos = glm::vec3(0.0f);
+	}
 }
 
 StereoKinectHeadTracking::~StereoKinectHeadTracking ()
@@ -56,7 +63,7 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 {
 	if (firstTick) {
 		vwSensorOrigin = SensorToVirtualWorldCoordinates(glm::vec3(0.0f));
-		m_headPosition.vwPos = vwSensorOrigin;
+		m_skeleton_positions[NUI_SKELETON_POSITION_HEAD].vwPos = vwSensorOrigin;
 		firstTick = false;
 	}
 
@@ -75,15 +82,13 @@ void StereoKinectHeadTracking::Update (float deltaTime)
         return;
     }
 
-//	const NUI_TRANSFORM_SMOOTH_PARAMETERS SMOOTHING_PARAMS = 
-//		{0.1f, 0.7f, 1.0f, 0.025f, 0.02f};
 	const NUI_TRANSFORM_SMOOTH_PARAMETERS SMOOTHING_PARAMS = 
 		{0.5f, 0.7f, 0.5f, 0.05f, 0.04f};
 
-    // smooth out the skeleton data
     m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, &SMOOTHING_PARAMS);
 	
 	headDist = 999999.0f;
+	int selectedSkeleton = -1;
     for (int i = 0 ; i < NUI_SKELETON_COUNT; ++i)
     {
 		const NUI_SKELETON_DATA& skel = skeletonFrame.SkeletonData[i];
@@ -91,54 +96,45 @@ void StereoKinectHeadTracking::Update (float deltaTime)
 
         if (trackingState == NUI_SKELETON_TRACKED)
         {
-			NUI_SKELETON_POSITION_TRACKING_STATE headState = skel.eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_HEAD];
+			NUI_SKELETON_POSITION_TRACKING_STATE tracking_state = skel.eSkeletonPositionTrackingState[NUI_SKELETON_POSITION_HEAD];
 
-			if (headState == NUI_SKELETON_POSITION_NOT_TRACKED)
+			if (tracking_state == NUI_SKELETON_POSITION_NOT_TRACKED)
 				continue;
 
 			// Real world coordinates transform (in meters)
-			glm::vec3 aux;
-			aux.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].x;
-			aux.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
-			aux.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
+			glm::vec3 head;
+			head.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].x;
+			head.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].y;
+			head.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HEAD].z;
 
-			if (glm::length(aux) > headDist) continue;
-			headDist = glm::length(aux);
+			if (glm::length(head) > headDist) continue; // We just want the skeleton closer to the screen
+			headDist = glm::length(head);
 
-			//if (headState != NUI_SKELETON_POSITION_INFERRED)// If the position is inferred we don't want to trust it
-				m_headPosition.rwPos = aux;
-
-			m_headPosition.vwPos = SensorToVirtualWorldCoordinates(m_headPosition.rwPos);
-
-
-			// HANDS
-			glm::vec3 lHand;
-			lHand.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].x;
-			lHand.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].y;
-			lHand.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_LEFT].z;
-
-			m_leftHandPosition.rwPos = lHand;
-
-			m_leftHandPosition.vwPos = SensorToVirtualWorldCoordinates(m_leftHandPosition.rwPos);
-
-			glm::vec3 rHand;
-			rHand.x = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].x;
-			rHand.y = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].y;
-			rHand.z = skel.SkeletonPositions[NUI_SKELETON_POSITION_HAND_RIGHT].z;
-
-			m_rightHandPosition.rwPos = rHand;
-
-			m_rightHandPosition.vwPos = SensorToVirtualWorldCoordinates(m_rightHandPosition.rwPos);
+			selectedSkeleton = i;
         }
     }
+
+	if (selectedSkeleton < 0) return;
+
+	// Store selected skeleton
+	const NUI_SKELETON_DATA& skel = skeletonFrame.SkeletonData[selectedSkeleton];
+	glm::vec3 aux;		
+
+	for (int i = 0; i < m_skeleton_positions.size(); ++i) {	
+		m_skeleton_positions[i].state = skel.eSkeletonPositionTrackingState[i];
+		aux.x = skel.SkeletonPositions[i].x;
+		aux.y = skel.SkeletonPositions[i].y;
+		aux.z = skel.SkeletonPositions[i].z;
+
+		m_skeleton_positions[i].rwPos = aux;
+		m_skeleton_positions[i].vwPos = SensorToVirtualWorldCoordinates(m_skeleton_positions[i].rwPos);
+
+		// TODO Store frame skeleton data to file
+	}
 }
 
 glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sPos) {
 	glm::vec3 vwPos;
-
-	/*sPos.y *= 0.85f;
-	sPos.x *= 0.77f;
-	sPos.z *= 1.1f;*/
 
 	vwPos.x = (SENSOR_RW_POS_X + sPos.x) * RW_TO_VW_RATIO.x;
 	vwPos.y = (SENSOR_RW_POS_Y + sPos.y*glm::cos(SENSOR_ANGLE*DEG_TO_RAD) + sPos.z*glm::sin(SENSOR_ANGLE*DEG_TO_RAD)) * RW_TO_VW_RATIO.x;
@@ -149,12 +145,17 @@ glm::vec3 StereoKinectHeadTracking::SensorToVirtualWorldCoordinates(glm::vec3 sP
 
 glm::vec3 StereoKinectHeadTracking::GetHeadPosition()
 {
-	return m_headPosition.vwPos;
+	return m_skeleton_positions[NUI_SKELETON_POSITION_HEAD].vwPos;
 }
 
 glm::vec3 StereoKinectHeadTracking::GetHandPosition(bool left)
 {
-	return left? m_leftHandPosition.vwPos : m_rightHandPosition.vwPos;
+	return left? m_skeleton_positions[NUI_SKELETON_POSITION_HAND_LEFT].vwPos : m_skeleton_positions[NUI_SKELETON_POSITION_HAND_RIGHT].vwPos;
+}
+
+std::vector<StereoKinectHeadTracking::SensorRelPoint> StereoKinectHeadTracking::GetSkeletonPositions()
+{
+	return m_skeleton_positions;
 }
 
 void StereoKinectHeadTracking::SetViewportSize (float w, float h) {
@@ -305,6 +306,4 @@ void StereoKinectHeadTracking::ViewportChanged()
 	RW_TO_VW_RATIO.x = VIEWPORT_WIDTH / DISPLAY_RW_WIDTH;
 	EYE_DISTANCE = RW_EYE_DISTANCE * RW_TO_VW_RATIO.x;
 	HEAD_RADIUS = RW_HEAD_RADIUS * RW_TO_VW_RATIO.x;
-
-	std::cout << "RW_TO_VW_RATIO is: " << RW_TO_VW_RATIO.x << ", " << RW_TO_VW_RATIO.y << std::endl;
 }

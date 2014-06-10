@@ -7,10 +7,18 @@
 #include "NuiApi.h"
 #include <iostream>
 #include <string>
+#include <vector>
 
 class StereoKinectHeadTracking
 {
 public:
+	class SensorRelPoint {
+		public:
+			glm::vec3 rwPos; // Real world coordinate
+			glm::vec3 vwPos; // Virtual world coordinate
+			NUI_SKELETON_POSITION_TRACKING_STATE state;
+	};
+
 	StereoKinectHeadTracking();
 
 	~StereoKinectHeadTracking();
@@ -32,8 +40,9 @@ public:
 	
 	glm::vec3 GetSensorOriginOnVirtualWorld();
 
+	std::vector<SensorRelPoint> GetSkeletonPositions();
+
 	INuiSensor* GetSensor();
-	
 
 	void SetViewportSize(float w, float h);
 
@@ -70,19 +79,10 @@ private:
 
 	glm::vec3 interestPoint;
 
-	class SensorRelPoint {
-	public:
-		glm::vec3 rwPos; // Real world coordinate
-		glm::vec3 vwPos; // Virtual world coordinate
-		NUI_SKELETON_POSITION_TRACKING_STATE state;
-	};
-
 	bool m_ready;
 	float headDist;
 
-	SensorRelPoint m_headPosition;
-	SensorRelPoint m_leftHandPosition;
-	SensorRelPoint m_rightHandPosition;
+	std::vector<SensorRelPoint> m_skeleton_positions;
 
 	INuiSensor* m_pNuiSensor;
 

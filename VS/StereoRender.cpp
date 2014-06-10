@@ -9,12 +9,6 @@ void DrawCube (float side, glm::vec4& pos, glm::vec3& color, glm::mat4& pvm)
 	glm::vec4 sx = pvm*glm::vec4(side/2.0f, 0.0f, 0.0f, 1.0f) - pvm*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec4 sy = pvm*glm::vec4(0.0f, side/2.0f, 0.0f, 1.0f) - pvm*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
 	glm::vec4 sz = pvm*glm::vec4(0.0f, 0.0f, side/2.0f, 1.0f) - pvm*glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
-
-//	float x = pos.x;
-//	float y = pos.y;
-//	float z = pos.z;
-
-	
 	
 	glColor3f(color.x, color.y, color.z);
 	glBegin(GL_QUADS);
@@ -48,36 +42,6 @@ void DrawCube (float side, glm::vec4& pos, glm::vec3& color, glm::mat4& pvm)
 	glVertex4fv(&((pos + sx + sy - sz)[0]));
 	glVertex4fv(&((pos + sx + sy + sz)[0]));
 	glVertex4fv(&((pos - sx + sy + sz)[0]));
-
-	/*glVertex3f(-s.x+x, -s.y+y, -s.z+z);
-    glVertex3f(s.x+x, -s.y+y, -s.z+z);
-    glVertex3f(s.x+x, s.y+y, -s.z+z);
-    glVertex3f(-s.x+x, s.y+y, -s.z+z);
-
-    glVertex3f(-s.x+x, -s.y+y, -s.z+z);
-    glVertex3f(-s.x+x, s.y+y, -s.z+z);
-    glVertex3f(-s.x+x, s.y+y, s.z+z);
-    glVertex3f(-s.x+x, -s.y+y, s.z+z);
-
-    glVertex3f(-s.x+x, -s.y+y, -s.z+z);
-    glVertex3f(-s.x+x, -s.y+y, s.z+z);
-    glVertex3f(s.x+x, -s.y+y, s.z+z);
-    glVertex3f(s.x+x, -s.y+y, -s.z+z);
-
-    glVertex3f(-s.x+x, -s.y+y, s.z+z);
-    glVertex3f(-s.x+x, s.y+y, s.z+z);
-    glVertex3f(s.x+x, s.y+y, s.z+z);
-    glVertex3f(s.x+x, -s.y+y, s.z+z);
-
-    glVertex3f(s.x+x, -s.y+y, -s.z+z);
-    glVertex3f(s.x+x, -s.y+y, s.z+z);
-    glVertex3f(s.x+x, s.y+y, s.z+z);
-    glVertex3f(s.x+x, s.y+y, -s.z+z);
-
-    glVertex3f(-s.x+x, s.y+y, -s.z+z);
-    glVertex3f(s.x+x, s.y+y, -s.z+z);
-    glVertex3f(s.x+x, s.y+y, s.z+z);
-    glVertex3f(-s.x+x, s.y+y, s.z+z);*/
 
     glEnd();
 }
@@ -269,7 +233,16 @@ void StereoRender::Draw(GridModel* model, KinectTool* tool, glm::mat4& view,
 		glVertex3f(r.x, r.y, r.z);
 		glEnd();
 
-		DrawCube(0.05f, h, glm::vec3(0.0f, 1.0f, 0.0f), pvm);
+		std::vector<StereoKinectHeadTracking::SensorRelPoint> skel = tool->_reader->m_headTracking->GetSkeletonPositions();
+		std::vector<glm::vec3> colors (3, glm::vec3(0.0f)); // 3 tracking states
+		colors[NUI_SKELETON_POSITION_NOT_TRACKED] = glm::vec3(1.0f, 0.0f, 0.0f);
+		colors[NUI_SKELETON_POSITION_INFERRED] = glm::vec3(1.0f, 1.0f, 0.0f);
+		colors[NUI_SKELETON_POSITION_TRACKED] = glm::vec3(0.0f, 1.0f, 0.0f);
+
+		for (int i = 0; i < skel.size(); ++i) {
+			glm::vec4 p = pvm*glm::vec4(skel[i].vwPos.x, skel[i].vwPos.y, skel[i].vwPos.z, 1.0f);
+			DrawCube(0.05f, p, colors[skel[i].state], pvm);
+		}
 
 		///////////////////////////   END OF HEAD DRAWTING   ///////////////////////////////////
 	}
