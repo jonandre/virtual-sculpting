@@ -23,7 +23,7 @@ private:
 	static glm::vec3 basePoint (glm::vec3 center, direction dir);
 
 public:
-	static void ExportToStl (unsigned char* voxels, int dimm);
+	static void ExportToStl (string sesionTime, unsigned char* voxels, int dimm);
 };
 
 #endif

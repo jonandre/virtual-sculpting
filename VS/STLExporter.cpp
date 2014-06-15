@@ -1,6 +1,4 @@
 #include "STLExporter.h"
-#include <time.h>
-#include <iomanip>
 #include <string>
 #include <sstream>
 #include <algorithm>
@@ -118,23 +116,12 @@ glm::vec3 STLExporter::basePoint (glm::vec3 center, direction dir)
 	}
 }
 
-void STLExporter::ExportToStl(unsigned char* voxels, int dimm)
+void STLExporter::ExportToStl(string sesionTime, unsigned char* voxels, int dimm)
 {
-	std::ofstream outFile;
-	time_t rawTime;
-	struct tm * timeInfo;
-
-	time (&rawTime);
-	timeInfo = localtime(&rawTime);
-	string timeString(asctime(timeInfo));
-	timeString.pop_back();
-	replace(timeString.begin(), timeString.end(), ' ', '_');
-	replace(timeString.begin(), timeString.end(), ':', '-'); 
-
 	std::stringstream ss;
-	ss << "Milo_sculpture_" << timeString << ".stl";
+	ss << "Milo_sculpture_" << sesionTime << ".stl";
 
-	std::cout << "Saving file " << ss.str() << std::endl;
+	std::cout << "Saving object file " << ss.str() << std::endl;
 
 	outFile.open(ss.str(), std::ofstream::out | std::ofstream::trunc);
 

@@ -6,6 +6,7 @@
 #include <map>
 #include "VoxelChunk.h"
 #include "VoxelBlock.h"
+#include "DataExporter.h"
 
 class GridModel
 {
@@ -20,7 +21,7 @@ public:
 	UINT8* GetCells();
 	unsigned int GetSize();
 	unsigned int GetDimm();
-	void UpdateGrid();
+	void UpdateGrid(DataExporter* exporter);
 	inline  unsigned int GetCellIndex( const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z );
 	std::map< unsigned int, VAO* >* GetRenderableCells();
 	void ReInitModel( bool clear );

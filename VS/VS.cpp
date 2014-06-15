@@ -17,6 +17,7 @@
 #include "Soundify.h"
 #include "texturemappedfont.h"
 #include "Stage.h"
+#include "DataExporter.h"
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -124,6 +125,10 @@ int main( int argc, char** argv)
 	std::cout << "Model initialized" << std::endl;
 	model->UpdateGrid();// update visual representation of model
 	std::cout << "Grid updated" << std::endl;
+	
+	/* Data exporter */
+	DataExporter exporter;
+	inp->SetDataExporter(&exporter, power);
 
 	/* Initilizes the tool */
 	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*0.75f + 100, -(side*.75f));
@@ -178,7 +183,7 @@ int main( int argc, char** argv)
 		if ( GetPressedStage() )
 			acted = tool->StopInteractModel( );//obvious
 
-		model->UpdateGrid();			// update visual representation of model
+		model->UpdateGrid(&exporter);			// update visual representation of model
 		
 		SoundAndHaptics();
 

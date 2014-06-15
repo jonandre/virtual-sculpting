@@ -321,7 +321,7 @@ inline  unsigned int GridModel::GetCellIndex( const Point& pos, unsigned int &x,
 }
 
 
-void GridModel::UpdateGrid()
+void GridModel::UpdateGrid(DataExporter* exporter)
 {
 	unsigned int i, j;
 	unsigned int index = 0;
@@ -350,7 +350,8 @@ void GridModel::UpdateGrid()
 	for( i = 0; i < _dirty_chunks.size(); i++ )
 	{
 		index = GetCellIndex( (_dirty_chunks[i]->GetCenter() ), x, y, z);
-				
+		exporter->meltedCell(index);
+		
 		_dirty_chunks[i]->CreateMesh( _cells, NULL, dimm );
 		if ( _dirty_chunks[i]->GetVAO() != NULL )// If mesh creating was successfull.
 		{

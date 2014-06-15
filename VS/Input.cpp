@@ -238,6 +238,10 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			
 		/// ON OFF sculpting
 		case SDLK_RETURN:
+			if (!GetPressedStage()) {
+				_dataExporter->init(GetObjectPosition());
+			}
+		
 			SetPressedStage(GetPressedStage() ^ true);
 			break;
 		case SDLK_SPACE:
@@ -253,8 +257,9 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			}
 			break;
 		case SDLK_x:
-			STLExporter::ExportToStl(_model->GetCells(), _model->GetDimm());
-
+			STLExporter::ExportToStl(_dataExporter->timeString, _model->GetCells(), _model->GetDimm());
+			_dataExporter.save();
+			
 			break;
 		
 		case SDLK_RIGHT:
@@ -327,9 +332,6 @@ glm::mat4 Input::GetModelM()
 	return m;
 }
 
-/** 
- * Get projection quaterion
- */
 glm::quat Input::GetObjectQ()
 {
 	return _obj_quat;
@@ -416,6 +418,11 @@ void Input::SetZoom( float val )
 float Input::GetZoom ()
 {
 	return zoom_val;
+}
+
+void Input::SetDataExporter(DataExporter* data)
+{
+	_dataExporter = data;
 }
 
 

@@ -4,6 +4,7 @@
 #include "main.h"
 #include "SDL.h"
 #include "STLExporter.h"
+#include "DataExporter.h"
 #include <vector>
 
 #include "GridModel.h"
@@ -16,8 +17,6 @@ public:
 
 
 	void Back(void);
-
-
 	
 	void OnKeyPressed( SDL_Keycode c );
 	void OnKeyReleased( SDL_Keycode c );
@@ -37,6 +36,8 @@ public:
 	void SetModel( GridModel* );
 	void SetModelSide(float wantedSide);
 	void SetModelPosition(glm::vec3 pos);
+	
+	void SetDataExporter(DataExporter* data);
 
 	glm::vec3 GetObjectPosition();
 
@@ -117,6 +118,7 @@ private:
 	int ry;
 	int rz;
 
+	DataExporter* _dataExporter;
 };
 
 #endif
