@@ -3,6 +3,11 @@
 
 #include "main.h"
 #include <iostream>
+#include <iomanip>
+
+#include <string>
+#include <sstream>
+#include <algorithm>
 
 
 class STLExporter {

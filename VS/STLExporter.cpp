@@ -1,7 +1,4 @@
 #include "STLExporter.h"
-#include <string>
-#include <sstream>
-#include <algorithm>
 
 inline int STLExporter::ref (int dimm, int i, int j, int k) {
 	return i*dimm*dimm + j*dimm + k;
@@ -122,7 +119,8 @@ void STLExporter::ExportToStl(string sesionTime, unsigned char* voxels, int dimm
 	ss << "Milo_sculpture_" << sesionTime << ".stl";
 
 	std::cout << "Saving object file " << ss.str() << std::endl;
-
+	
+	std::ofstream outFile;
 	outFile.open(ss.str(), std::ofstream::out | std::ofstream::trunc);
 
 	if (!outFile) {

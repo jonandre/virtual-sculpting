@@ -116,19 +116,21 @@ int main( int argc, char** argv)
 	/* Initializes the model */
 	unsigned int power = 7;
 	GridModel* model = new GridModel(power);//power of 2
-	//inp->SetZoom(-(side*4.0f));
+	float modelSide = 0.5f; // meters
+
+	/* Data exporter */
+	DataExporter exporter (power);
+	inp->SetDataExporter(&exporter);
+
 	inp->SetModel( model );
-	inp->SetModelSide(0.5f);
+	inp->SetModelSide(modelSide);
 	inp->SetModelPosition(glm::vec3(0.0f, 0.0f, 1.0f));
 	float side = inp->GetModelSide();
 	std::cout << "Model side is " << side << std::endl;
 	std::cout << "Model initialized" << std::endl;
-	model->UpdateGrid();// update visual representation of model
+	model->UpdateGrid(&exporter);// update visual representation of model
 	std::cout << "Grid updated" << std::endl;
 	
-	/* Data exporter */
-	DataExporter exporter;
-	inp->SetDataExporter(&exporter, power);
 
 	/* Initilizes the tool */
 	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*0.75f + 100, -(side*.75f));
@@ -184,6 +186,8 @@ int main( int argc, char** argv)
 			acted = tool->StopInteractModel( );//obvious
 
 		model->UpdateGrid(&exporter);			// update visual representation of model
+
+		exporter.update(inp->GetObjectQ(), headTracking);
 		
 		SoundAndHaptics();
 

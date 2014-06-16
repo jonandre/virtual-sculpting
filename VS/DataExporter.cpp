@@ -1,13 +1,21 @@
 #include "DataExporter.h"
 
-DataExporter::DataExporter ()
+DataExporter::DataExporter (int objSide)
 {
-	this.samplePeriod = 0.2f;
+	samplePeriod = 0.25f;
+
+	int dimm = 1<<objSide;
+	size = dimm*dimm*dimm;
+	voxels = new float[size];
 }
 
-DataExporter::DataExporter (float samplePeriod)
+DataExporter::DataExporter (int objSide, float samplePeriod)
 {
-	this.samplePeriod = samplePeriod;
+	this->samplePeriod = samplePeriod;
+
+	int dimm = 1<<objSide;
+	size = dimm*dimm*dimm;
+	voxels = new float[size];
 }
 
 DataExporter::~DataExporter()
@@ -15,9 +23,11 @@ DataExporter::~DataExporter()
 	if (outFile && outFile.is_open()) {
 		outFile.close();
 	}
+
+	delete voxels;
 }
 
-void DataExporter::init(glm::vec3 objPos, int objSide)
+void DataExporter::init(glm::vec3 objPos, float objSize)
 {
 	if (outFile && outFile.is_open()) {
 		outFile.close();
@@ -25,7 +35,8 @@ void DataExporter::init(glm::vec3 objPos, int objSide)
 	
 	time (&rawTime);
 	timeInfo = localtime(&rawTime);
-	timeString(asctime(timeInfo));
+	timeString.resize(0);
+	new (&timeString) std::string(asctime(timeInfo));
 	timeString.pop_back();
 	replace(timeString.begin(), timeString.end(), ' ', '_');
 	replace(timeString.begin(), timeString.end(), ':', '-');
@@ -43,16 +54,14 @@ void DataExporter::init(glm::vec3 objPos, int objSide)
 	
 	outFile << std::scientific;
 	
-	outFile << objPos.x << " " << objPos.y << " " << objPos.z << std::endl;
+	outFile << "s " << objSize << " p " <<  objPos.x << " " << objPos.y << " " << objPos.z << std::endl;
 	
 	initTick = SDL_GetTicks();
 	
 	lastTime = ((float) initTick)/1000.0f;
 	
 	// Voxels
-	if (voxels)
-		delete voxels;
-	
+
 	if (outVoxels && outVoxels.is_open()) {
 		exportVoxels();
 	
@@ -71,16 +80,14 @@ void DataExporter::init(glm::vec3 objPos, int objSide)
 	}
 	
 	outVoxels << std::scientific;
-	
-	int dimm = 1<<objSide;
-	size = dimm*dimm*dimm;
-	voxels = new float[size];
 }
 	
 void DataExporter::update(glm::quat& q, StereoKinectHeadTracking* tracking)
 {
 	int currentTick = SDL_GetTicks();
 	currentTime = ((float) currentTick)/1000.0f;
+
+	std::cout << currentTime;
 	
 	if (currentTime - lastTime < samplePeriod) return;
 	

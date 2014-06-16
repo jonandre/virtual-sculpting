@@ -239,7 +239,7 @@ void Input::OnKeyPressed( SDL_Keycode c )
 		/// ON OFF sculpting
 		case SDLK_RETURN:
 			if (!GetPressedStage()) {
-				_dataExporter->init(GetObjectPosition());
+				_dataExporter->init(GetObjectPosition(), wantedSide);
 			}
 		
 			SetPressedStage(GetPressedStage() ^ true);
@@ -258,7 +258,7 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			break;
 		case SDLK_x:
 			STLExporter::ExportToStl(_dataExporter->timeString, _model->GetCells(), _model->GetDimm());
-			_dataExporter.save();
+			_dataExporter->save();
 			
 			break;
 		

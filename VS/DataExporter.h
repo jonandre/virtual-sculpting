@@ -8,6 +8,7 @@
 #include <time.h>
 #include <iomanip>
 #include "SDL.h"
+#include <algorithm>
 
 #include "StereoKinectHeadTracking.h"
 
@@ -33,14 +34,14 @@ public:
 	
 	float currentTime;
 
-	DataExporter();
+	DataExporter(int objSide);
 
-	DataExporter (float samplePeriod);
+	DataExporter (int objSide, float samplePeriod);
 	
 	~DataExporter();
 	
 	
-	void init(glm::vec3 objPos);
+	void init(glm::vec3 objPos, float objSize);
 	
 	void update(glm::quat& q, StereoKinectHeadTracking* tracking);
 	

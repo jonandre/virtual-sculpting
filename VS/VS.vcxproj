@@ -162,6 +162,7 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DataExporter.cpp" />
     <ClCompile Include="GLSLShader.cpp" />
     <ClCompile Include="GridModel.cpp" />
     <ClCompile Include="Input.cpp" />
@@ -192,6 +193,7 @@
     <ClCompile Include="VS.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DataExporter.h" />
     <ClInclude Include="GLSLShader.h" />
     <ClInclude Include="GraphicsLib.h" />
     <ClInclude Include="GridModel.h" />
