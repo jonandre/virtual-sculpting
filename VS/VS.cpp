@@ -1,57 +1,156 @@
-#include "GridModel.h"
-#include "GLContext.h"
-#include <time.h>
-#include "KinectTool.h"
-#include "TriangleMesh.h"
-#include "Soundify.h"
-
+#include "main.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <sys/types.h>
-#include <Winsock.h>
-#include <Windows.h>
 #include <iostream>
 #include <MMSystem.h>
 
+#include "GridModel.h"
+#include "SDLContext.h"
+
+#include <time.h>
+#include "KinectTool.h"
+#include "StereoKinectHeadTracking.h"
+#include "KinectReader.h"
+#include "TriangleMesh.h"
+#include "Soundify.h"
+#include "texturemappedfont.h"
+#include "Stage.h"
+#include "DataExporter.h"
+
 #pragma comment(lib, "ws2_32.lib")
 
-void hand_on(bool a, bool b);
-void hand_off(bool a, bool b);
 
-inline double diffclock( clock_t clock1, clock_t clock2 ) 
+void SoundAndHaptics(void)
 {
-	double diffticks = clock1 - clock2;
-    double diffms    = diffticks / ( CLOCKS_PER_SEC / 1000 );
+	if (space_pressed)
+	{
+		
+		if (acted <= 1)
+			waveOutSetVolume(NULL, 1);
+		else if (acted >= 180000)
+		{
+			if (GetSoundStage())
+			{
+				waveOutSetVolume(NULL, 180000);
+			}
+		}
+		else
+		{
+			if (GetSoundStage())
+			{
+				waveOutSetVolume(NULL, acted*1000);
+			}
+		}
 
-    return diffms;
+		if (!GetSoundStage())
+			RemoveSound();
+		if (hapticsConnected)
+		{
+			if (!GetHapticsStage())
+			{
+				RemoveHaptics();
+			}
+		}
+		if (acted)
+		{
+			if (!hand_is_on)
+			{
+				if (GetHapticsStage() && hapticsConnected)
+					system("C:/Python33/python.exe gloves.py on");
+				else
+				{
+					if (hapticsConnected)
+						RemoveHaptics();
+				}
+				if (!GetSoundStage())
+					RemoveSound();
+
+				hand_is_on = true;
+			}
+		}
+		else
+		{
+			if (hand_is_on)
+			{
+				if (GetHapticsStage() && hapticsConnected)
+					system("C:/Python33/python.exe gloves.py off");
+				else
+				{
+					if (hapticsConnected)
+						RemoveHaptics();
+				}
+				if (GetSoundStage())
+					waveOutSetVolume(NULL, 100);
+				else
+					RemoveSound();
+
+				hand_is_on = false;
+			}
+		}
+		
+	}
+	else
+	{
+		RemoveSound();
+
+		if (hapticsConnected)
+			RemoveHaptics();
+	}
 }
 
-int main( int argc, UINT8** argv) 
+int main( int argc, char** argv) 
 {
-	GLContext* cntx = new GLContext();//Window+render.
+	/* Intilising the stage */
+	printf("Initilising stage... \n");
+	new Stage();
+
+	/* Initates the screen and its context */
+	SDLContext* cntx = new SDLContext();//Window+render
+	
+	/* Initilaizes the input */
 	Input* inp = new Input();//Input system.
 	cntx->SetInput( inp );//Context redirects mouse+keyb to Input
+
+	/* Initializes the model */
+	unsigned int power = 7;
+	GridModel* model = new GridModel(power);//power of 2
+	float modelSide = 0.5f; // meters
+
+	/* Data exporter */
+	DataExporter exporter (power);
+	inp->SetDataExporter(&exporter);
+
+	inp->SetModel( model );
+	inp->SetModelSide(modelSide);
+	inp->SetModelPosition(glm::vec3(0.0f, 0.0f, 1.0f));
+	float side = inp->GetModelSide();
+	std::cout << "Model side is " << side << std::endl;
+	std::cout << "Model initialized" << std::endl;
+	model->UpdateGrid(&exporter);// update visual representation of model
+	std::cout << "Grid updated" << std::endl;
 	
 
-	unsigned int power = 8;
+	/* Initilizes the tool */
+	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*0.75f + 100, -(side*.75f));
 
-	GridModel* model = new GridModel(power);//power of 2
-	unsigned int side = model->GetDimm();
-	inp->SetZoom(-(side*4.0f));
-	inp->SetModel( model );
+	/* Initializes head tracking */
+	StereoKinectHeadTracking* headTracking = new StereoKinectHeadTracking();
+	tool->_reader->Init(headTracking);
 
-	model->UpdateGrid();// update visual representation of model
-	KinectTool* tool = new KinectTool( (side*0.75f), (side*0.75f), side*.75f, -(side*.75f));
+	cntx->SetHeadTracking(headTracking);
+	
+	/* Initilizes the the font and text */
+	int fontSize = 20;
+	int dif = 5;
+	TextureMappedFont* font1 = new TextureMappedFont("font1.bmp", fontSize);
+	TextureMappedFont* font2 = new TextureMappedFont("font1.bmp", fontSize + dif);
+	TextureMappedFont* font3 = new TextureMappedFont("font1.bmp", fontSize + 2*dif);
 
-	Soundify snd;
-	snd.Play();
-
-	int acted = 0;
-
-	/* Windows socket startup */
-	WSADATA wsaData;
-	WSAStartup(0x0202, &wsaData);
+	/* Initilizes Windows socket */
+	//WSADATA wsaData;
+	//WSAStartup(0x0202, &wsaData);
 
 
 	void** speech_thread_args = (void**)malloc(2 * sizeof(void*));
@@ -61,108 +160,49 @@ int main( int argc, UINT8** argv)
 	pthread_create(&speechThread, NULL, SpeechThreed, speech_thread_args);
 	
     
+	PlaySound(TEXT("VS-midle-sound.wav"), NULL, SND_LOOP | SND_ASYNC);
+	
+	std::cout << "Starting main loop" << std::endl;
 
+	clock_t start = clock() - 1;
 	while (cntx->alive())
-	{	
-		clock_t start = clock();
-		acted = 0;
-
-		inp->UpdateFrame();		//Reset frame variables.
+	{
+		clock_t end = clock();
+		float deltaTime = (float)(end - start) / CLOCKS_PER_SEC;
+		
 		cntx->doMessage();		//Win message loop
-
-
 		tool->DoToolUpdate();	//update tool state - like depthmap
+		headTracking->Update(deltaTime);
+		inp->UpdateHandPosition(headTracking->GetHandPosition(true), headTracking->GetHandPosition(false));
+		inp->UpdateFrame(deltaTime);		//Update frame variables.
 		
-		if ( inp->IsPressed(' ') )
-		{
-			inp->space_pressed = !(inp->space_pressed);
-		}
 
-		if ( inp->space_pressed )
-			tool->StartInteractModel( model, inp->GetObjectQ());//obvious
-		
-		
-		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM());// do actual rendering.
+		if ( GetPressedStage() )
+			tool->StartInteractModel( model, inp->GetObjectQ(), inp->GetObjectM(), inp->GetModelSide());
 
-		if ( inp->space_pressed )
+		cntx->renderScene(model, tool, inp->GetViewM(), inp->GetObjectM(), font1, font2, font3);// do actual rendering.
+		
+		if ( GetPressedStage() )
 			acted = tool->StopInteractModel( );//obvious
 
-		model->UpdateGrid();			// update visual representation of model
+		model->UpdateGrid(&exporter);			// update visual representation of model
+
+		exporter.update(inp->GetObjectQ(), headTracking);
 		
-		///
-		//static int tmp = 0;
-		//tmp++;
-		//acted = (rand()%100) > 10 ? (rand()%3000) : 0;
-		//acted = tmp;
-		///
+		SoundAndHaptics();
 
-		if (acted)
-			hand_on(inp->useHaptics, inp->useSound);
-		else
-			hand_off(inp->useHaptics, inp->useSound);
-			
+		start = end;
 	}
-
-	snd.SetGain(0.0f);
-
+	
+	RemoveSound();
+	if (hapticsConnected)
+		RemoveHaptics();
+ 
 	delete model;
 	delete inp;
 	delete tool;
 	delete cntx;
+	delete headTracking;
 	return 0;
 }
 
-int hand_is_on = 1;
-
-
-void hand_on(bool a, bool b)
-{
-	if (!hand_is_on)
-	{
-		if (a == true)
-		{
-			system("C:/Python33/python.exe gloves.py on");
-		}
-		
-		if (b == true){
-			//PlaySound(TEXT("VS-start-sound.wav"), NULL, SND_ASYNC); 
-			PlaySound(TEXT("VS-midle-sound.wav"), NULL, SND_LOOP | SND_ASYNC);
-		}
-		/*
-		std::cerr << "Send on" << std::endl;
-		sendto(sock, hand_on_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
-		std::cerr << "Send on again" << std::endl;
-		sendto(sock, hand_on_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
-		std::cerr << "Send on done" << std::endl << std::endl;
-		*/
-		hand_is_on = 1;
-	} 
-	//else if (hand_is_on == 1)
-		
-}
-
-/**
- * Send signal to the Arduino to turn off feedback actions
- */
-void hand_off(bool a, bool b)
-{
-	if (hand_is_on)
-	{
-		if (a == true)
-		{
-			system("C:/Python33/python.exe gloves.py off");
-		}
-		if (b == true){
-			PlaySound(NULL, 0, 0);
-			PlaySound(TEXT("VS-end-sound.wav"), NULL, SND_ASYNC); 
-		}
-		/*
-			std::cerr << "Send off" << std::endl;
-			sendto(sock, hand_off_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
-			std::cerr << "Send off again" << std::endl;
-			sendto(sock, hand_off_packet, 16, 0, (struct sockaddr*)&send_address, sizeof(send_address));
-			std::cerr << "Send off done" << std::endl << std::endl;
-		*/
-		hand_is_on = 0;
-	}
-}

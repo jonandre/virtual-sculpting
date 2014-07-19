@@ -1,7 +1,4 @@
 #include "TriangleMesh.h"
-#include "main.h"
-#include "VBO.h"
-#include "VAO.h"
 
 TriangleMesh::TriangleMesh()
 {
@@ -72,12 +69,43 @@ void TriangleMesh::UpdateDepth( float* _depth_map )
 	{
 		for ( unsigned int j = 0; j < _y; j++ )
 		{
-			/*_mesh[ i*_y + j ].coord[2] = _start_z + ((_depth_map[ (_y-j)*_x + i ] + _depth_map[ (_y-j-1)*_x + i -1] + 
-				_depth_map[ (_y-j-1)*_x + i + 1 ] + _depth_map[ (_y-j-2)*_x + i ])/4.0f + _depth_map[ (_y-j-1)*_x + i ])/2.0f;*/
 			_mesh[ i*_y + j ].coord[2] = _start_z + _depth_map[ (_y-j-1)*_x + i ];
 		}
 	}
-	//MakeVBO();
+	UpdateVBO();
+}
+
+void TriangleMesh::UpdateDepth( StereoKinectHeadTracking* tracking, vector<NUI_DEPTH_IMAGE_POINT>& points )
+{
+	INuiCoordinateMapper* coordMapper;
+	tracking->GetSensor()->NuiGetCoordinateMapper(&coordMapper);
+
+	for ( unsigned int i = 0; i < _x; i++ )
+	{
+		for ( unsigned int j = 0; j < _y; j++ )
+		{
+			NUI_DEPTH_IMAGE_POINT o = points[(_y-j-1)*_x + i];
+			Vector4 p;
+
+			coordMapper->MapDepthPointToSkeletonPoint(NUI_IMAGE_RESOLUTION_640x480, &points[(_y-j-1)*_x + i], &p);
+			//p = NuiTransformDepthImageToSkeleton(o.x, o.y, o.depth, NUI_IMAGE_RESOLUTION_640x480);
+			
+			glm::vec3 rwPoint = glm::vec3(p.x, p.y, p.z);
+			glm::vec3 vwPoint = tracking->SensorToVirtualWorldCoordinates(rwPoint);
+			vwPoint += glm::vec3(-0.027f, 0.03f, 0.013f); // Seen error
+
+			if (false/*i == _x/2 && j == 0*/) {
+				std::cout << "Depth conversion " << i <<","<<j<<":" << std::endl;
+				std::cout << o.x << "," << o.y << "," << o.depth << std::endl;
+				std::cout << "->" << p.x << "," << p.y << "," << p.z << std::endl;
+				std::cout << "VW:" << vwPoint.x << "," << vwPoint.y << "," << vwPoint.z << endl;
+				std::cout << "-------------------------" << std::endl;
+			}
+			_mesh[ i*_y + j ].coord[0] = vwPoint.x;
+			_mesh[ i*_y + j ].coord[1] = vwPoint.y;
+			_mesh[ i*_y + j ].coord[2] = vwPoint.z;
+		}
+	}
 	UpdateVBO();
 }
 

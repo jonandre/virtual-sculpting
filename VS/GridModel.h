@@ -1,11 +1,14 @@
-#include "Model.h"
+#ifndef GRID_MODEL_H
+#define GRID_MODEL_H
+
 #include "main.h"
 #include <vector>
 #include <map>
-class VoxelChunk;
-class VAO;
+#include "VoxelChunk.h"
+#include "VoxelBlock.h"
+#include "DataExporter.h"
 
-class GridModel: public Model
+class GridModel
 {
 public:
 	GridModel();
@@ -18,7 +21,7 @@ public:
 	UINT8* GetCells();
 	unsigned int GetSize();
 	unsigned int GetDimm();
-	void UpdateGrid();
+	void UpdateGrid(DataExporter* exporter);
 	inline  unsigned int GetCellIndex( const Point& pos, unsigned int &x, unsigned int &y, unsigned int &z );
 	std::map< unsigned int, VAO* >* GetRenderableCells();
 	void ReInitModel( bool clear );
@@ -34,13 +37,15 @@ private:
 	inline bool EvaluateCell( unsigned int x, unsigned int y, unsigned int z );
 
 	UINT8* _cells;
-	bool* _interacted;
+	//bool* _interacted;
 	VoxelChunk** _chunks;
 	std::vector< VoxelChunk* > _dirty_chunks;
-	std::vector< VoxelChunk* > _modified_chunks;
+	//std::vector< VoxelChunk* > _modified_chunks;
 	std::map< unsigned int, VAO* > _renderable_chunks;
 	unsigned int chunk_dimm;
 	unsigned int chunk_size;
 	unsigned int internal_chunk_size;
 	unsigned int power_for_chunk;
 };
+
+#endif // GRID_MODEL_H

@@ -1,4 +1,9 @@
-#pragma once
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <Winsock.h>
+#include <Windows.h>
+
 #include <string>
 #include <iostream>
 #include <vector>
@@ -11,8 +16,6 @@ using namespace std;
 #include "glm\gtc\matrix_transform.hpp"
 #include "glm\gtx\orthonormalize.hpp"
 #include "glm\gtx\quaternion.hpp"
-#include "glm\gtc\matrix_transform.hpp"
-#include "glm\gtc\quaternion.hpp"
 
 typedef unsigned char UINT8;
 
@@ -64,3 +67,5 @@ static string textFileRead(const char *fileName)
 
     return fileString;
 }
+
+#endif // MAIN_H

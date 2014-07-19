@@ -1,4 +1,9 @@
-class VBO;
+#ifndef VAO_H
+#define VAO_H
+#include "VBO.h"
+#include "GraphicsLib.h"
+#include "main.h"
+
 class VAO
 {
 public:
@@ -13,3 +18,5 @@ private:
 	unsigned int sz;
 	unsigned int counter;
 };
+
+#endif // VAO_H

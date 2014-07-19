@@ -1,6 +1,5 @@
 #include "GridModel.h"
-#include "VoxelChunk.h"
-#include "VoxelBlock.h"
+
 #include <pthread.h>
 
 #define USE_SPINLOCK
@@ -184,14 +183,17 @@ inline static void floating_rock(unsigned int x,unsigned int y,unsigned int z, U
 
 GridModel::GridModel( int power )
 {
-	dimm = 1<<power; //grid dimension
-	size = dimm*dimm*dimm;//total size
+	dimm = 1<<power;			//grid dimension
+	size = dimm*dimm*dimm;		//total size
 	half_dimm = dimm>>1;
-	_cells = new UINT8[size];//cells - voxels.
-	_interacted = new bool[size];//array to store bool - if voxel was changed during this frame.
-	memset( _interacted, 0, size*sizeof(bool) );
+	_cells = new UINT8[size];	//cells - voxels.
+	//_interacted = new bool[size];//array to store bool - if voxel was changed during this frame.
+	//memset( _interacted, 0, size*sizeof(bool) );
 
-	power_for_chunk = max( unsigned(power-4), unsigned(4) );//chunk_size
+	unsigned int max = unsigned(power - 4);
+	if (max < unsigned(4)) max = unsigned(4);
+
+	power_for_chunk = max;//chunk_size
 	unsigned int _chunk_power = power - power_for_chunk;
 	chunk_dimm = 1<<_chunk_power;//dimension for array of chunk
 	chunk_size = chunk_dimm*chunk_dimm*chunk_dimm;
@@ -256,6 +258,8 @@ GridModel::GridModel( int power )
 		}
 	}
 
+	std::cout << "GridModel initalized" << std::endl;
+
 	/* init mutex*/
 #ifdef USE_SPINLOCK
 	pthread_spin_init(&spinlock, 0);
@@ -266,26 +270,35 @@ GridModel::GridModel( int power )
 }
 
 
-void GridModel::ReInitModel( bool clear )
+void GridModel::ReInitModel( bool sphere )
 {
 	unsigned int iter;
+	float radius;
+	Point center;
 	for (  int i = 0; i < dimm; i++ )
 	{
+		center.coord[0] = float(i - half_dimm);
 		for (  int j = 0; j < dimm; j++ )
 		{
+			center.coord[1] = float(j - half_dimm);
 			for (  int k = 0; k < dimm; k++ )
 			{
+				center.coord[2] = float(k - half_dimm);
 				iter = i*dimm*dimm+ j*dimm+ k;
-
-				_cells[iter] = clear ? 0 : 255;
-				_interacted[iter] = false;
+				
+				radius = sqrtf(  center.coord[0]*center.coord[0] + center.coord[1]*center.coord[1] + center.coord[2]*center.coord[2]);
+				
+				if (!sphere || radius < dimm/2 - 1)
+					_cells[iter] = 255;
+				else _cells[iter] = 0;
+				//_interacted[iter] = false;
 				//floating_rock(i, j, k, _cells, dimm);				
 			}
 		}
 	}
 
 	_dirty_chunks.clear();
-	_modified_chunks.clear();
+	//_modified_chunks.clear();
 	for ( unsigned int i = 0; i < chunk_size; i++ )
 	{
 		_dirty_chunks.push_back(_chunks[i]);
@@ -308,14 +321,14 @@ inline  unsigned int GridModel::GetCellIndex( const Point& pos, unsigned int &x,
 }
 
 
-void GridModel::UpdateGrid()
+void GridModel::UpdateGrid(DataExporter* exporter)
 {
 	unsigned int i, j;
 	unsigned int index = 0;
 	unsigned int x,y,z;
 
 	bool not_dirty;
-	for( i = 0; i < _modified_chunks.size(); i++ )//bad
+	/*for( i = 0; i < _modified_chunks.size(); i++ )//bad
 	{
 		not_dirty = true;
 		for( j = 0; j < _dirty_chunks.size(); j++ )
@@ -331,21 +344,23 @@ void GridModel::UpdateGrid()
 			_modified_chunks[i]->RecalcColor( _cells, dimm );
 	
 	}
-
 	_modified_chunks.clear();
+	*/
 
 	for( i = 0; i < _dirty_chunks.size(); i++ )
 	{
 		index = GetCellIndex( (_dirty_chunks[i]->GetCenter() ), x, y, z);
-				
-		_dirty_chunks[i]->CreateMesh( _cells, _interacted, dimm );
+		exporter->meltedCell(index);
+		
+		_dirty_chunks[i]->CreateMesh( _cells, NULL, dimm );
 		if ( _dirty_chunks[i]->GetVAO() != NULL )// If mesh creating was successfull.
 		{
 			_renderable_chunks[index] = _dirty_chunks[i]->GetVAO();			
-			_modified_chunks.push_back(_dirty_chunks[i]);
+			//_modified_chunks.push_back(_dirty_chunks[i]);
 		}
-		else
+		else {
 			_renderable_chunks.erase( index );
+		}
 	}
 
 	_dirty_chunks.clear();
@@ -450,7 +465,7 @@ int GridModel::UpdateCellMelt( int i, int j, int k, UINT8 val )
 #endif
 	
 	_cells[i*dimm*dimm+ j*dimm+ k] = ( _cells[i*dimm*dimm+ j*dimm+ k] > val ) ? (_cells[i*dimm*dimm+ j*dimm+ k] - val) : 0;
-	_interacted[i*dimm*dimm+ j*dimm+ k] = true;
+	//_interacted[i*dimm*dimm+ j*dimm+ k] = true;
 
 	EnshureMarked(i, j, k);
 #ifdef USE_SPINLOCK
@@ -493,7 +508,7 @@ int GridModel::UpdateCellAdd( int i, int j, int k, UINT8 val )
 	else
 		return 0;
 
-	_interacted[i*dimm*dimm+ j*dimm+ k] = true;
+	//_interacted[i*dimm*dimm+ j*dimm+ k] = true;
 	EnshureMarked(i, j, k);
 
 #ifdef USE_SPINLOCK
@@ -514,7 +529,7 @@ GridModel::~GridModel()
 		delete _chunks[i];
 
 	delete [] _chunks;
-	delete [] _interacted;
+	//delete [] _interacted;
 #ifdef USE_SPINLOCK
     pthread_spin_destroy(&spinlock);
 #else

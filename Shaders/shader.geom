@@ -116,7 +116,8 @@ void EmitSide( vec4 pos, vec4 color, int start, vec4 transVerts[8], vec3 norm, b
 			gl_Position = pv*(transVerts[cubeIndices[i]]);
 			pass_Color.rgb = color.rgb*sh_light(norm, groove);
 			//pass_Color.rgb = color.rgb*max(dot(norm, light_dir), 0.3);
-			pass_Color.a = 1.0;			
+			pass_Color.a = 1.0;	
+			pass_Color = pass_Color*(gl_Position.z/gl_Position.w*0.2);	
 			EmitVertex();
 		}		
 	}

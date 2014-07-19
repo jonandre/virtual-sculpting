@@ -256,10 +256,10 @@ void VoxelChunk::CreateMesh( UINT8* m_pBlocks, bool* _acted, unsigned int dimm )
 
 					
 					global_index = ( x+ y + _local_to_global_k+k );;
-					//MapColor( &clr, m_pBlocks[global_index], false);
-					MapColor( &clr, m_pBlocks[global_index], _acted[global_index]);
+					MapColor( &clr, m_pBlocks[global_index], false);
+					//MapColor( &clr, m_pBlocks[global_index], _acted[global_index]);
 	
-					_acted[global_index] = false;
+					//_acted[global_index] = false;
 					clr.comp[3] = tmp_res;
 					SetColorForVoxel(i, j, k, &clr);
 					_renderable_indexes[num_created] = i*size*size + j*size + k;

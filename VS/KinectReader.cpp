@@ -1,15 +1,13 @@
 #include "KinectReader.h"
+
 #include "main.h"
 
 // For Kinect SDK APIs
-#include "NuiApi.h"
-
 /* Voice Recognition Start */
 #include "stdafx.h"
-#include "resource.h"
+#include <guiddef.h>
 
 #define INITGUID
-#include <guiddef.h>
 
 // Static initializers
 LPCWSTR KinectReader::GrammarFileName = L"SpeechCommands.grxml";
@@ -21,7 +19,7 @@ KinectReader::KinectReader(void)
 	
 }
 
-KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, float dist ):
+KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, float dist):
     m_pKinectAudioStream(NULL),
     m_pSpeechStream(NULL),
     m_pSpeechRecognizer(NULL),
@@ -29,16 +27,32 @@ KinectReader::KinectReader( unsigned int min_depth, unsigned int max_depth, floa
     m_pSpeechGrammar(NULL),
     m_hSpeechEvent(INVALID_HANDLE_VALUE)
 {
+	/*  Must be the array of pointers
+		memset(b, c, l) set the l bytes starting at address b to the value c
+	*/
 	m_depth = new float[640*480];
 	memset(m_depth, 0, 640*480*sizeof(float));
+
+	/* Intilizes the Nui sensor */
 	m_pNuiSensor = NULL;
-	CreateFirstConnected();
+	
+	/* Sets this varibales */
 	_min_depth = min_depth;
 	_max_depth = max_depth;
 	_active_depth = dist;
+
+	/* Initilizes when first connected */ 
+	//CreateFirstConnected();
 }
 
-
+/**
+ * Deteaches the kinect sensor and speech recognicer including:
+ * KinectAudioStream
+ * SpeechStream
+ * SpeechRecognizer
+ * SpeechContext
+ * SpeechGrammar
+ */
 KinectReader::~KinectReader(void)
 {
 	if (m_pNuiSensor)
@@ -50,12 +64,8 @@ KinectReader::~KinectReader(void)
 			CloseHandle(m_hNextDepthFrameEvent);
 		}
     }
-
-   
-	
    // SafeRelease(m_pNuiSensor);
 	delete [] m_depth;
-
 	/* Voice Recognition Start */
     SafeRelease(m_pKinectAudioStream);
     SafeRelease(m_pSpeechStream);
@@ -65,17 +75,25 @@ KinectReader::~KinectReader(void)
 	/* Voice Recognition End */
 }
 
+void KinectReader::Init(StereoKinectHeadTracking* headTracking)
+{
+	CreateFirstConnected(headTracking);
+}
+
 /// <summary>
 /// Create the first connected Kinect found.
 /// </summary>
 /// <returns>S_OK on success, otherwise failure code.</returns>
-HRESULT KinectReader::CreateFirstConnected()
+HRESULT KinectReader::CreateFirstConnected(StereoKinectHeadTracking* headTracking)
 {
     INuiSensor * pNuiSensor = NULL;
     HRESULT hr;
+	
+	m_headTracking = headTracking;
 
     int iSensorCount = 0;
     hr = NuiGetSensorCount(&iSensorCount);
+
     if (FAILED(hr))
     {
         return hr;
@@ -87,10 +105,7 @@ HRESULT KinectReader::CreateFirstConnected()
         // Create the sensor so we can check status, if we can't create it, move on to the next
         hr = NuiCreateSensorByIndex(i, &pNuiSensor);
         if (FAILED(hr))
-        {
             continue;
-        }
-
         // Get the status of the sensor, and if connected, then we can initialize it
         hr = pNuiSensor->NuiStatus();
         if (S_OK == hr)
@@ -98,7 +113,6 @@ HRESULT KinectReader::CreateFirstConnected()
             m_pNuiSensor = pNuiSensor;
             break;
         }
-
         // This sensor wasn't OK, so release it since we're not using it
         pNuiSensor->Release();
     }
@@ -107,7 +121,7 @@ HRESULT KinectReader::CreateFirstConnected()
     {
 		// Initialize the Kinect and specify that we'll be using audio signal
         // Initialize the Kinect and specify that we'll be using depth
-        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_AUDIO | NUI_INITIALIZE_FLAG_USES_DEPTH); 
+        hr = m_pNuiSensor->NuiInitialize(NUI_INITIALIZE_FLAG_USES_DEPTH | NUI_INITIALIZE_FLAG_USES_AUDIO | NUI_INITIALIZE_FLAG_USES_SKELETON | NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT); 
 		
         if (SUCCEEDED(hr))
         {
@@ -122,6 +136,10 @@ HRESULT KinectReader::CreateFirstConnected()
                 2,
                 m_hNextDepthFrameEvent,
                 &m_pDepthStreamHandle);
+
+			/* Installation of skelleton traking begins here*/
+			headTracking->Init(m_pNuiSensor);
+			/* Installation of skelleton traking ends here*/
         }
     }
 
@@ -134,6 +152,16 @@ HRESULT KinectReader::CreateFirstConnected()
     }
 	
 	printf("Kinect found. \n");
+	
+	// Done properly	
+	m_depthVector.resize(cDepthWidth*cDepthHeight);
+	
+	for (unsigned int i = 0; i < m_depthVector.size(); ++i) {
+		m_depthVector[i].x = i%cDepthWidth;
+		m_depthVector[i].y = i/cDepthWidth;
+		m_depthVector[i].depth = 255;
+	}
+	// Done properly
 
 	/* Speech start */
 
@@ -143,7 +171,7 @@ HRESULT KinectReader::CreateFirstConnected()
 		printf("Could not initialize audio stream.\n");
 		return hr;
 	}
-	printf("Initialize Audio Stream. \n");
+	printf("Initialize Audio Stream... \n");
 	
 	hr = CreateSpeechRecognizer();
 	if (FAILED(hr))
@@ -151,7 +179,7 @@ HRESULT KinectReader::CreateFirstConnected()
         printf("Could not create speech recognizer. Please ensure that Microsoft Speech SDK and other sample requirements are installed.\n");
         return hr;
     }
-	printf("Create Speech Recognizer. \n");
+	printf("Create Speech Recognizer... \n");
 
 	hr = LoadSpeechGrammar();
 	if (FAILED(hr))
@@ -159,32 +187,23 @@ HRESULT KinectReader::CreateFirstConnected()
         printf("Could not load speech grammar. Please ensure that grammar configuration file was properly deployed.\n");
         return hr;
     }
-	printf("Start Speech Recognition. \n");
+	printf("Start Speech Recognition... \n");
 
 	hr = StartSpeechRecognition();
     if (FAILED(hr))
     {
-        printf("Could not start recognizing speech. \n");
+        printf("Could not start recognizing speech... \n");
         return hr;
     }
 	/* Speech end */
-
-
     return hr;
 }
 
 void KinectReader::ProcessDepth()
 {
+	/* If no kinect*/
 	if(!m_pNuiSensor)
-	{/*
-		int delta_depth =  _max_depth - _min_depth;
-		for ( unsigned int i = 0; i < 640*160; i++ )
-			m_depth[i] = (rand()%delta_depth - delta_depth)*0.15f;
-			*/
-
 		return;
-	}
-
 
     HRESULT hr;
     NUI_IMAGE_FRAME imageFrame;
@@ -193,20 +212,16 @@ void KinectReader::ProcessDepth()
     hr = m_pNuiSensor->NuiImageStreamGetNextFrame(m_pDepthStreamHandle, 0, &imageFrame);
 	
     if (FAILED(hr))
-    {
         return;
-    }
-
-    BOOL nearMode;
+	
+	BOOL nearMode;
     INuiFrameTexture* pTexture;
 
     // Get the depth image pixel texture
     hr = m_pNuiSensor->NuiImageFrameGetDepthImagePixelFrameTexture(
         m_pDepthStreamHandle, &imageFrame, &nearMode, &pTexture);
     if (FAILED(hr))
-    {
         goto ReleaseFrame;
-    }
 	
     NUI_LOCKED_RECT LockedRect;
 	
@@ -231,11 +246,14 @@ void KinectReader::ProcessDepth()
 		float float_per_depth_unit = _active_depth/float(delta_depth );
 		static int t=0;
 		++t;
+		int aux = 0;
         while ( pBufferRun < pBufferEnd )
         {
             // discard the portion of the depth that contains only the player index
             USHORT depth = pBufferRun->depth;
 
+			m_depthVector[aux].depth = (depth >= minDepth)? depth : 10000;
+			
             // To convert to a byte, we're discarding the most-significant
             // rather than least-significant bits.
             // We're preserving detail, although the intensity will "wrap."
@@ -253,6 +271,7 @@ void KinectReader::ProcessDepth()
 
             // Increment our index into the Kinect's depth buffer
             ++pBufferRun;
+			++aux;
         }
 
         // Draw the data with Direct2D
@@ -265,7 +284,7 @@ void KinectReader::ProcessDepth()
 
     pTexture->Release();
 
-ReleaseFrame:
+	ReleaseFrame:
 	//return;
     // Release the frame
     m_pNuiSensor->NuiImageStreamReleaseFrame(m_pDepthStreamHandle, &imageFrame);
@@ -274,6 +293,16 @@ ReleaseFrame:
 float* KinectReader::GetDepth()
 {
 	return m_depth;
+}
+
+vector<NUI_DEPTH_IMAGE_POINT>& KinectReader::GetDepthVector()
+{
+	return m_depthVector;
+}
+
+StereoKinectHeadTracking* KinectReader::GetHeadTracking()
+{
+	return m_headTracking;
 }
 
 /// <summary>
@@ -294,7 +323,6 @@ HRESULT KinectReader::InitializeAudioStream()
     if (SUCCEEDED(hr))
     {
         hr = pNuiAudioSource->QueryInterface(IID_IMediaObject, (void**)&pDMO);
-
         if (SUCCEEDED(hr))
         {
             hr = pNuiAudioSource->QueryInterface(IID_IPropertyStore, (void**)&pPropertyStore);
@@ -330,20 +358,14 @@ HRESULT KinectReader::InitializeAudioStream()
             if (SUCCEEDED(hr))
             {
                 m_pKinectAudioStream = new KinectAudioStream(pDMO);
-
                 hr = m_pKinectAudioStream->QueryInterface(IID_IStream, (void**)&pStream);
-
                 if (SUCCEEDED(hr))
                 {
                     hr = CoCreateInstance(CLSID_SpStream, NULL, CLSCTX_INPROC_SERVER, __uuidof(ISpStream), (void**)&m_pSpeechStream);
-
                     if (SUCCEEDED(hr))
-                    {
                         hr = m_pSpeechStream->SetBaseStream(pStream, SPDFID_WaveFormatEx, &wfxOut);
-                    }
                 }
             }
-
             MoFreeMediaType(&mt);
         }
     }
@@ -364,9 +386,7 @@ HRESULT KinectReader::InitializeAudioStream()
 HRESULT KinectReader::CreateSpeechRecognizer()
 {
     ISpObjectToken *pEngineToken = NULL;
-    
     HRESULT hr = CoCreateInstance(CLSID_SpInprocRecognizer, NULL, CLSCTX_INPROC_SERVER, __uuidof(ISpRecognizer), (void**)&m_pSpeechRecognizer);
-
     if (SUCCEEDED(hr))
     {
         m_pSpeechRecognizer->SetInput(m_pSpeechStream, FALSE);
@@ -385,9 +405,7 @@ HRESULT KinectReader::CreateSpeechRecognizer()
             //}
         }
     }
-
     SafeRelease(pEngineToken);
-
     return hr;
 }
 
@@ -402,11 +420,7 @@ HRESULT KinectReader::LoadSpeechGrammar()
     HRESULT hr = m_pSpeechContext->CreateGrammar(1, &m_pSpeechGrammar);
 
     if (SUCCEEDED(hr))
-    {
-        // Populate recognition grammar from file
-        hr = m_pSpeechGrammar->LoadCmdFromFile(GrammarFileName, SPLO_STATIC);
-    }
-
+        hr = m_pSpeechGrammar->LoadCmdFromFile(GrammarFileName, SPLO_STATIC); // Populate recognition grammar from file
     return hr;
 }
 
@@ -434,9 +448,7 @@ HRESULT KinectReader::StartSpeechRecognition()
         // Ensure that engine is recognizing speech and not in paused state
         hr = m_pSpeechContext->Resume(0);
         if (SUCCEEDED(hr))
-        {
             m_hSpeechEvent = m_pSpeechContext->GetNotifyEventHandle();
-        }
     }
         
     return hr;
@@ -448,7 +460,7 @@ HRESULT KinectReader::StartSpeechRecognition()
 void KinectReader::ProcessSpeech(Input* input)
 {
 	m_pSpeechController = new SpeechController(input);
-    const float ConfidenceThreshold = 0.3f;
+    const float ConfidenceThreshold = 0.6f;
 	
     SPEVENT curEvent;
     ULONG fetched = 0;
@@ -485,7 +497,6 @@ void KinectReader::ProcessSpeech(Input* input)
                 }
                 break;
         }
-
         m_pSpeechContext->GetEvents(1, &curEvent, &fetched);
     }
 
@@ -507,11 +518,53 @@ SpeechAction KinectReader::MapSpeechTagToAction(LPCWSTR pszSpeechTag)
     };
     const SpeechTagToAction Map[] =
     {
-        {L"START", SpeechActionStart},
-        {L"STOP", SpeechActionStop},
-        {L"LEFT", SpeechActionRotateLeft},
-        {L"RIGHT", SpeechActionRotateRight}
-    };
+		/// Stage 1 /// 
+        {L"MODEL", SpeechActionModel},				// model
+        {L"CAMERA", SpeechActionCamera},			// camera
+        {L"SOUND", SpeechActionSound},				// sound
+        {L"HAPTICS", SpeechActionHaptics},			// haptics
+
+		///  Stage 2 || 3 || 4 || 5 || 6 || 7 ///
+        {L"BACK", SpeechActionBack},				// back	
+		
+		/// Stage 2 /// 
+        {L"REINITIATE", SpeechActionReinitiate},	// reinititate	
+        {L"SPIN", SpeechActionSpin},				// spin	
+        {L"ROTATE", SpeechActionRotate},			// rotate
+		
+		/// Stage 3 || 4 || 5 /// 
+        {L"RIGHT", SpeechActionRight},				// right	
+        {L"LEFT", SpeechActionLeft},				// left	
+
+		/// Stage 3 ///
+        {L"UP", SpeechActionUp},					// up	
+        {L"DOWN", SpeechActionDown},				// down	
+        {L"CLOCKWISE", SpeechActionClockwise},		// clockwise	
+        {L"COUNTER_CLOCKWISE", SpeechActionCounterClockwise}, // counter clockwise
+        {L"FREEZ", SpeechActionFreezRotation},		// freez
+
+        {L"FASTER", SpeechActionFaster},			// faster	
+        {L"SLOWER", SpeechActionSlower},			// slower	
+
+		///  Stage 3 || 4  ///
+        {L"CLEAR", SpeechActionClearRotation},		// clear		
+		
+		/// Stage 4 || 5  /// 
+        {L"FRONT", SpeechActionFront},				// front	
+        {L"TOP", SpeechActionTop},					// top	
+        {L"BOTTOM", SpeechActionBottom},			// bottom	
+        {L"REAR", SpeechActionRear},				// rear	
+		
+		
+		/// Stage 6 /// 
+        {L"ON", SpeechActionON},					// ON
+        {L"OFF", SpeechActionOFF},					// OFF	
+				
+		/// Stage Always on /// 
+        {L"START", SpeechActionBegin},				// start
+        {L"END", SpeechActionEnd},					// top	
+        {L"QUIT", SpeechActionQuit}					// quit program	
+	};
     SpeechAction action = SpeechActionNone;
 
     for (int i = 0; i < _countof(Map); ++i)
@@ -525,3 +578,47 @@ SpeechAction KinectReader::MapSpeechTagToAction(LPCWSTR pszSpeechTag)
 
     return action;
 }
+
+/// <summary>
+/// Handle new skeleton data
+/// </summary>
+void KinectReader::ProcessSkeleton()
+{
+    NUI_SKELETON_FRAME skeletonFrame = {0};
+    HRESULT hr = m_pNuiSensor->NuiSkeletonGetNextFrame(0, &skeletonFrame);
+    if ( FAILED(hr))
+        return;
+    // smooth out the skeleton data
+    m_pNuiSensor->NuiTransformSmooth(&skeletonFrame, NULL);
+}
+	
+	
+/*	
+void KinectReader::SkeletonFrameReady(NUI_SKELETON_FRAME* pSkeletonFrame)
+{
+    for (int i = 0; i < NUI_SKELETON_COUNT; i++)
+    {
+        const NUI_SKELETON_DATA & skeleton = pSkeletonFrame->SkeletonData[i];
+		/*
+        switch (skeleton.eTrackingState)
+        {
+			case NUI_SKELETON_TRACKED:
+				//DrawTrackedSkeletonJoints(skeleton);
+				break;
+ 
+			case NUI_SKELETON_POSITION_ONLY:
+				//DrawSkeletonPosition(skeleton.Position);
+				break;
+        }
+    }
+}
+void KinectReader::DrawSkeleton(const NUI_SKELETON_DATA & skeleton)
+{
+	DrawBone(skeleton, NUI_SKELETON_POSITION_WRIST_RIGHT, NUI_SKELETON_POSITION_HAND_RIGHT);
+}
+void KinectReader::DrawBone(const NUI_SKELETON_DATA & skeleton,
+      NUI_SKELETON_POSITION_INDEX jointFrom,
+      NUI_SKELETON_POSITION_INDEX jointTo)
+{
+
+}*/
