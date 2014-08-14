@@ -29,8 +29,8 @@ DataExporter::~DataExporter()
 
 void DataExporter::init(glm::vec3 objPos, float objSize)
 {
-	if (outFile && outFile.is_open()) {
-		outFile.close();
+	if (outFile && outFile.is_open() && outVoxels && outVoxels.is_open()) {
+		save();
 	}
 	
 	time (&rawTime);
@@ -71,7 +71,7 @@ void DataExporter::init(glm::vec3 objPos, float objSize)
 	std::stringstream ssv;
 	ssv << "Milo_data_" << timeString << ".vox";
 	
-	std::cout << "Saving voxels file " << ss.str() << std::endl;
+	std::cout << "Saving voxels file " << ssv.str() << std::endl;
 	
 	outVoxels.open(ssv.str(), std::ofstream::out | std::ofstream::trunc);
 	
@@ -87,7 +87,7 @@ void DataExporter::update(glm::quat& q, StereoKinectHeadTracking* tracking)
 	int currentTick = SDL_GetTicks();
 	currentTime = ((float) currentTick)/1000.0f;
 
-	std::cout << currentTime;
+	//std::cout << currentTime;
 	
 	if (currentTime - lastTime < samplePeriod) return;
 	

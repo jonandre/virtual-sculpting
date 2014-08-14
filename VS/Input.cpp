@@ -237,14 +237,17 @@ void Input::OnKeyPressed( SDL_Keycode c )
 		case SDLK_o: hapticsConnected ^= true;			break;
 			
 		/// ON OFF sculpting
+		case SDLK_SPACE:
 		case SDLK_RETURN:
 			if (!GetPressedStage()) {
 				_dataExporter->init(GetObjectPosition(), wantedSide);
 			}
+			else {
+				_dataExporter->save();
+			}
 		
 			SetPressedStage(GetPressedStage() ^ true);
 			break;
-		case SDLK_SPACE:
 		case SDLK_PAGEDOWN:
 		case SDLK_PAGEUP:
 			if (!rotateOn)
