@@ -173,7 +173,7 @@ SDLContext::SDLContext()
 	SCENE_PREVIW_SIZE = SCREEN_HEIGHT/4;
 
 	sceneProj = glm::perspective(45.0f, 1.0f, 0.1f, 100.0f);
-
+	
 	// PROJECTOR SHADOW 0.92, 1.42
 	float projW = 1.39f;
 	float projH = 0.925f;
@@ -374,7 +374,7 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	lastTick = tick;
 
 	if (tick - lastFPSTick > FPSPeriod) {
-		std::cout << "FPS: " << FPS << std::endl;
+		//std::cout << "FPS: " << FPS << std::endl;
 		lastFPSTick = tick;
 	}
 
