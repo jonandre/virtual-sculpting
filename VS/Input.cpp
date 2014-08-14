@@ -243,6 +243,7 @@ void Input::OnKeyPressed( SDL_Keycode c )
 				_dataExporter->init(GetObjectPosition(), wantedSide);
 			}
 			else {
+				STLExporter::ExportToStl(_dataExporter->timeString, _model->GetCells(), _model->GetDimm());
 				_dataExporter->save();
 			}
 		
