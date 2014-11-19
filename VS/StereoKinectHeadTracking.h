@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+/*
+ * The direction of the sensor has to be perpendicular with the horizontal axis of the screen plane
+ */
 class StereoKinectHeadTracking
 {
 public:
