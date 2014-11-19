@@ -21,13 +21,16 @@ SDLContext::SDLContext()
 	int numDisplays = SDL_GetNumVideoDisplays();
 	std::cout << "Number of displays detected: " << numDisplays << std::endl;
 
+	// Ugly hack to see if we have a projector to display the shadow on our setup with 5 displays
 	if (numDisplays > 4) {
 		std::cout << "Enabling shadow rendering on display 1" << std::endl;
 		shadowRendering = true;
 	}
 
 	// Main Window
-#ifdef VIC4K
+#ifdef STEREO
+	// Your stereo display size
+	// If set to half of your display each eye will take half of the screen
 	SCREEN_WIDTH = 4096;
 	SCREEN_HEIGHT = 2400;
 #else
@@ -36,10 +39,8 @@ SDLContext::SDLContext()
 	SCREEN_HEIGHT = 1080;
 #endif
 	window = SDL_CreateWindow("Virtual Sculpting", 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS
-#ifndef VIC4K
-#if (STEREO == 0)
+#ifndef STEREO
 		| SDL_WINDOW_FULLSCREEN_DESKTOP
-#endif
 #endif
 		);
 	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
@@ -58,7 +59,7 @@ SDLContext::SDLContext()
 		std::cout << "Error: " << glewGetErrorString(error) << std::endl;
 	}
 
-#if (STEREO > 0)
+#ifdef STEREO
 	{
 		SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1);
 		windowRight = SDL_CreateWindow("Virtual Sculpting 2", SCREEN_WIDTH, 0, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS);
@@ -148,15 +149,10 @@ SDLContext::SDLContext()
 	std::cout << "Using OpenGL: " << glVersion[0] << "." << glVersion[1] << std::endl; // Output which version of OpenGL we are using
 
 	// Scene rendering
-#if (STEREO > 0)
+
 	render = new StereoRender();
 	render->Init();
-	render->Resize( SCREEN_WIDTH, SCREEN_HEIGHT );
-#else
-	render = new Render();
-	render->Init();
-	render->Resize(SCREEN_WIDTH, SCREEN_HEIGHT);
-#endif
+	render->Resize( SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	// FPS count
 	FPS = 1.0f;
@@ -186,7 +182,6 @@ SDLContext::SDLContext()
 	shadowProj = glm::ortho(-projW/2.0f, projW/2.0f, -projH/2.0f, projH/2.0f, 0.1f, projDepth);
 	shadowView = glm::lookAt(glm::vec3(projPosX, projPosY,projPosZ), glm::vec3(projPosX, projPosY-projDepth, projPosZ), glm::vec3(1.0f, 0.0f, 0.0f));
 
-
 	std::cout << "SDLContext initialized" << std::endl;
 }
 
@@ -198,7 +193,7 @@ void SDLContext::SetInput( Input* input)
 SDLContext::~SDLContext() 
 {
 	SDL_GL_DeleteContext(context);
-#if (STEREO > 0)
+#ifdef STEREO
 	SDL_GL_DeleteContext(contextRight);
 #endif
 	if (shadowRendering)
@@ -288,8 +283,6 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 							TextureMappedFont* font2, TextureMappedFont* font3)
 {
 	
-
-#if (STEREO > 0)
 	float side = inp->GetModelSide();
 
 	float ratio  = float(SCREEN_WIDTH) / float(SCREEN_HEIGHT);
@@ -307,6 +300,26 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	
 	glm::mat4 cameraView = glm::translate(glm::mat4(1.0f), cameraPosition);
 
+#ifndef STEREO
+	render->Draw(model, _tool_mesh, cameraView, obj, font1, font2, font3, leftProj, 0);
+	
+	if (showScene) {
+		glViewport(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
+		
+		glEnable(GL_SCISSOR_TEST); 
+		glScissor(SCREEN_WIDTH/2 - SCENE_PREVIW_SIZE/2,SCREEN_HEIGHT - SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE,SCENE_PREVIW_SIZE);
+
+		render->Draw(model, _tool_mesh, sceneView, obj, font1, font2, font3, sceneProj, 3);
+
+		glDisable(GL_SCISSOR_TEST); 
+
+		glViewport(0,0,SCREEN_WIDTH,SCREEN_HEIGHT);
+	}
+
+	SDL_GL_SwapWindow(window);
+
+#else
+	// STEREO
 	render->Draw(model, _tool_mesh, leftEye*cameraView, obj, font1, font2, font3, leftProj, 0);
 	
 	if (showScene) {
@@ -346,10 +359,6 @@ void SDLContext::renderScene( GridModel* model, KinectTool* _tool_mesh,
 	}
 
 	SDL_GL_SwapWindow(windowRight);
-#else
-	render->Draw(model, _tool_mesh, view, obj, font1, font2, font3);
-
-	SDL_GL_SwapWindow(window);
 #endif
 
 	if (shadowRendering) {

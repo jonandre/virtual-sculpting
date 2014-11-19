@@ -1,19 +1,9 @@
 #ifndef SDL_CONTEXT_H
 #define SDL_CONTEXT_H
 
-#define VIC4K
+#define STEREO
 
-#ifdef VIC4K
-	#define STEREO 1
-#else
-	#define STEREO 1
-#endif
-
-#if (STEREO > 0)
-	#include "StereoRender.h"
-#else
-	#include "Render.h"
-#endif
+#include "StereoRender.h"
 
 #include "StereoKinectHeadTracking.h"
 #include "SDL.h"
@@ -46,7 +36,6 @@ private:
 	SDL_Renderer* rendererShadow;
 	SDL_GLContext contextShadow;
 
-#if (STEREO > 0)
 	StereoRender* render;
 
 	glm::mat4 leftProj, rightProj, leftEye, rightEye;
@@ -54,9 +43,6 @@ private:
 	glm::mat4 shadowProj, shadowView;
 
 	glm::mat4 sceneProj, sceneView;
-#else
-	Render* render;
-#endif
 
 	StereoKinectHeadTracking* headTracking;
 
