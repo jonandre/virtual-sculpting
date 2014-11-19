@@ -253,22 +253,21 @@ void SDLContext::doMessage()
 void SDLContext::SetHeadTracking(StereoKinectHeadTracking* headTracking) {
 	this->headTracking = headTracking;
 
-	// All in Meters
-	float VIC_SCREEN_WIDTH = 4.0055f;
-	float VIC_SCREEN_HEIGHT = 2.430f;
-	float VIC_SCREEN_BORDER = 0.075f;
+	// Real World sizes all in meters
+	float RW_SCREEN_WIDTH = 4.0055f - 0.075f*2.0f; 
+	float RW_SCREEN_HEIGHT = 2.430f - 0.075f*2.0f;
 	float EYE_DISTANCE = 0.065f;
 	float HEAD_DEPTH_RADIUS = 0.1f;
 
-	headTracking->SetDisplaySize(VIC_SCREEN_WIDTH - VIC_SCREEN_BORDER*2.0f,  VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f);
+	headTracking->SetDisplaySize(RW_SCREEN_WIDTH,  RW_SCREEN_HEIGHT);
 	headTracking->SetEyeDistance(EYE_DISTANCE);
 	headTracking->SetHeadRadius(HEAD_DEPTH_RADIUS);
 
 	// Relative to the center of the screen
-	headTracking->SetSensorPosition(0.13f, ((VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f)/2.0f + 0.0375f), 0.13f);
+	headTracking->SetSensorPosition(0.13f, RW_SCREEN_HEIGHT/2.0f + 0.0375f, 0.13f);
 	headTracking->SetInterestFacing(true);
 	
-	headTracking->SetViewportSize(VIC_SCREEN_WIDTH - VIC_SCREEN_BORDER*2.0f, VIC_SCREEN_HEIGHT - VIC_SCREEN_BORDER*2.0f);
+	headTracking->SetViewportSize(RW_SCREEN_WIDTH, RW_SCREEN_HEIGHT);
 	headTracking->SetZPlanes(render->ZNEAR, render->ZFAR);	
 }
 
