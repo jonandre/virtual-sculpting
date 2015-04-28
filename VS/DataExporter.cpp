@@ -103,9 +103,9 @@ void DataExporter::update(glm::quat& q, StereoKinectHeadTracking* tracking)
 	outFile << std::endl;
 }
 
-void DataExporter::meltedCell(int index)
+void DataExporter::meltedCell(int index, bool filled)
 {
-	voxels[index] = currentTime;
+	voxels[index] = filled? 0f : currentTime;
 }
 
 void DataExporter::save()
