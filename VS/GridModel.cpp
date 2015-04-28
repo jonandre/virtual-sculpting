@@ -350,7 +350,7 @@ void GridModel::UpdateGrid(DataExporter* exporter)
 	for( i = 0; i < _dirty_chunks.size(); i++ )
 	{
 		index = GetCellIndex( (_dirty_chunks[i]->GetCenter() ), x, y, z);
-		exporter->meltedCell(index);
+		exporter->meltedCell(index, _cells[index] != 0);
 		
 		_dirty_chunks[i]->CreateMesh( _cells, NULL, dimm );
 		if ( _dirty_chunks[i]->GetVAO() != NULL )// If mesh creating was successfull.
