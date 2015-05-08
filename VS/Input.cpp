@@ -1,6 +1,8 @@
 #include "Input.h"
 #include "Stage.h"
 
+#define EXPORT
+
 
 static const float DEGREES_PER_SECOND_PER_SECOND = glm::pi<float>() * 30.f / 1000.f / 180.f;
 #define DEGREES_PER_SECOND DEGREES_PER_SECOND_PER_SECOND
@@ -242,10 +244,12 @@ void Input::OnKeyPressed( SDL_Keycode c )
 			if (!GetPressedStage()) {
 				_dataExporter->init(GetObjectPosition(), wantedSide);
 			}
+#ifdef EXPORT
 			else {
 				STLExporter::ExportToStl(_dataExporter->timeString, _model->GetCells(), _model->GetDimm());
 				_dataExporter->save();
 			}
+#endif
 		
 			SetPressedStage(GetPressedStage() ^ true);
 			break;
