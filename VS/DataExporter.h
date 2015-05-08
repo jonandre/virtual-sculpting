@@ -47,7 +47,7 @@ public:
 	
 	void save();
 	
-	void meltedCell(int index);
+	void meltedCell(int index, bool cellMelted);
 };
 
 #endif // DATA_EXPORTER_H
