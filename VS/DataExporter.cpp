@@ -8,9 +8,10 @@ DataExporter::DataExporter (int objSide)
 	size = dimm*dimm*dimm;
 	voxels = new float[size];
 	
-	for (int i = 1; i < size; ++i) {
+	for (int i = 0; i < size; ++i) {
 		voxels[i] = -1.f;
 	}
+	currentTime = 0.f;
 }
 
 DataExporter::DataExporter (int objSide, float samplePeriod)
@@ -21,9 +22,10 @@ DataExporter::DataExporter (int objSide, float samplePeriod)
 	size = dimm*dimm*dimm;
 	voxels = new float[size];
 	
-	for (int i = 1; i < size; ++i) {
+	for (int i = 0; i < size; ++i) {
 		voxels[i] = -1.f;
 	}
+	currentTime = 0.f;
 }
 
 DataExporter::~DataExporter()
@@ -63,7 +65,6 @@ void DataExporter::init(glm::vec3 objPos, float objSize)
 	outFile << std::scientific;
 	
 	outFile << "s " << objSize << " p " <<  objPos.x << " " << objPos.y << " " << objPos.z << std::endl;
-	
 	initTick = SDL_GetTicks();
 	
 	lastTime = ((float) initTick)/1000.0f;
@@ -88,6 +89,8 @@ void DataExporter::init(glm::vec3 objPos, float objSize)
 	}
 	
 	outVoxels << std::scientific;
+	
+	currentTime = 0.f;
 }
 	
 void DataExporter::update(glm::quat& q, StereoKinectHeadTracking* tracking)
