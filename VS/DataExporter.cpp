@@ -7,6 +7,10 @@ DataExporter::DataExporter (int objSide)
 	int dimm = 1<<objSide;
 	size = dimm*dimm*dimm;
 	voxels = new float[size];
+	
+	for (int i = 1; i < size; ++i) {
+		voxels[i] = -1.f;
+	}
 }
 
 DataExporter::DataExporter (int objSide, float samplePeriod)
@@ -16,6 +20,10 @@ DataExporter::DataExporter (int objSide, float samplePeriod)
 	int dimm = 1<<objSide;
 	size = dimm*dimm*dimm;
 	voxels = new float[size];
+	
+	for (int i = 1; i < size; ++i) {
+		voxels[i] = -1.f;
+	}
 }
 
 DataExporter::~DataExporter()
@@ -105,7 +113,7 @@ void DataExporter::update(glm::quat& q, StereoKinectHeadTracking* tracking)
 
 void DataExporter::meltedCell(int index, bool filled)
 {
-	voxels[index] = filled? 0f : currentTime;
+	voxels[index] = filled? -1.f : currentTime;
 }
 
 void DataExporter::save()
