@@ -8,9 +8,9 @@ DataExporter::DataExporter (int objSide)
 	size = dimm*dimm*dimm;
 	voxels = new float[size];
 	
-	for (int i = 0; i < size; ++i) {
-		voxels[i] = -1.f;
-	}
+	//for (int i = 0; i < size; ++i) {
+	//	voxels[i] = -1.f;
+	//}
 	currentTime = 0.f;
 }
 
@@ -22,9 +22,9 @@ DataExporter::DataExporter (int objSide, float samplePeriod)
 	size = dimm*dimm*dimm;
 	voxels = new float[size];
 	
-	for (int i = 0; i < size; ++i) {
-		voxels[i] = -1.f;
-	}
+	//for (int i = 0; i < size; ++i) {
+	//	voxels[i] = -1.f;
+	//}
 	currentTime = 0.f;
 }
 
